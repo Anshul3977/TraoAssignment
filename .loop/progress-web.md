@@ -1,0 +1,74 @@
+# Web lane progress
+
+## 2026-09-25 T21 Auth UI + shell
+- Changed: `apps/web/` (auth pages, middleware, API client, Query provider, dashboard empty state, rewrite fix), root `README.md`
+- Decisions:
+  - Browser paths `/api/*` rewrite to Express `/:path*` (not `/api/:path*`) — because `docs/API.md` mounts `/auth/*` and `/health` at the API root; the previous scaffold destination double-prefixed `/api` and would 404.
+  - Dashboard shows empty kits state without calling a kit list endpoint — because `docs/API.md` (T17a) has no kit CRUD routes yet ("Do not call kit/job routes until they appear here"). CTA links to `/kits/new` for T22a.
+  - Middleware gates on `session` cookie presence only; JWT validity checked via `GET /auth/me` on the dashboard server render — because the web app does not hold `JWT_SECRET` and the contract puts auth enforcement on the API.
+  - API client always uses `credentials: 'include'` and maps contract paths through `/api` — because same-origin cookies per project.mdc / API.md.
+- Limitations / follow-ups: no `GET /kits` in contract → cannot list real kits until T17b/T18 extend API.md; `/kits/new` is CTA-only until T22a; desktop-focused layout.
+
+## 2026-09-25 T22a Create kit form
+- Changed: `apps/web/` (validation helpers + tests, `createKit` API client, `/kits/new` page + `CreateKitForm`), root `README.md`
+- Decisions:
+  - Thin-JD warning at 80 trimmed chars — because core `groundRequirements` uses the same `THIN_JD_CHARS` threshold for `notes.thin_jd`.
+  - `createKit` treats HTTP `201` as new job and `200` as idempotent existing — because `docs/API.md` `POST /kits` documents that split; duplicate-submit notice only on `200`.
+  - Form stays on `/kits/new` after success with a link to `/jobs/:id` — because T22b owns the job progress page; do not invent poll UI here.
+  - Client validation mirrors API.md field rules (non-empty JD ≤100k, http(s) URL ≤2048, days integer 1–60) before `POST /kits`.
+- Limitations / follow-ups: job timeline / batch upload are T22b; no kit list until a list route appears in API.md.
+
+## 2026-09-25 T22b Batch upload + job progress
+- Changed: `apps/web/` (batch parse/validate, `/kits/batch`, job view helpers + `/jobs/[id]` progress UI, API client `createKitsBatch` / `getJob` / `retryJob`, tests), root `README.md`
+- Decisions:
+  - Browser parses JSON/CSV locally into `{ jd, company_url, days }[]` then `POST /kits/batch` — because API.md says the web app parses the uploaded file; do not invent a multipart upload route.
+  - Job page polls `GET /jobs/:id` every 2s while queued/running — because generation is async (~90s) and progress is persisted (safe to leave and return).
+  - Sources found/skipped derived from step timeline details (done crawl/search/extract vs skipped+detail) — because the Job object has no separate sources field in API.md.
+  - Failed jobs expose Retry via `POST /jobs/:id/retry` only — because 409 `NOT_RETRYABLE` covers non-failed statuses.
+- Limitations / follow-ups: no kit list/builder until those routes land in API.md + T23a; desktop only.
+
+## 2026-09-25 T23a Builder — Brief + Role
+- Changed: `apps/web/` (`/kits/[id]` page, `KitBriefRoleBuilder`, `kit-builder` helpers + tests, API client `getKit` / `patchKit` / conflict helper, job “Open builder” link), root `README.md`, `.loop/progress-web.md`
+- Decisions:
+  - Brief + Role only on `/kits/:id` via `GET /kits/:id` + `PATCH /kits/:id` — because T23a scope; questions/flashcards/regen are T23b/T23c; do not invent list or other endpoints.
+  - Local draft + 600 ms debounced op-batch (`update` brief / requirement) — because task Verify requires inline edit without full-page reload and API.md documents op batches with `baseVersion`.
+  - Save status Saved / Saving… / Offline (+ Retry); network `TypeError` → Offline; `VERSION_CONFLICT` adopts returned kit — because contract returns current kit on 409 and T23b owns richer merge UX.
+  - Coverage badge from `coverage.uncovered_requirement_ids`; must/nice + origin/edited badges from requirement/brief meta — because Appendix A + API.md extensions.
+- Limitations / follow-ups: no questions UI / regen / flashcards / schedule (T23b–c); no kit list route yet; desktop only.
+
+## 2026-09-25 T23b Builder — Questions
+- Changed: `apps/web/` (`KitQuestionsSection`, builder integration, kit-builder helpers + tests, `regenerateKitQuestions` API client, `@dnd-kit` deps), root `README.md`, `package-lock.json`, `.loop/progress-web.md`
+- Decisions:
+  - Questions on same `/kits/:id` builder as Brief + Role — because T23b extends the kit page; flashcards/schedule regen stay T23c.
+  - Category regen via `POST /kits/:id/regenerate` `{ section: "questions", category }` only — because API.md documents that shape; confirm dialog lists user/edited/pinned that merge will keep.
+  - Flush pending debounced text ops before structural PATCH and before regenerate — because task requires flush-before-regen and version must match.
+  - `409 VERSION_CONFLICT` opens reload/dismiss merge prompt (never silent adopt into overwrite) — because §6 / API.md return current kit on conflict.
+  - Optimistic reorder with `@dnd-kit` PointerSensor + KeyboardSensor; pin/move/add/delete via documented PATCH ops; delete undo re-adds via `add` op — because server assigns new ids on add.
+- Limitations / follow-ups: flashcards + schedule/brief regen UI are T23c; practice is T24; desktop only.
+
+## 2026-09-25 T23c Builder — Flashcards + Schedule regen
+- Changed: `apps/web/` (`KitFlashcardsSection`, `KitScheduleSection`, builder wiring, kit-builder helpers + tests, `regenerateKitBrief` / `regenerateKitSchedule` API client), root `README.md`, `.loop/progress-web.md`
+- Decisions:
+  - Flashcards CRUD via documented `PATCH` update/add/delete flashcard ops only — because API.md has no flashcard regenerate section; practice stays T24.
+  - Schedule section is read-only + regenerate — because T25 owns richer day cards / coverage matrix; T23c only needs read + regen.
+  - Flush pending brief/question/flashcard text ops before schedule or brief regen — because Verify requires schedule regen not clobber unrelated edits and version must match.
+  - Brief regen confirm mirrors question keep rules (edited/yours listed) with optional `force` — because API skips edited briefs unless `force:true` and returns `briefSkipped`.
+- Limitations / follow-ups: practice mode is T24; full schedule day cards + coverage matrix are T25; desktop only.
+
+## 2026-09-25 T24 Practice mode
+- Changed: `apps/web/` (`PracticeMode`, `/kits/[id]/practice`, practice helpers + tests, API client `getPracticeNext` / `getPracticeStats` / `submitPracticeReview`, builder Practice link), root `README.md`, `.loop/progress-web.md`
+- Decisions:
+  - Session queue is exactly `GET /kits/:id/practice/next` order — because API.md documents Leitner next-session ordering; client must not re-sort (§7).
+  - Space/Enter reveal, then 1–5 → `POST /kits/:id/practice/review` — because task Verify is keyboard-only one session; buttons mirror the same actions.
+  - Summary + coverage grid from `GET /kits/:id/practice/stats` after the queue finishes — because contract separates next vs stats; covered = reviewed flashcard requirement ids.
+  - Practice lives at `/kits/:id/practice` with a builder header link — because T25 owns schedule/coverage matrix views; keep practice scoped to flashcards.
+- Limitations / follow-ups: schedule day cards + requirements×questions matrix are T25; desktop only.
+
+## 2026-09-25 T25 Schedule + coverage views
+- Changed: `apps/web/` (`schedule-views` helpers + tests, `KitScheduleSection` day cards + Today marker, `CoverageMatrixSection`, builder wiring, question `#question-:id` anchors), root `README.md`, `.loop/progress-web.md`
+- Decisions:
+  - Interview date = local calendar day of kit `createdAt` + `schedule.days_available` — because SPEC says days-until-interview and API.md has no interview-date field; do not invent a PATCH.
+  - Today marker = schedule day whose calendar date matches local today within the prep window (null outside) — because day 1 is the created date and day N is the last prep day before the interview date.
+  - Day cards link question ids to `#question-:id` with prompt/category — because T25 asks for questions linked; hash anchors avoid inventing navigation routes.
+  - Coverage matrix gaps use kit `coverage.uncovered_requirement_ids` only (not client recompute) — because §8 visibility must match pipeline coverage; Verify requires highlighting those ids.
+- Limitations / follow-ups: desktop only; no Story Bank (T26); a11y/responsive pass is T27.
