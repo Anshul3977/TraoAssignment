@@ -42,7 +42,8 @@ export type RunBatchOptions = {
 };
 
 const DEFAULT_CONCURRENCY = 2;
-const DEFAULT_CASE_TIMEOUT_MS = 4 * 60 * 1000;
+/** Free-tier rate limits stretch rich cases past ~4 min; keep headroom under the 8–12 min Checkpoint B budget. */
+const DEFAULT_CASE_TIMEOUT_MS = 8 * 60 * 1000;
 
 function toBatchError(err: unknown): { code: string; message: string } {
   if (isLlmNotConfiguredError(err)) {

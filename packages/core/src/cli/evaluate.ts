@@ -132,7 +132,7 @@ export async function main(argv: string[] = process.argv.slice(2)): Promise<void
     `evaluate: ${cases.length} case(s) from ${resolve(input)} -> ${resolve(output)}`,
   );
   console.log(
-    `LLM_PROVIDER=${process.env.LLM_PROVIDER ?? "(unset)"} concurrency=2 caseTimeout=4m allowPrivateHosts=true`,
+    `LLM_PROVIDER=${process.env.LLM_PROVIDER ?? "(unset)"} concurrency=2 caseTimeout=8m allowPrivateHosts=true`,
   );
 
   const { output: batch, elapsedMs } = await runBatch({
