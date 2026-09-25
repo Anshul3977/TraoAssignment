@@ -13,5 +13,8 @@
   },
   "devDependencies": {
     "@types/node": "^22.13.10"
+  },
+  "dependencies": {
+    "zod": "^4.6.5"
   }
 }
