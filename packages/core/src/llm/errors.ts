@@ -71,3 +71,22 @@ export function isLlmProviderError(err: unknown): err is LlmProviderError {
 export function isLlmError(err: unknown): err is LlmError {
   return err instanceof LlmError;
 }
+
+/**
+ * Primary provider has no API key in env — kit generation cannot start.
+ * Batch CLI maps this to Appendix B code `LLM_NOT_CONFIGURED`.
+ */
+export class LlmNotConfiguredError extends Error {
+  readonly code = "LLM_NOT_CONFIGURED" as const;
+
+  constructor(message: string) {
+    super(message);
+    this.name = "LlmNotConfiguredError";
+  }
+}
+
+export function isLlmNotConfiguredError(
+  err: unknown,
+): err is LlmNotConfiguredError {
+  return err instanceof LlmNotConfiguredError;
+}

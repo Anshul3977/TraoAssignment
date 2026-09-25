@@ -92,7 +92,7 @@ Writes JSON + log under `.loop/checkpoint-a/`. Review notes: `.loop/checkpoint-a
 
 ## Known limitations
 
-- **Batch evaluate without an LLM key** records every case as `failed` (`GEMINI_API_KEY` / `GROQ_API_KEY` required); put a free-tier key in `.env` for real kits.
+- **Batch evaluate without an LLM key** prints a startup `WARNING`, then records every case as `failed` with code `LLM_NOT_CONFIGURED` and a message pointing at `.env` / `.env.example` (`GEMINI_API_KEY` or `GROQ_API_KEY` for the active `LLM_PROVIDER`). Put a free-tier key in `.env` for real kits.
 - **Job-board hosts** (Greenhouse / Lever / Ashby) are off-site and not followed.
 - **Client-rendered shells:** if extracted text is near-empty after `cleanPage`, the crawl records *little extractable content (likely client-rendered)* on `skipped` and keeps the page as `other` — that is not evidence that a hiring page is missing.
 - Classification can still label careers hubs as **about** when hiring-process copy is thin; budget can exhaust before high-signal paths are fetched.

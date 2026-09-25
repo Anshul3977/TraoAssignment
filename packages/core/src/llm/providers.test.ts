@@ -37,10 +37,15 @@ describe("createProvidersFromEnv", () => {
     expect(fallback?.id).toBe("groq");
   });
 
-  it("throws when primary key is missing", () => {
+  it("throws LlmNotConfiguredError when primary key is missing", () => {
     expect(() =>
       createProvidersFromEnv({ LLM_PROVIDER: "gemini", GROQ_API_KEY: "only-groq" }),
-    ).toThrow(/GEMINI_API_KEY/);
+    ).toThrow(/GEMINI_API_KEY is not set/);
+    try {
+      createProvidersFromEnv({ LLM_PROVIDER: "gemini" });
+    } catch (err) {
+      expect(err).toMatchObject({ code: "LLM_NOT_CONFIGURED", name: "LlmNotConfiguredError" });
+    }
   });
 });
 

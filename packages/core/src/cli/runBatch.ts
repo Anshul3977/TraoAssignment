@@ -1,5 +1,6 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
+import { isLlmNotConfiguredError } from "../llm/errors.js";
 import {
   isPipelineError,
   PipelineError,
@@ -44,6 +45,9 @@ const DEFAULT_CONCURRENCY = 2;
 const DEFAULT_CASE_TIMEOUT_MS = 4 * 60 * 1000;
 
 function toBatchError(err: unknown): { code: string; message: string } {
+  if (isLlmNotConfiguredError(err)) {
+    return { code: err.code, message: err.message };
+  }
   if (isPipelineError(err)) {
     return { code: err.code, message: err.message };
   }

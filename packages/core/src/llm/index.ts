@@ -10,8 +10,10 @@ export type {
 export {
   LlmProviderError,
   LlmError,
+  LlmNotConfiguredError,
   isLlmProviderError,
   isLlmError,
+  isLlmNotConfiguredError,
   isRetryableKind,
 } from "./errors.js";
 
@@ -42,6 +44,8 @@ export { createGroqProvider, type GroqConfig } from "./groq.js";
 export {
   resolveLlmEnv,
   createProvidersFromEnv,
+  isLlmConfigured,
+  missingLlmKeyMessage,
   type EnvLike,
   type ResolvedLlmEnv,
   type ProvidersFromEnv,

@@ -1,3 +1,4 @@
+import { LlmNotConfiguredError } from "./errors.js";
 import { createGeminiProvider } from "./gemini.js";
 import { createGroqProvider } from "./groq.js";
 import type { LlmProvider, ProviderId } from "./types.js";
@@ -32,6 +33,22 @@ export function resolveLlmEnv(env: EnvLike = process.env): ResolvedLlmEnv {
   };
 }
 
+/** True when the configured primary provider has a non-empty API key. */
+export function isLlmConfigured(env: EnvLike = process.env): boolean {
+  const resolved = resolveLlmEnv(env);
+  if (resolved.primaryId === "gemini") return Boolean(resolved.gemini);
+  return Boolean(resolved.groq);
+}
+
+/** Human-readable missing-key message for the active primary provider. */
+export function missingLlmKeyMessage(env: EnvLike = process.env): string {
+  const primaryId = resolveLlmEnv(env).primaryId;
+  if (primaryId === "groq") {
+    return "GROQ_API_KEY is not set. Add it to .env (see .env.example) before running evaluate.";
+  }
+  return "GEMINI_API_KEY is not set. Add it to .env (see .env.example) before running evaluate.";
+}
+
 export type ProvidersFromEnv = {
   primary: LlmProvider;
   fallback?: LlmProvider;
@@ -40,7 +57,7 @@ export type ProvidersFromEnv = {
 
 /**
  * Build primary (+ optional other-provider fallback) from env.
- * Throws if the configured primary has no API key.
+ * Throws `LlmNotConfiguredError` if the configured primary has no API key.
  */
 export function createProvidersFromEnv(env: EnvLike = process.env): ProvidersFromEnv {
   const resolved = resolveLlmEnv(env);
@@ -49,13 +66,13 @@ export function createProvidersFromEnv(env: EnvLike = process.env): ProvidersFro
 
   if (resolved.primaryId === "gemini") {
     if (!gemini) {
-      throw new Error("GEMINI_API_KEY is required when LLM_PROVIDER=gemini");
+      throw new LlmNotConfiguredError(missingLlmKeyMessage(env));
     }
     return { primary: gemini, fallback: groq, primaryId: "gemini" };
   }
 
   if (!groq) {
-    throw new Error("GROQ_API_KEY is required when LLM_PROVIDER=groq");
+    throw new LlmNotConfiguredError(missingLlmKeyMessage(env));
   }
   return { primary: groq, fallback: gemini, primaryId: "groq" };
 }

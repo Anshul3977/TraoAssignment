@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { parseArgs } from "node:util";
 import { z } from "zod";
+import { isLlmConfigured, missingLlmKeyMessage } from "../llm/config.js";
 import { formatBatchSummary, runBatch, type BatchCase } from "./runBatch.js";
 
 /**
@@ -15,6 +16,19 @@ function loadEnv(): void {
   if (existsSync(envPath)) {
     process.loadEnvFile(envPath);
   }
+}
+
+/** Startup warning when the primary provider key is missing (still runs; cases fail). */
+export function warnIfLlmNotConfigured(
+  env: NodeJS.ProcessEnv = process.env,
+  warn: (line: string) => void = console.warn,
+): boolean {
+  if (isLlmConfigured(env)) return false;
+  warn(`WARNING: ${missingLlmKeyMessage(env)}`);
+  warn(
+    "WARNING: Every case will be recorded as failed with code LLM_NOT_CONFIGURED.",
+  );
+  return true;
 }
 
 const CaseSchema = z.object({
@@ -110,6 +124,7 @@ function loadCases(inputPath: string): BatchCase[] {
 
 export async function main(argv: string[] = process.argv.slice(2)): Promise<void> {
   loadEnv();
+  warnIfLlmNotConfigured();
   const { input, output } = parseCliArgs(argv);
   const cases = loadCases(input);
 

@@ -2,6 +2,7 @@ import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { LlmNotConfiguredError } from "../llm/errors.js";
 import { PipelineError } from "../pipeline.js";
 import { BatchOutputSchema, type Kit } from "../schema/index.js";
 import {
@@ -10,6 +11,7 @@ import {
   type BatchCase,
   type CaseRunner,
 } from "./runBatch.js";
+import { warnIfLlmNotConfigured } from "./evaluate.js";
 
 function minimalKit(days: number): Kit {
   return {
@@ -258,5 +260,60 @@ describe("runBatch", () => {
       JSON.parse(readFileSync(outputPath, "utf8")),
     );
     expect(onDisk.kits).toEqual([]);
+  });
+
+  it("records LLM_NOT_CONFIGURED when the runner has no API key", async () => {
+    const outputPath = tempOut();
+    const runCase: CaseRunner = async () => {
+      throw new LlmNotConfiguredError(
+        "GEMINI_API_KEY is not set. Add it to .env (see .env.example) before running evaluate.",
+      );
+    };
+
+    const { output } = await runBatch({
+      cases: [
+        {
+          id: "no-key",
+          jd: "Engineer\nRequirements:\n- TypeScript",
+          company_url: "http://localhost:8099/acme/",
+          days: 3,
+        },
+      ],
+      outputPath,
+      concurrency: 1,
+      runCase,
+      log: () => {},
+    });
+
+    expect(output.kits).toHaveLength(1);
+    expect(output.kits[0]!.status).toBe("failed");
+    expect(output.kits[0]!.kit).toBeNull();
+    expect(output.kits[0]!.error?.code).toBe("LLM_NOT_CONFIGURED");
+    expect(output.kits[0]!.error?.message).toMatch(/GEMINI_API_KEY is not set/);
+  });
+});
+
+describe("warnIfLlmNotConfigured", () => {
+  it("prints a clear startup warning when the primary key is unset", () => {
+    const lines: string[] = [];
+    const warned = warnIfLlmNotConfigured(
+      { LLM_PROVIDER: "gemini", GEMINI_API_KEY: "", GROQ_API_KEY: undefined },
+      (line) => lines.push(line),
+    );
+    expect(warned).toBe(true);
+    expect(lines.some((l) => l.includes("GEMINI_API_KEY is not set"))).toBe(
+      true,
+    );
+    expect(lines.some((l) => l.includes("LLM_NOT_CONFIGURED"))).toBe(true);
+  });
+
+  it("stays quiet when a non-empty primary key is present", () => {
+    const lines: string[] = [];
+    const warned = warnIfLlmNotConfigured(
+      { LLM_PROVIDER: "gemini", GEMINI_API_KEY: "test-key" },
+      (line) => lines.push(line),
+    );
+    expect(warned).toBe(false);
+    expect(lines).toEqual([]);
   });
 });
