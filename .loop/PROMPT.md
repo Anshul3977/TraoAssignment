@@ -16,7 +16,7 @@ You are one iteration of a build loop. You start with a fresh context every time
    - Decisions: <choice> — because <reason>   (these become the README; be specific)
    - Limitations / follow-ups: <...>
    ```
-7. Update root `README.md` in the same commit: state what this task added, and how to run it if there is a new command. A commit without `README.md` is incomplete.
+7. Update root `README.md` in the **same commit only when something documentable changed** — a new command, HTTP route, env var, or user-facing limitation. If this task did not change any of those, do not touch `README.md`. A commit without `README.md` is fine when nothing documentable changed.
 8. `git add -A && git commit -m "<type>(<scope>): <summary>"` with a body explaining why.
 9. Print `ITERATION_DONE T<nn>`.
 
@@ -26,4 +26,4 @@ Hard rules:
 - Never send untrusted text to the model outside `wrapUntrusted`.
 - Never let the model do scheduling, gap detection, id assignment, or source citation.
 - Do not start the next task.
-- Every task commit MUST include an updated root `README.md`; a commit without `README.md` is incomplete.
+- Update root `README.md` only when something documentable changed (new command, route, env var, limitation). Do not require a README touch on every commit if nothing user-facing changed.
