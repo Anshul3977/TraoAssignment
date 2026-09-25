@@ -67,11 +67,14 @@ function defaultCurrentPath(): string {
   return "/";
 }
 
-export async function apiFetch<T = unknown>(
+export type ApiResult<T> = { data: T; status: number };
+
+/** Like apiFetch, but also returns the HTTP status (needed for POST /kits 200 vs 201). */
+export async function apiFetchResult<T = unknown>(
   contractPath: string,
   options: ApiFetchOptions = {},
   deps: ApiFetchDeps = {},
-): Promise<T> {
+): Promise<ApiResult<T>> {
   const {
     skipAuthRedirect = false,
     headers: initHeaders,
@@ -99,7 +102,7 @@ export async function apiFetch<T = unknown>(
   }
 
   if (res.status === 204) {
-    return undefined as T;
+    return { data: undefined as T, status: 204 };
   }
 
   let json: unknown = null;
@@ -131,7 +134,61 @@ export async function apiFetch<T = unknown>(
     });
   }
 
-  return json as T;
+  return { data: json as T, status: res.status };
+}
+
+export async function apiFetch<T = unknown>(
+  contractPath: string,
+  options: ApiFetchOptions = {},
+  deps: ApiFetchDeps = {},
+): Promise<T> {
+  const { data } = await apiFetchResult<T>(contractPath, options, deps);
+  return data;
+}
+
+/** Generation job shape from docs/API.md (kits + generation jobs). */
+export type GenerationJob = {
+  id: string;
+  userId: string;
+  kitId: string | null;
+  status: "queued" | "running" | "done" | "failed";
+  steps: Array<{
+    step: string;
+    status: string;
+    detail?: string;
+  }>;
+  error: { code: string; message: string } | null;
+  input: { jd: string; company_url: string; days: number };
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type CreateKitInput = {
+  jd: string;
+  company_url: string;
+  days: number;
+};
+
+/**
+ * POST /kits — start generation or return existing job for the same idempotency key.
+ * `created` is true when the API returns 201 (new job); false for 200 (existing).
+ */
+export async function createKit(
+  input: CreateKitInput,
+  deps?: ApiFetchDeps,
+): Promise<{ job: GenerationJob; created: boolean }> {
+  const { data, status } = await apiFetchResult<{ job: GenerationJob }>(
+    "/kits",
+    {
+      method: "POST",
+      body: JSON.stringify(input),
+    },
+    deps,
+  );
+  return {
+    job: data.job,
+    created: status === 201,
+  };
 }
 
 export async function register(

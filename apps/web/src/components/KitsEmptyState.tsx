@@ -2,8 +2,8 @@ import Link from "next/link";
 
 /**
  * Dashboard kit list.
- * docs/API.md (T17a) has no kit list route yet — show empty state only until
- * T17b/T18 document GET /kits. Do not invent endpoints.
+ * docs/API.md has no kit list route yet — empty state only.
+ * Create CTA → /kits/new (T22a → POST /kits). Do not invent list endpoints.
  */
 export function KitsEmptyState() {
   return (

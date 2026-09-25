@@ -3,6 +3,7 @@ import {
   ApiClientError,
   apiFetch,
   apiPath,
+  createKit,
   login,
   loginRedirectUrl,
   logout,
@@ -107,5 +108,74 @@ describe("apiFetch", () => {
         body: JSON.stringify({ email: "a@b.co", password: "password1" }),
       }),
     );
+  });
+});
+
+const sampleJob = {
+  id: "job1",
+  userId: "u1",
+  kitId: null,
+  status: "queued" as const,
+  steps: [],
+  error: null,
+  input: {
+    jd: "Senior engineer…",
+    company_url: "https://example.com",
+    days: 5,
+  },
+  createdAt: "2026-01-01T00:00:00.000Z",
+  updatedAt: "2026-01-01T00:00:00.000Z",
+};
+
+describe("createKit", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("POSTs to /api/kits and marks created on 201", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ job: sampleJob }), { status: 201 }),
+    );
+    const result = await createKit(
+      {
+        jd: "Senior engineer…",
+        company_url: "https://example.com",
+        days: 5,
+      },
+      { fetch: fetchMock },
+    );
+    expect(result.created).toBe(true);
+    expect(result.job.id).toBe("job1");
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/kits",
+      expect.objectContaining({
+        method: "POST",
+        credentials: "include",
+        body: JSON.stringify({
+          jd: "Senior engineer…",
+          company_url: "https://example.com",
+          days: 5,
+        }),
+      }),
+    );
+  });
+
+  it("marks created=false on 200 (idempotent existing job)", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(
+        JSON.stringify({ job: { ...sampleJob, status: "running" } }),
+        { status: 200 },
+      ),
+    );
+    const result = await createKit(
+      {
+        jd: "Senior engineer…",
+        company_url: "https://example.com",
+        days: 5,
+      },
+      { fetch: fetchMock },
+    );
+    expect(result.created).toBe(false);
+    expect(result.job.status).toBe("running");
   });
 });
