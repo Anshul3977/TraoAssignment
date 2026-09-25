@@ -397,7 +397,138 @@ Brief regeneration is skipped when the brief is edited unless `force=true` (`bri
 | 409 | `MISSING_RESEARCH` | Brief regen needs a stored research bundle |
 | 409 | `VERSION_CONFLICT` | Concurrent write — body includes current `kit` |
 
-Practice routes arrive in T20.
+---
+
+## Practice (T20)
+
+Leitner-style flashcard practice scoped to an owned kit. State lives on `PracticeState` (per user + kit) so sessions reopen after restart (§13).
+
+### Box rules on review
+
+| Confidence | New box |
+|---|---|
+| 1–2 | Always **1** |
+| 3 | Always **2** |
+| 4–5 | `min(5, previousBox + 1)` (unseen cards treat previous as **1**) |
+
+### Next-session order
+
+1. Sort **seen** cards by `box` ascending, then `lastConfidence` ascending, then `lastSeenAt` ascending (least recently seen first).
+2. **Never-seen** cards (no `lastSeenAt`) are interleaved early: one never-seen card is inserted before each sorted seen card until the never-seen pool is exhausted; any remainder is appended.
+
+### Coverage
+
+A requirement is **covered** when at least one flashcard that lists its id has been reviewed. Requirements with no flashcards stay not-covered.
+
+---
+
+### `POST /kits/:id/practice/review`
+
+**Protected.** Record confidence for one flashcard and update its Leitner box.
+
+**Request body**
+
+```json
+{ "flashcardId": "f1", "confidence": 4 }
+```
+
+| Field | Rules |
+|---|---|
+| `flashcardId` | Required string; must exist on the kit |
+| `confidence` | Integer 1–5 |
+
+**Response `200`**
+
+```json
+{
+  "card": {
+    "flashcardId": "f1",
+    "box": 2,
+    "lastConfidence": 4,
+    "lastSeenAt": "ISO-8601"
+  },
+  "flashcard": {
+    "id": "f1",
+    "front": "…",
+    "back": "…",
+    "requirement_ids": ["r1"]
+  }
+}
+```
+
+| Status | Code | Meaning |
+|---|---|---|
+| 400 | `VALIDATION_ERROR` | Body failed zod checks |
+| 401 | `UNAUTHENTICATED` / `SESSION_EXPIRED` | Auth |
+| 404 | `NOT_FOUND` | Unknown/foreign kit, or flashcard id not on kit |
+
+---
+
+### `GET /kits/:id/practice/next`
+
+**Protected.** Ordered queue for the next practice session (full card list).
+
+**Response `200`**
+
+```json
+{
+  "items": [
+    {
+      "flashcardId": "f3",
+      "front": "…",
+      "back": "…",
+      "requirement_ids": ["r2"],
+      "box": null,
+      "lastConfidence": null,
+      "lastSeenAt": null
+    },
+    {
+      "flashcardId": "f1",
+      "front": "…",
+      "back": "…",
+      "requirement_ids": ["r1"],
+      "box": 1,
+      "lastConfidence": 2,
+      "lastSeenAt": "ISO-8601"
+    }
+  ]
+}
+```
+
+`box` is `null` for never-seen cards.
+
+| Status | Code | Meaning |
+|---|---|---|
+| 401 | `UNAUTHENTICATED` / `SESSION_EXPIRED` | Auth |
+| 404 | `NOT_FOUND` | Unknown or not owned |
+
+---
+
+### `GET /kits/:id/practice/stats`
+
+**Protected.** Per-requirement covered / not-covered plus totals.
+
+**Response `200`**
+
+```json
+{
+  "requirements": [
+    { "id": "r1", "text": "5+ years with React", "priority": "must", "covered": true },
+    { "id": "r2", "text": "Mentors juniors", "priority": "must", "covered": false }
+  ],
+  "totals": {
+    "covered": 1,
+    "notCovered": 1,
+    "cards": 4,
+    "reviewed": 1
+  }
+}
+```
+
+| Status | Code | Meaning |
+|---|---|---|
+| 401 | `UNAUTHENTICATED` / `SESSION_EXPIRED` | Auth |
+| 404 | `NOT_FOUND` | Unknown or not owned |
 
 ---
 

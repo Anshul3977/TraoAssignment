@@ -5,8 +5,13 @@
 
 ## Outside apps/api/ this iteration
 - `README.md` (required in same commit)
-- `docs/API.md` — job lifecycle + `POST /kits`, `POST /kits/batch`, `GET /jobs/:id`, `POST /jobs/:id/retry` (SPEC-required for web; no invented routes)
+- `docs/API.md` — practice routes (T20) documented for web (T24)
 - `.loop/progress-api.md` (this log; TASKS.md not edited per lane rules)
+
+## 2026-09-25 T20 Practice API
+- Changed: `apps/api/src/practice/{leitner,schema,store,routes}.ts`, `practice.test.ts`, `kits/routes.ts`; `docs/API.md`; `README.md`; `.loop/progress-api.md`
+- Decisions: Leitner boxes on review (≤2→1, 3→2, ≥4→box+1 capped at 5) with never-seen interleaved early before each sorted seen card — because §7 asks for spaced repetition and "next session" ordering the web can poll without reimplementing; requirement covered when ≥1 linked flashcard has `lastSeenAt` — because T24 needs a covered/not grid and empty flashcard sets stay honest; pure `orderNextSession` / `nextLeitnerBox` unit-tested separately from Mongo — because Verify is ordering-focused; PracticeState upserted per user+kit — because §13 reopen/continue
+- Limitations / follow-ups: deleted flashcards may leave orphan PracticeState card rows (harmless; `/next` only returns current kit cards); api lane complete at T20 — no web tasks started; TASKS.md left unmarked per lane rules
 
 ## 2026-09-25 T19b Edit + regenerate API
 - Changed: `apps/api/src/kits/{opsSchema,applyOps,regenerate,routes,store}.ts`, `lib/prepCore.ts`, `jobs/worker.ts`, `app.ts`, `edit.test.ts`, `tsconfig.json`; `docs/API.md`; `README.md`; `.loop/progress-api.md`

@@ -29,6 +29,7 @@ import {
   kitToPublic,
   saveKitIfVersion,
 } from "./store.js";
+import { createPracticeRouter } from "../practice/routes.js";
 
 function kitIdParam(raw: string | string[] | undefined): string | null {
   if (!raw) return null;
@@ -45,8 +46,8 @@ function asBundle(raw: unknown): StoredResearchBundle | null {
 }
 
 /**
- * Kit routes: create/batch (T18), scoped read (T17b), PATCH ops + regenerate (T19b).
- * Register `/batch` before `/:id`.
+ * Kit routes: create/batch (T18), scoped read (T17b), PATCH ops + regenerate (T19b),
+ * practice (T20). Register `/batch` before `/:id`.
  */
 export function createKitsRouter(
   worker: JobWorker,
@@ -81,6 +82,9 @@ export function createKitsRouter(
       res.status(200).json({ jobs });
     },
   );
+
+  // Practice before bare `/:id` so `/practice/*` is not captured as an id.
+  router.use("/:id/practice", createPracticeRouter());
 
   router.get("/:id", requireAuth, async (req, res) => {
     const userId = req.user!.id;
