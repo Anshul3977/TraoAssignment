@@ -5,6 +5,12 @@ import helmet from "helmet";
 import { createAuthRouter } from "./auth/routes.js";
 import { createMemoryUserStore, type UserStore } from "./auth/store.js";
 import { sendError } from "./errors.js";
+import { createJobsRouter } from "./jobs/routes.js";
+import {
+  JobWorker,
+  type JobWorkerOptions,
+  type PipelineRunner,
+} from "./jobs/worker.js";
 import { createKitsRouter } from "./kits/routes.js";
 import { attachSession } from "./middleware/auth.js";
 import { createHealthRouter } from "./routes/health.js";
@@ -13,13 +19,24 @@ export type CreateAppOptions = {
   userStore?: UserStore;
   /** Disable rate limiting in tests. */
   disableRateLimit?: boolean;
+  /** Injected pipeline (tests). Defaults to `@prep/core` `runPipeline`. */
+  runPipeline?: PipelineRunner;
+  allowPrivateHosts?: boolean;
+  workerConcurrency?: number;
 };
 
 export function createApp(options: CreateAppOptions = {}): {
   app: Express;
   userStore: UserStore;
+  worker: JobWorker;
 } {
   const userStore = options.userStore ?? createMemoryUserStore();
+  const workerOpts: JobWorkerOptions = {
+    runPipeline: options.runPipeline,
+    allowPrivateHosts: options.allowPrivateHosts,
+    concurrency: options.workerConcurrency,
+  };
+  const worker = new JobWorker(workerOpts);
   const app = express();
 
   app.disable("x-powered-by");
@@ -44,7 +61,8 @@ export function createApp(options: CreateAppOptions = {}): {
   app.use(attachSession(userStore));
   app.use(createHealthRouter());
   app.use("/auth", createAuthRouter(userStore));
-  app.use("/kits", createKitsRouter());
+  app.use("/kits", createKitsRouter(worker));
+  app.use("/jobs", createJobsRouter(worker));
 
   app.use((_req, res) => {
     sendError(res, 404, "NOT_FOUND", "Route not found.");
@@ -56,5 +74,5 @@ export function createApp(options: CreateAppOptions = {}): {
     sendError(res, 500, "INTERNAL_ERROR", "An unexpected error occurred.");
   });
 
-  return { app, userStore };
+  return { app, userStore, worker };
 }

@@ -1,6 +1,10 @@
 import { createApp } from "./app.js";
 import { createMongooseUserStore } from "./auth/mongooseStore.js";
 import { connectMongo } from "./db/connect.js";
+import {
+  listQueuedJobIds,
+  markInterruptedRunningJobs,
+} from "./jobs/store.js";
 
 const PORT = Number(process.env.PORT ?? 4000);
 
@@ -17,7 +21,21 @@ if (!mongoUri || mongoUri.trim() === "") {
 
 await connectMongo(mongoUri);
 
-const { app } = createApp({ userStore: createMongooseUserStore() });
+const interrupted = await markInterruptedRunningJobs();
+if (interrupted > 0) {
+  console.warn(
+    `Marked ${interrupted} in-flight job(s) as failed (INTERRUPTED). Clients may retry.`,
+  );
+}
+
+const { app, worker } = createApp({
+  userStore: createMongooseUserStore(),
+  allowPrivateHosts: process.env.ALLOW_PRIVATE_HOSTS === "true",
+});
+
+for (const id of await listQueuedJobIds()) {
+  worker.enqueue(id);
+}
 
 app.listen(PORT, () => {
   console.log(`API listening on http://localhost:${PORT}`);

@@ -1,14 +1,51 @@
 import { Router } from "express";
 import { sendError } from "../errors.js";
 import { requireAuth } from "../middleware/auth.js";
+import { validate } from "../middleware/validate.js";
+import { createOrGetJob } from "../jobs/service.js";
+import {
+  kitBatchSchema,
+  kitCreateSchema,
+  type KitCreateBody,
+} from "../jobs/schema.js";
+import { jobToPublic } from "../jobs/store.js";
+import type { JobWorker } from "../jobs/worker.js";
 import { findKitForUser, kitToPublic } from "./store.js";
 
 /**
- * Minimal kit read surface for T17b (scoping + reopen). Create/list/jobs
- * arrive in T18+.
+ * Kit routes: create/batch (T18) + scoped read (T17b).
+ * Register `/batch` before `/:id`.
  */
-export function createKitsRouter(): Router {
+export function createKitsRouter(worker: JobWorker): Router {
   const router = Router();
+
+  router.post(
+    "/",
+    requireAuth,
+    validate("body", kitCreateSchema),
+    async (req, res) => {
+      const userId = req.user!.id;
+      const body = req.body as KitCreateBody;
+      const { job, created } = await createOrGetJob(userId, body, worker);
+      res.status(created ? 201 : 200).json({ job: jobToPublic(job) });
+    },
+  );
+
+  router.post(
+    "/batch",
+    requireAuth,
+    validate("body", kitBatchSchema),
+    async (req, res) => {
+      const userId = req.user!.id;
+      const items = req.body as KitCreateBody[];
+      const jobs = [];
+      for (const item of items) {
+        const { job, created } = await createOrGetJob(userId, item, worker);
+        jobs.push({ job: jobToPublic(job), created });
+      }
+      res.status(200).json({ jobs });
+    },
+  );
 
   router.get("/:id", requireAuth, async (req, res) => {
     const userId = req.user!.id;

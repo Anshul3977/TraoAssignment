@@ -7,7 +7,7 @@ Interview prep kit generator (Trao FS-AI-INTERVIEW-01). Paste a job description 
 npm workspaces:
 
 - `packages/core` — schema, retrieval, LLM helpers, deterministic steps, pipeline pieces
-- `apps/api` — Express API (auth, Mongo persistence, scoped kit read; jobs in later tasks)
+- `apps/api` — Express API (auth, Mongo persistence, scoped kits, async generation jobs)
 - `apps/web` — Next.js App Router UI (scaffold)
 - `docs/API.md` — HTTP contract the web app builds against
 
@@ -32,16 +32,19 @@ npm run evaluate -- --input fixtures/cases-real.json --output out/kits-real.json
 npm run dev                                               # workspace dev scripts if present
 ```
 
-### API (`apps/api`) — T17a + T17b
+### API (`apps/api`) — T17a + T17b + T18
 
 Express base with helmet, rate limiting, cookie sessions, and zod request validation. Contract: [`docs/API.md`](docs/API.md).
 
 Auth routes: `GET /health`, `POST /auth/register`, `POST /auth/login`, `POST /auth/logout`, `GET /auth/me`. JWT lives in an httpOnly `session` cookie (7 days, `SameSite=Lax`, `Secure` in production). Protected routes distinguish `401 UNAUTHENTICATED` (no cookie) from `401 SESSION_EXPIRED` (bad/expired cookie).
 
-**T17b persistence:** Mongoose models `User`, `Kit`, `Job`, `PracticeState`. Production auth uses the Mongo `User` store. Kit reads (`GET /kits/:id`) always filter by `userId` — another owner's id returns `404 NOT_FOUND`. Kit / job / practice documents store enough to reopen and continue after restart (§13); create/job worker routes arrive in T18+.
+**Persistence (T17b):** Mongoose models `User`, `Kit`, `Job`, `PracticeState`. Kit reads (`GET /kits/:id`) always filter by `userId` — another owner's id returns `404 NOT_FOUND`.
+
+**Generation jobs (T18):** `POST /kits` and `POST /kits/batch` enqueue an in-process worker that runs `runPipeline`, persisting step progress on the Job for polling via `GET /jobs/:id`. Idempotency key = `sha256(userId + normalised JD + URL + days)` — a second submit returns the same job (`200`) instead of starting another run. `POST /jobs/:id/retry` re-queues failed jobs (including boot-time `INTERRUPTED`). Kits are `validateKit`'d before save. Edit/regenerate/practice routes arrive in T19b–T20.
 
 ```bash
 # requires JWT_SECRET and MONGODB_URI in .env (see .env.example); default PORT=4000
+# optional: ALLOW_PRIVATE_HOSTS=true for localhost fixture company URLs
 npm run dev --workspace=@prep/api
 # or
 npm start --workspace=@prep/api
