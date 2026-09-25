@@ -7,8 +7,9 @@ Interview prep kit generator (Trao FS-AI-INTERVIEW-01). Paste a job description 
 npm workspaces:
 
 - `packages/core` — schema, retrieval, LLM helpers, deterministic steps, pipeline pieces
-- `apps/api` — Express API (scaffold; auth/jobs not fully wired yet)
+- `apps/api` — Express API (auth + health; kits/jobs in later tasks)
 - `apps/web` — Next.js App Router UI (scaffold)
+- `docs/API.md` — HTTP contract the web app builds against
 
 ## Setup
 
@@ -30,6 +31,20 @@ npx tsx scripts/review-kits.ts out/kits.json              # Checkpoint B per-cas
 npm run evaluate -- --input fixtures/cases-real.json --output out/kits-real.json
 npm run dev                                               # workspace dev scripts if present
 ```
+
+### API (`apps/api`) — T17a
+
+Express base with helmet, rate limiting, cookie sessions, and zod request validation. Contract: [`docs/API.md`](docs/API.md).
+
+Routes so far: `GET /health`, `POST /auth/register`, `POST /auth/login`, `POST /auth/logout`, `GET /auth/me`. JWT lives in an httpOnly `session` cookie (7 days, `SameSite=Lax`, `Secure` in production). Protected routes distinguish `401 UNAUTHENTICATED` (no cookie) from `401 SESSION_EXPIRED` (bad/expired cookie). Users are **in-memory** until T17b (Mongo).
+
+```bash
+# requires JWT_SECRET in .env (see .env.example); default PORT=4000
+npm run dev --workspace=@prep/api
+# or
+npm start --workspace=@prep/api
+```
+
 
 ### Batch CLI (`npm run evaluate`) — T16
 

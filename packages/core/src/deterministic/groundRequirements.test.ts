@@ -108,6 +108,7 @@ describe("overridePriority", () => {
   it("reads nice / must cues from section headings", () => {
     expect(
       overridePriority({
+        text: "GraphQL",
         priority: "must",
         evidence: "GraphQL",
         section: "Nice to have",
@@ -115,6 +116,7 @@ describe("overridePriority", () => {
     ).toBe("nice");
     expect(
       overridePriority({
+        text: "React",
         priority: "nice",
         evidence: "React",
         section: "Requirements",
@@ -125,12 +127,14 @@ describe("overridePriority", () => {
   it("reads cues from the evidence line when section is absent", () => {
     expect(
       overridePriority({
+        text: "GraphQL",
         priority: "must",
         evidence: "Familiarity with GraphQL",
       }),
     ).toBe("nice");
     expect(
       overridePriority({
+        text: "React",
         priority: "nice",
         evidence: "You will need 5 years of React",
       }),
