@@ -1,0 +1,16 @@
+node_modules/
+.next/
+dist/
+out/
+build/
+coverage/
+*.tsbuildinfo
+.env
+.env.local
+.env.*.local
+.loop/agent.log
+.loop/verify.out
+.llm-cache/
+.DS_Store
+*.log
+npm-debug.log*
