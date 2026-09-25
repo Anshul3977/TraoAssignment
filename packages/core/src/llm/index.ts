@@ -7,7 +7,13 @@ export type {
   RetryableKind,
 } from "./types.js";
 
-export { LlmProviderError, isLlmProviderError, isRetryableKind } from "./errors.js";
+export {
+  LlmProviderError,
+  LlmError,
+  isLlmProviderError,
+  isLlmError,
+  isRetryableKind,
+} from "./errors.js";
 
 export {
   TokenRequestLimiter,
@@ -47,3 +53,23 @@ export {
   type LlmClient,
   type CreateLlmClientOptions,
 } from "./client.js";
+
+export {
+  wrapUntrusted,
+  neutralizeUntrustedClosingTags,
+} from "./wrapUntrusted.js";
+
+export {
+  generateJson,
+  parseJsonText,
+  type GenerateJsonArgs,
+  type GenerateJsonOptions,
+} from "./generateJson.js";
+
+export {
+  llmCacheKey,
+  resolveLlmCacheDir,
+  readLlmCache,
+  writeLlmCache,
+  type CacheLookup,
+} from "./cache.js";
