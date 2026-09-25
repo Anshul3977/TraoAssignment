@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import type { AuthUser, PublicUser } from "./types.js";
 
-/** In-memory user store for T17a. Replaced by Mongoose User in T17b. */
+/** In-memory user store (tests / optional inject). Production uses Mongoose (T17b). */
 export type UserStore = {
   create(email: string, passwordHash: string): Promise<AuthUser>;
   findByEmail(email: string): Promise<AuthUser | null>;

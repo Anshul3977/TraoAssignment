@@ -7,7 +7,7 @@ Interview prep kit generator (Trao FS-AI-INTERVIEW-01). Paste a job description 
 npm workspaces:
 
 - `packages/core` — schema, retrieval, LLM helpers, deterministic steps, pipeline pieces
-- `apps/api` — Express API (auth + health; kits/jobs in later tasks)
+- `apps/api` — Express API (auth, Mongo persistence, scoped kits, async generation jobs)
 - `apps/web` — Next.js App Router UI (scaffold)
 - `docs/API.md` — HTTP contract the web app builds against
 
@@ -32,14 +32,23 @@ npm run evaluate -- --input fixtures/cases-real.json --output out/kits-real.json
 npm run dev                                               # workspace dev scripts if present
 ```
 
-### API (`apps/api`) — T17a
+### API (`apps/api`) — T17a + T17b + T18 + T19b + T20
 
 Express base with helmet, rate limiting, cookie sessions, and zod request validation. Contract: [`docs/API.md`](docs/API.md).
 
-Routes so far: `GET /health`, `POST /auth/register`, `POST /auth/login`, `POST /auth/logout`, `GET /auth/me`. JWT lives in an httpOnly `session` cookie (7 days, `SameSite=Lax`, `Secure` in production). Protected routes distinguish `401 UNAUTHENTICATED` (no cookie) from `401 SESSION_EXPIRED` (bad/expired cookie). Users are **in-memory** until T17b (Mongo).
+Auth routes: `GET /health`, `POST /auth/register`, `POST /auth/login`, `POST /auth/logout`, `GET /auth/me`. JWT lives in an httpOnly `session` cookie (7 days, `SameSite=Lax`, `Secure` in production). Protected routes distinguish `401 UNAUTHENTICATED` (no cookie) from `401 SESSION_EXPIRED` (bad/expired cookie).
+
+**Persistence (T17b):** Mongoose models `User`, `Kit`, `Job`, `PracticeState`. Kit reads (`GET /kits/:id`) always filter by `userId` — another owner's id returns `404 NOT_FOUND`.
+
+**Generation jobs (T18):** `POST /kits` and `POST /kits/batch` enqueue an in-process worker that runs `runPipeline`, persisting step progress on the Job for polling via `GET /jobs/:id`. Idempotency key = `sha256(userId + normalised JD + URL + days)` — a second submit returns the same job (`200`) instead of starting another run. `POST /jobs/:id/retry` re-queues failed jobs (including boot-time `INTERRUPTED`). Kits are `validateKit`'d before save. The worker also stores the crawl `researchBundle` on the Kit so regenerate can skip a re-crawl.
+
+**Edit + regenerate (T19b):** `PATCH /kits/:id` applies a batch of ops (`update` / `add` / `delete` / `reorder` / `move`) with optimistic concurrency via `baseVersion` (mismatch → `409 VERSION_CONFLICT` + current kit). Deleting a generated question records its normalised prompt in `kit.meta.dismissed`. `POST /kits/:id/regenerate` merges via `mergeRegenerated` (brief / schedule / one question category); schedule re-allocates with `allocateSchedule` when questions change.
+
+**Practice (T20):** `POST /kits/:id/practice/review` records confidence (1–5) into Leitner boxes (≤2 → box 1, 3 → box 2, ≥4 → box+1 capped at 5). `GET /kits/:id/practice/next` returns the next-session queue (seen cards by box↑ / lastConfidence↑ / least-recently-seen; never-seen interleaved early). `GET /kits/:id/practice/stats` reports covered/not-covered per requirement (≥1 reviewed flashcard linked to that req).
 
 ```bash
-# requires JWT_SECRET in .env (see .env.example); default PORT=4000
+# requires JWT_SECRET and MONGODB_URI in .env (see .env.example); default PORT=4000
+# optional: ALLOW_PRIVATE_HOSTS=true for localhost fixture company URLs
 npm run dev --workspace=@prep/api
 # or
 npm start --workspace=@prep/api
