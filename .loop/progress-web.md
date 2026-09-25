@@ -54,3 +54,12 @@
   - Flush pending brief/question/flashcard text ops before schedule or brief regen — because Verify requires schedule regen not clobber unrelated edits and version must match.
   - Brief regen confirm mirrors question keep rules (edited/yours listed) with optional `force` — because API skips edited briefs unless `force:true` and returns `briefSkipped`.
 - Limitations / follow-ups: practice mode is T24; full schedule day cards + coverage matrix are T25; desktop only.
+
+## 2026-09-25 T24 Practice mode
+- Changed: `apps/web/` (`PracticeMode`, `/kits/[id]/practice`, practice helpers + tests, API client `getPracticeNext` / `getPracticeStats` / `submitPracticeReview`, builder Practice link), root `README.md`, `.loop/progress-web.md`
+- Decisions:
+  - Session queue is exactly `GET /kits/:id/practice/next` order — because API.md documents Leitner next-session ordering; client must not re-sort (§7).
+  - Space/Enter reveal, then 1–5 → `POST /kits/:id/practice/review` — because task Verify is keyboard-only one session; buttons mirror the same actions.
+  - Summary + coverage grid from `GET /kits/:id/practice/stats` after the queue finishes — because contract separates next vs stats; covered = reviewed flashcard requirement ids.
+  - Practice lives at `/kits/:id/practice` with a builder header link — because T25 owns schedule/coverage matrix views; keep practice scoped to flashcards.
+- Limitations / follow-ups: schedule day cards + requirements×questions matrix are T25; desktop only.

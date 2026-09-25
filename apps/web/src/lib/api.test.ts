@@ -15,6 +15,9 @@ import {
   regenerateKitBrief,
   regenerateKitQuestions,
   regenerateKitSchedule,
+  getPracticeNext,
+  getPracticeStats,
+  submitPracticeReview,
   retryJob,
 } from "./api";
 
@@ -529,6 +532,97 @@ describe("regenerateKitSchedule", () => {
         method: "POST",
         credentials: "include",
         body: JSON.stringify({ section: "schedule" }),
+      }),
+    );
+  });
+});
+
+describe("practice API (T24)", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("GET /api/kits/:id/practice/next returns ordered items", async () => {
+    const items = [
+      {
+        flashcardId: "f3",
+        front: "A",
+        back: "a",
+        requirement_ids: ["r2"],
+        box: null,
+        lastConfidence: null,
+        lastSeenAt: null,
+      },
+      {
+        flashcardId: "f1",
+        front: "B",
+        back: "b",
+        requirement_ids: ["r1"],
+        box: 1,
+        lastConfidence: 2,
+        lastSeenAt: "2026-01-01T00:00:00.000Z",
+      },
+    ];
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ items }), { status: 200 }),
+    );
+    const result = await getPracticeNext("kit1", { fetch: fetchMock });
+    expect(result.items.map((i) => i.flashcardId)).toEqual(["f3", "f1"]);
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/kits/kit1/practice/next",
+      expect.objectContaining({ method: "GET", credentials: "include" }),
+    );
+  });
+
+  it("GET /api/kits/:id/practice/stats returns coverage grid payload", async () => {
+    const stats = {
+      requirements: [
+        { id: "r1", text: "React", priority: "must", covered: true },
+        { id: "r2", text: "Mentoring", priority: "must", covered: false },
+      ],
+      totals: { covered: 1, notCovered: 1, cards: 4, reviewed: 1 },
+    };
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify(stats), { status: 200 }),
+    );
+    const result = await getPracticeStats("kit1", { fetch: fetchMock });
+    expect(result.totals.covered).toBe(1);
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/kits/kit1/practice/stats",
+      expect.objectContaining({ method: "GET", credentials: "include" }),
+    );
+  });
+
+  it("POST /api/kits/:id/practice/review with flashcardId + confidence", async () => {
+    const body = {
+      card: {
+        flashcardId: "f1",
+        box: 2,
+        lastConfidence: 4,
+        lastSeenAt: "2026-01-02T00:00:00.000Z",
+      },
+      flashcard: {
+        id: "f1",
+        front: "Q",
+        back: "A",
+        requirement_ids: ["r1"],
+      },
+    };
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify(body), { status: 200 }),
+    );
+    const result = await submitPracticeReview(
+      "kit1",
+      { flashcardId: "f1", confidence: 4 },
+      { fetch: fetchMock },
+    );
+    expect(result.card.box).toBe(2);
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/kits/kit1/practice/review",
+      expect.objectContaining({
+        method: "POST",
+        credentials: "include",
+        body: JSON.stringify({ flashcardId: "f1", confidence: 4 }),
       }),
     );
   });

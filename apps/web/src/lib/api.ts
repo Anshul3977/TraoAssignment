@@ -603,3 +603,93 @@ export async function regenerateKitSchedule(
     deps,
   );
 }
+
+/** One item from GET /kits/:id/practice/next (docs/API.md Practice). */
+export type PracticeNextItem = {
+  flashcardId: string;
+  front: string;
+  back: string;
+  requirement_ids: string[];
+  box: number | null;
+  lastConfidence: number | null;
+  lastSeenAt: string | null;
+};
+
+export type PracticeReviewBody = {
+  flashcardId: string;
+  confidence: number;
+};
+
+export type PracticeReviewResult = {
+  card: {
+    flashcardId: string;
+    box: number;
+    lastConfidence: number;
+    lastSeenAt: string;
+  };
+  flashcard: {
+    id: string;
+    front: string;
+    back: string;
+    requirement_ids: string[];
+  };
+};
+
+export type PracticeRequirementStat = {
+  id: string;
+  text: string;
+  priority: string;
+  covered: boolean;
+};
+
+export type PracticeStats = {
+  requirements: PracticeRequirementStat[];
+  totals: {
+    covered: number;
+    notCovered: number;
+    cards: number;
+    reviewed: number;
+  };
+};
+
+/** GET /kits/:id/practice/next — ordered queue for the next practice session. */
+export async function getPracticeNext(
+  kitId: string,
+  deps?: ApiFetchDeps,
+): Promise<{ items: PracticeNextItem[] }> {
+  return apiFetch(
+    `/kits/${encodeURIComponent(kitId)}/practice/next`,
+    { method: "GET" },
+    deps,
+  );
+}
+
+/** GET /kits/:id/practice/stats — per-requirement covered / not-covered. */
+export async function getPracticeStats(
+  kitId: string,
+  deps?: ApiFetchDeps,
+): Promise<PracticeStats> {
+  return apiFetch(
+    `/kits/${encodeURIComponent(kitId)}/practice/stats`,
+    { method: "GET" },
+    deps,
+  );
+}
+
+/**
+ * POST /kits/:id/practice/review — record confidence 1–5 and update Leitner box.
+ */
+export async function submitPracticeReview(
+  kitId: string,
+  body: PracticeReviewBody,
+  deps?: ApiFetchDeps,
+): Promise<PracticeReviewResult> {
+  return apiFetch(
+    `/kits/${encodeURIComponent(kitId)}/practice/review`,
+    {
+      method: "POST",
+      body: JSON.stringify(body),
+    },
+    deps,
+  );
+}

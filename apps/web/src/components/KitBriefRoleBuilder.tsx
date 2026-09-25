@@ -668,34 +668,43 @@ export function KitBriefRoleBuilder({
           <h1 className="text-2xl font-semibold tracking-tight">
             {record.title || record.kit.role.title}
           </h1>
-          <div
-            className="flex items-center gap-2 text-sm"
-            data-testid="save-status"
-            data-status={saveStatus}
-            role="status"
-            aria-live="polite"
-          >
-            <span
-              className={
-                saveStatus === "offline"
-                  ? "text-amber-700"
-                  : saveStatus === "saving"
-                    ? "text-zinc-500"
-                    : "text-emerald-700"
-              }
+          <div className="flex flex-wrap items-center gap-3">
+            <Link
+              href={`/kits/${encodeURIComponent(kitId)}/practice`}
+              className="rounded-md border border-zinc-300 bg-white px-3 py-1.5 text-sm font-medium text-zinc-800 hover:bg-zinc-50"
+              data-testid="open-practice"
             >
-              {saveStatusLabel(saveStatus)}
-            </span>
-            {saveStatus === "offline" ? (
-              <button
-                type="button"
-                onClick={onRetry}
-                className="rounded-md border border-zinc-300 bg-white px-2 py-1 text-xs font-medium text-zinc-800 hover:bg-zinc-50"
-                data-testid="save-retry"
+              Practice
+            </Link>
+            <div
+              className="flex items-center gap-2 text-sm"
+              data-testid="save-status"
+              data-status={saveStatus}
+              role="status"
+              aria-live="polite"
+            >
+              <span
+                className={
+                  saveStatus === "offline"
+                    ? "text-amber-700"
+                    : saveStatus === "saving"
+                      ? "text-zinc-500"
+                      : "text-emerald-700"
+                }
               >
-                Retry
-              </button>
-            ) : null}
+                {saveStatusLabel(saveStatus)}
+              </span>
+              {saveStatus === "offline" ? (
+                <button
+                  type="button"
+                  onClick={onRetry}
+                  className="rounded-md border border-zinc-300 bg-white px-2 py-1 text-xs font-medium text-zinc-800 hover:bg-zinc-50"
+                  data-testid="save-retry"
+                >
+                  Retry
+                </button>
+              ) : null}
+            </div>
           </div>
         </div>
         <p className="text-sm text-zinc-600">
