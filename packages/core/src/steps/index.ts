@@ -78,3 +78,13 @@ export {
   type GenerateFlashcardsInput,
   type GenerateFlashcardsOptions,
 } from "./generateFlashcards.js";
+
+export {
+  runCoverageLoop,
+  generateQuestionsForGaps,
+  fallbackQuestionFor,
+  type CoverageLoopInput,
+  type CoverageLoopOptions,
+  type CoverageLoopResult,
+  type CoveragePassLog,
+} from "./coverageLoop.js";
