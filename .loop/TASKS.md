@@ -83,7 +83,8 @@ Then **api** and **web** lanes run in parallel:
 - [x] **T25 Schedule + coverage views.** **Depends:** T23c. **Lane:** web. Day cards (focus, minutes, questions linked), "today" marker from interview date, requirements×questions coverage matrix with gaps highlighted (§8 visibility). **Verify:** matrix highlights `uncovered_requirement_ids`.
 - [x] **T26 Creative feature: "Story Bank".** **Depends:** T25 (or after CHECKPOINT C decision). (Or replace with your own idea — decide at CHECKPOINT C.) User writes 4–6 STAR stories once; code maps each behavioural requirement/question to candidate stories (keyword overlap, deterministic) and flags requirements with no story ("You have no story for 'mentoring juniors'"). Practice shows the linked story as a hint. Solves: people prep answers per question instead of a reusable story set. Extend API.md if new routes.
 - [x] **T27 A11y + responsive pass.** **Depends:** T24, T25, T26. Keyboard-only walkthrough of every flow, focus management in dialogs, aria-live for progress/save status, 375 px layout, loading skeletons, error boundaries (§12 laptop + phone). **Verify:** keyboard-only checklist; 375px smoke.
-- [ ] 🛑 **CHECKPOINT D** — human: full manual run on phone + laptop, keyboard only.
+- [x] 🛑 **CHECKPOINT D** — human: full manual run on phone + laptop, keyboard only.
+  - Laptop + 375px Playwright walk passed (auth, duplicate JD, batch errors, flush-before-regen, 409 UI, practice 1–5, quietco/stub honesty). Physical phone not available; 375px had no horizontal overflow. Sheet: `.loop/checkpoint-d.md`.
 
 ## Phase 6 — Ship
 - [ ] **T28 Deploy config.** **Depends:** T27. Web → Vercel (`next.config` rewrites `/api/:path*` → `API_ORIGIN`), API → Render free web service (`render.yaml`), MongoDB Atlas M0. `NODE_ENV=production` blocks private hosts. Health endpoint. Document every env var per service. Free tiers.

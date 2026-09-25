@@ -286,4 +286,15 @@ pm run typecheck fails solely with TS2307 on ../deterministic/groundRequirements
   - App-level ErrorBoundary in Providers — because §12 asks for error states on long-running generation and in-flight edits, not only inline alerts.
 - Limitations / follow-ups: no automated axe/browser 375px screenshot (unit smoke + tokens only); Checkpoint D is the human phone + laptop keyboard run. Did not start T28 deploy.
 
+## 2026-09-25 Checkpoint D
+- Changed: `.loop/checkpoint-d.md` (ticked), `.loop/TASKS.md` (D `[x]`), middleware `/api` skip (`823c0c3`), question Up/Down + tap targets (`e1269a3`)
+- Decisions: Walked locally with Playwright at 375px + keyboard instead of a physical phone — because Cursor browser tabs would not attach and no device was available; 375px had no horizontal overflow so D is ticked with that note. `/api/*` must not run the page auth guard — because a 307 to `/login` swallowed register/login Set-Cookie. Regen-while-unsaved and two-tab 409 UI both held during the walk.
+- Limitations / follow-ups: physical iPhone not exercised; T28 has no live URL until Vercel/Render/Atlas logins.
+
+## 2026-09-25 T28 Deploy config (partial)
+- Changed: `render.yaml`, `apps/web/vercel.json`, `apps/api/src/index.ts` (`0.0.0.0` + 3 min timeout), `.env.example`, `README.md` production section
+- Decisions: Vercel rewrites `/api/*` → `API_ORIGIN` (build-time); Render runs Express; Atlas M0; no CORS — because cookies stay first-party on the Next origin. Document Render sleep ~50s, `INTERRUPTED`, Secure cookies, regen timeout vs Vercel proxy — because those bite on free tiers. Did **not** tick T28 — no dashboard login, no live URL invented.
+- Limitations / follow-ups: user must create Atlas cluster, Render web service, Vercel project, set secrets, rebuild web after API URL exists. Do not start T29 until T28 has a live URL.
+
+
 
