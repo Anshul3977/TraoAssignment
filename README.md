@@ -55,6 +55,8 @@ On some Windows npm versions, `--input` / `--output` are eaten as unknown npm co
 
 Company research uses `safeFetch` + `cleanPage` + `crawl` / `rankLinks` (and optional `searchDiscussion`). Crawl stays on the seed’s **registrable domain** (eTLD+1 via [`tldts`](https://github.com/remusao/tldts)), so links like `handbook.gitlab.com` from `about.gitlab.com` are followed; same-host seeds still respect the path prefix (e.g. `/acme/`). Pages where cheerio extracts almost no text are logged as *little extractable content (likely client-rendered)* and are not treated as confirmed missing hiring pages.
 
+Requirement priorities are re-checked in code: nearest JD section heading above each evidence quote (Requirements vs Nice to have) plus cue phrases override the model’s must/nice label. LLM calls use temperature 0.
+
 ## Pipeline (`runPipeline`)
 
 `packages/core/src/pipeline.ts` orchestrates the full kit build (same entry the batch CLI and API will call):
