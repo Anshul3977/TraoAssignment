@@ -147,6 +147,7 @@ describe("overridePriority", () => {
     expect(
       overridePriority(
         {
+          text: "Familiarity with GraphQL",
           priority: "must",
           evidence: "Familiarity with GraphQL",
           section: "Requirements",
@@ -157,6 +158,7 @@ describe("overridePriority", () => {
     expect(
       overridePriority(
         {
+          text: "5+ years of professional experience with React and TypeScript",
           priority: "nice",
           evidence: "5+ years of professional experience with React and TypeScript",
           section: "Nice to have",
@@ -164,6 +166,23 @@ describe("overridePriority", () => {
         jd,
       ),
     ).toBe("must");
+  });
+
+  it("applies preferred / familiarity cues from requirement text", () => {
+    expect(
+      overridePriority({
+        text: "Node preferred",
+        priority: "must",
+        evidence: "Node",
+      }),
+    ).toBe("nice");
+    expect(
+      overridePriority({
+        text: "Familiarity with REST APIs",
+        priority: "must",
+        evidence: "REST APIs",
+      }),
+    ).toBe("nice");
   });
 });
 

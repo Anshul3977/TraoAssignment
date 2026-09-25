@@ -325,11 +325,19 @@ export async function runPipeline(
   emit(onProgress, { step: "brief", status: "running" });
   let companyBrief: CompanyBrief;
   try {
-    companyBrief = await buildBrief(client, { homepage, aboutPages });
+    companyBrief = await buildBrief(client, {
+      homepage,
+      aboutPages,
+      hiringPagesFound: hiringPages.length > 0,
+    });
     emit(onProgress, { step: "brief", status: "done" });
   } catch (err) {
     if (isLlmFailure(err)) {
-      companyBrief = honestEmptyBrief({ homepage, aboutPages });
+      companyBrief = honestEmptyBrief({
+        homepage,
+        aboutPages,
+        hiringPagesFound: hiringPages.length > 0,
+      });
       skipped.push({
         reason: err instanceof Error ? err.message : String(err),
         source: "brief",

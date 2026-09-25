@@ -95,17 +95,20 @@ function cuePriority(haystack: string): Priority | null {
 }
 
 /**
- * Override LLM priority from section heading, then evidence line cues;
+ * Override LLM priority from section heading, then evidence/text cues;
  * otherwise keep the extracted priority.
  * When `jd` is provided, also infer the nearest section heading above the
  * evidence so mislabelled LLM sections cannot flip must/nice.
  */
 export function overridePriority(
-  extracted: Pick<ExtractedRequirement, "priority" | "evidence" | "section">,
+  extracted: Pick<
+    ExtractedRequirement,
+    "priority" | "evidence" | "section" | "text"
+  >,
   jd?: string,
 ): Priority {
   if (jd) {
-    const inferred = inferSectionHeading(jd, extracted.evidence || "");
+    const inferred = inferSectionHeading(jd, extracted.evidence || extracted.text || "");
     const fromInferred = cuePriority(inferred ?? "");
     if (fromInferred) return fromInferred;
   }
@@ -113,6 +116,8 @@ export function overridePriority(
   if (fromSection) return fromSection;
   const fromEvidence = cuePriority(extracted.evidence);
   if (fromEvidence) return fromEvidence;
+  const fromText = cuePriority(extracted.text);
+  if (fromText) return fromText;
   return extracted.priority;
 }
 

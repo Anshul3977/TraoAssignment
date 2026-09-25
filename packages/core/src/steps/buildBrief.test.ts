@@ -109,12 +109,11 @@ describe("buildBrief", () => {
     expect(brief.summary.toLowerCase()).toContain("acme");
   });
 
-  it("quietco: honest brief from homepage only (no about pages)", async () => {
+  it("quietco: appends missing about/hiring honesty when the model omits it", async () => {
     const primary = fakeProvider("gemini", () => ({
       text: JSON.stringify({
-        summary:
-          "QuietCo makes calm productivity software. Public site has only a homepage; no about or hiring pages were found.",
-        what_they_do: "Calm productivity software (details limited to the homepage).",
+        summary: "QuietCo makes calm productivity software.",
+        what_they_do: "Calm productivity software.",
         sources: ["http://localhost:8099/quietco/"],
       }),
       provider: "gemini",
@@ -123,14 +122,16 @@ describe("buildBrief", () => {
 
     const brief = await buildBrief(
       testClient(primary),
-      { homepage: QUIETCO_HOME, aboutPages: [] },
+      {
+        homepage: QUIETCO_HOME,
+        aboutPages: [],
+        hiringPagesFound: false,
+      },
       { cacheDir: false },
     );
 
-    expect(primary.calls).toBe(1);
-    expect(brief.sources).toEqual(["http://localhost:8099/quietco/"]);
-    expect(brief.summary.toLowerCase()).toMatch(/quietco|only|homepage|no about/);
-    expect(brief.summary.toLowerCase()).not.toMatch(/knows cobol|fabricat/);
+    expect(brief.summary.toLowerCase()).toMatch(/no about/);
+    expect(brief.summary.toLowerCase()).toMatch(/no hiring|no careers|careers page/);
   });
 
   it("returns honest empty brief with no LLM when nothing usable", async () => {
