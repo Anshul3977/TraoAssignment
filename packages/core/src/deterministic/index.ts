@@ -7,3 +7,9 @@ export {
   type GroundRequirementsNotes,
   type GroundRequirementsResult,
 } from "./groundRequirements.js";
+
+export {
+  findGaps,
+  type GapQuestion,
+  type GapRequirement,
+} from "./findGaps.js";
