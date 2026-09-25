@@ -133,8 +133,13 @@ export function JobProgress({ jobId, initialJob = null }: JobProgressProps) {
         </p>
         {job.status === "done" && job.kitId ? (
           <p className="text-sm text-emerald-800" data-testid="job-kit-ready">
-            Kit ready (id {job.kitId}). Open it from the dashboard once the
-            builder is available.
+            Kit ready.{" "}
+            <Link
+              href={`/kits/${job.kitId}`}
+              className="font-medium underline hover:text-emerald-950"
+            >
+              Open builder
+            </Link>
           </p>
         ) : null}
       </header>

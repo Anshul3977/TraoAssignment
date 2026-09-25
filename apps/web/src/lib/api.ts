@@ -18,13 +18,20 @@ export class ApiClientError extends Error {
   readonly status: number;
   readonly code: string;
   readonly details?: unknown;
+  /** Full JSON body when the server returned one (e.g. 409 VERSION_CONFLICT + kit). */
+  readonly responseBody?: unknown;
 
-  constructor(status: number, payload: ApiErrorPayload) {
+  constructor(
+    status: number,
+    payload: ApiErrorPayload,
+    responseBody?: unknown,
+  ) {
     super(payload.message);
     this.name = "ApiClientError";
     this.status = status;
     this.code = payload.code;
     this.details = payload.details;
+    this.responseBody = responseBody;
   }
 }
 
@@ -127,11 +134,15 @@ export async function apiFetchResult<T = unknown>(
             code: "INTERNAL_ERROR",
             message: res.statusText || "Request failed",
           };
-    throw new ApiClientError(res.status, {
-      code: errBody.code ?? "INTERNAL_ERROR",
-      message: errBody.message ?? "Request failed",
-      details: errBody.details,
-    });
+    throw new ApiClientError(
+      res.status,
+      {
+        code: errBody.code ?? "INTERNAL_ERROR",
+        message: errBody.message ?? "Request failed",
+        details: errBody.details,
+      },
+      json,
+    );
   }
 
   return { data: json as T, status: res.status };
@@ -281,4 +292,156 @@ export async function getMe(
   deps?: ApiFetchDeps,
 ): Promise<{ user: PublicUser }> {
   return apiFetch("/auth/me", { method: "GET", skipAuthRedirect: true }, deps);
+}
+
+/** Optional per-item meta from Appendix A extensions (origin / edited / pinned). */
+export type KitItemMeta = {
+  origin?: string;
+  edited?: boolean;
+  pinned?: boolean;
+  updated_at?: string;
+  [key: string]: unknown;
+};
+
+/** Appendix A kit document (fields the builder reads for Brief + Role). */
+export type KitDocument = {
+  source: {
+    company: string;
+    company_url: string;
+    role: string;
+    location: string;
+    jd_chars: number;
+    researched_at: string;
+    pages_used: string[];
+  };
+  company_brief: {
+    summary: string;
+    what_they_do: string;
+    sources: string[];
+    meta?: KitItemMeta;
+  };
+  role: {
+    title: string;
+    seniority: string;
+    responsibilities: string[];
+    requirements: Array<{
+      id: string;
+      text: string;
+      kind: string;
+      priority: "must" | "nice" | string;
+      meta?: KitItemMeta;
+    }>;
+  };
+  questions: unknown[];
+  flashcards: unknown[];
+  schedule: unknown;
+  coverage: {
+    uncovered_requirement_ids: string[];
+    passes: number;
+  };
+  research_log?: Record<string, unknown>;
+  notes?: Record<string, unknown>;
+  meta?: KitItemMeta;
+};
+
+/** Kit row from GET/PATCH /kits/:id (docs/API.md). */
+export type KitRecord = {
+  id: string;
+  userId: string;
+  version: number;
+  title: string;
+  input: { jd: string; company_url: string; days: number };
+  kit: KitDocument;
+  createdAt: string;
+  updatedAt: string;
+};
+
+/** PATCH /kits/:id op shapes used by the builder (Brief + Role). */
+export type KitOp =
+  | {
+      op: "update";
+      target: "brief";
+      set: { summary?: string; what_they_do?: string };
+    }
+  | {
+      op: "update";
+      target: "requirement";
+      id: string;
+      set: {
+        text?: string;
+        priority?: "must" | "nice";
+        kind?: "technical" | "behavioural" | "domain";
+      };
+    }
+  | {
+      op: "update";
+      target: "question";
+      id: string;
+      set: Record<string, unknown>;
+    }
+  | {
+      op: "update";
+      target: "flashcard";
+      id: string;
+      set: Record<string, unknown>;
+    }
+  | { op: "add"; target: "question"; value: Record<string, unknown> }
+  | { op: "add"; target: "flashcard"; value: Record<string, unknown> }
+  | { op: "delete"; target: "question" | "flashcard"; id: string }
+  | {
+      op: "reorder";
+      target: "questions" | "flashcards";
+      ids: string[];
+      category?: string;
+    }
+  | { op: "move"; target: "question"; id: string; category: string };
+
+export type KitPatchBody = {
+  baseVersion: number;
+  ops: KitOp[];
+};
+
+/** GET /kits/:id — load one owned kit. */
+export async function getKit(
+  id: string,
+  deps?: ApiFetchDeps,
+): Promise<{ kit: KitRecord }> {
+  return apiFetch(`/kits/${encodeURIComponent(id)}`, { method: "GET" }, deps);
+}
+
+/**
+ * PATCH /kits/:id — apply op batch with optimistic concurrency.
+ * On 409 VERSION_CONFLICT the thrown ApiClientError.responseBody includes `{ kit }`.
+ */
+export async function patchKit(
+  id: string,
+  body: KitPatchBody,
+  deps?: ApiFetchDeps,
+): Promise<{ kit: KitRecord }> {
+  return apiFetch(
+    `/kits/${encodeURIComponent(id)}`,
+    {
+      method: "PATCH",
+      body: JSON.stringify(body),
+    },
+    deps,
+  );
+}
+
+/** Extract current kit from a 409 VERSION_CONFLICT error body, if present. */
+export function kitFromConflictError(
+  err: ApiClientError,
+): KitRecord | null {
+  if (err.code !== "VERSION_CONFLICT" || !err.responseBody) return null;
+  const body = err.responseBody;
+  if (
+    typeof body === "object" &&
+    body !== null &&
+    "kit" in body &&
+    (body as { kit: unknown }).kit &&
+    typeof (body as { kit: unknown }).kit === "object"
+  ) {
+    return (body as { kit: KitRecord }).kit;
+  }
+  return null;
 }

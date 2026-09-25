@@ -26,3 +26,12 @@
   - Sources found/skipped derived from step timeline details (done crawl/search/extract vs skipped+detail) — because the Job object has no separate sources field in API.md.
   - Failed jobs expose Retry via `POST /jobs/:id/retry` only — because 409 `NOT_RETRYABLE` covers non-failed statuses.
 - Limitations / follow-ups: no kit list/builder until those routes land in API.md + T23a; desktop only.
+
+## 2026-09-25 T23a Builder — Brief + Role
+- Changed: `apps/web/` (`/kits/[id]` page, `KitBriefRoleBuilder`, `kit-builder` helpers + tests, API client `getKit` / `patchKit` / conflict helper, job “Open builder” link), root `README.md`, `.loop/progress-web.md`
+- Decisions:
+  - Brief + Role only on `/kits/:id` via `GET /kits/:id` + `PATCH /kits/:id` — because T23a scope; questions/flashcards/regen are T23b/T23c; do not invent list or other endpoints.
+  - Local draft + 600 ms debounced op-batch (`update` brief / requirement) — because task Verify requires inline edit without full-page reload and API.md documents op batches with `baseVersion`.
+  - Save status Saved / Saving… / Offline (+ Retry); network `TypeError` → Offline; `VERSION_CONFLICT` adopts returned kit — because contract returns current kit on 409 and T23b owns richer merge UX.
+  - Coverage badge from `coverage.uncovered_requirement_ids`; must/nice + origin/edited badges from requirement/brief meta — because Appendix A + API.md extensions.
+- Limitations / follow-ups: no questions UI / regen / flashcards / schedule (T23b–c); no kit list route yet; desktop only.

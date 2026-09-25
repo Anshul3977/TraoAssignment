@@ -8,7 +8,7 @@ npm workspaces:
 
 - `packages/core` — schema, retrieval, LLM helpers, deterministic steps, pipeline pieces
 - `apps/api` — Express API (auth, kits/jobs — see `docs/API.md`)
-- `apps/web` — Next.js App Router UI (auth shell, dashboard, create-kit / batch upload, job progress)
+- `apps/web` — Next.js App Router UI (auth shell, dashboard, create-kit / batch upload, job progress, kit builder Brief + Role)
 - `docs/API.md` — HTTP contract the web app builds against
 
 ## Setup
@@ -45,7 +45,7 @@ npm run dev --workspace=@prep/api
 npm start --workspace=@prep/api
 ```
 
-### Web (`apps/web`) — T21 + T22a + T22b
+### Web (`apps/web`) — T21 + T22a + T22b + T23a
 
 Auth UI + app shell against [`docs/API.md`](docs/API.md) only (no invented routes). Login/register/logout, `middleware.ts` gate for signed-out visitors, same-origin API client (`credentials: 'include'`, 401 → `/login?next=`), TanStack Query provider, dashboard empty state.
 
@@ -53,7 +53,9 @@ Auth UI + app shell against [`docs/API.md`](docs/API.md) only (no invented route
 
 **Batch upload** (`/kits/batch`): JSON or CSV file → preview table with per-row validation → `POST /kits/batch` (1–50 `{ jd, company_url, days }`). Links to each job’s progress page.
 
-**Job progress** (`/jobs/:id`): polls `GET /jobs/:id` while queued/running; step timeline (spinner / ✓ / skipped+reason / failed); sources found vs skipped from step details; elapsed time; safe-to-leave notice; `POST /jobs/:id/retry` when failed.
+**Job progress** (`/jobs/:id`): polls `GET /jobs/:id` while queued/running; step timeline (spinner / ✓ / skipped+reason / failed); sources found vs skipped from step details; elapsed time; safe-to-leave notice; `POST /jobs/:id/retry` when failed. When done, links to the kit builder.
+
+**Kit builder — Brief + Role** (`/kits/:id`): loads `GET /kits/:id`. Editable company brief (summary / what they do) and requirement text with must/nice badges, coverage (covered vs uncovered from `coverage.uncovered_requirement_ids`), and origin/edited badges. Edits stay local and flush as a debounced (600 ms) `PATCH /kits/:id` op batch (`baseVersion` + brief/requirement update ops). Save status: Saved / Saving… / Offline (+ Retry). No full-page reload on save. Questions / flashcards / schedule / regenerate arrive in later tasks.
 
 Browser calls go to `/api/*`; Next rewrites strip the prefix to the Express origin (`API_ORIGIN`, default `http://localhost:4000`).
 
@@ -64,7 +66,7 @@ npm run dev --workspace=@prep/api
 npm run dev --workspace=@prep/web
 ```
 
-Open `http://localhost:3000`. Signed-out visits to `/`, `/kits/new`, `/kits/batch`, or `/jobs/:id` redirect to `/login`. After register/login, use **Create a kit** or **Batch upload** on the dashboard (list endpoint not in the contract yet — empty state only).
+Open `http://localhost:3000`. Signed-out visits to `/`, `/kits/new`, `/kits/batch`, `/kits/:id`, or `/jobs/:id` redirect to `/login`. After register/login, use **Create a kit** or **Batch upload** on the dashboard (list endpoint not in the contract yet — empty state only). Open a finished job’s **Open builder** link for Brief + Role.
 
 
 ### Batch CLI (`npm run evaluate`) — T16
