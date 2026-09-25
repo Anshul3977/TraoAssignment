@@ -23,3 +23,8 @@ ew URL(href, pageUrl)) before stripping nav/footer/header/form — because T05 r
 - Changed: packages/core/src/retrieval/ (rankLinks.ts, crawl.ts, crawl.test.ts, index.ts)
 - Decisions: path-prefix confinement from company_url (e.g. /acme/) so sibling fixture hosts stay out; frontier fetched in deterministic score order (hiring/about signals minus penalties); optional sitemap.xml at prefix then origin root; CONTENT_SCORE_THRESHOLD=8 so denial copy like quietco ("no careers/hiring handbook") stays other while real hiring/about pages classify; seed score 1000 so homepage is always fetched first; no new dependencies
 - Limitations / follow-ups: still not re-exported from package root index.ts; homepage also appears in its kind bucket; TASKS.md left untouched per lane override (T06 remains [ ] there until serial sync); did not start T07
+
+## 2026-09-25 T07 searchDiscussion
+- Changed: packages/core/src/retrieval/ (searchDiscussion.ts, searchDiscussion.test.ts, index.ts)
+- Decisions: company name order title → og:site_name → domain label; providers HN Algolia → DuckDuckGo HTML → Brave → Tavily (keyed pair only when SEARCH_API_KEY set, else logged skipped); query APIs use injectable fetch (JSON not on safeFetch allowlist), result pages via safeFetch + cleanPage; keep hits that mention company in title/snippet/url, re-check after fetch; return pages:[] + log entry no_discussion_found when empty — because SPEC §2/§10 and T07 require honest empty discussion
+- Limitations / follow-ups: still not re-exported from package root index.ts; TASKS.md left untouched per lane override (T07 remains [ ] until serial sync); no new dependencies; DuckDuckGo HTML is best-effort and layout-fragile; this is the last retrieval-lane task

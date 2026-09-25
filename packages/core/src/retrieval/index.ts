@@ -31,3 +31,13 @@ export {
   type LinkScoreBreakdown,
   type PageKind,
 } from "./rankLinks.js";
+export {
+  searchDiscussion,
+  inferCompanyName,
+  extractOgSiteName,
+  MAX_DISCUSSION_PAGES,
+  type SearchDiscussionOptions,
+  type SearchDiscussionResult,
+  type DiscussionPage,
+  type DiscussionLogEntry,
+} from "./searchDiscussion.js";
