@@ -5,6 +5,7 @@ import helmet from "helmet";
 import { createAuthRouter } from "./auth/routes.js";
 import { createMemoryUserStore, type UserStore } from "./auth/store.js";
 import { sendError } from "./errors.js";
+import { createKitsRouter } from "./kits/routes.js";
 import { attachSession } from "./middleware/auth.js";
 import { createHealthRouter } from "./routes/health.js";
 
@@ -43,6 +44,7 @@ export function createApp(options: CreateAppOptions = {}): {
   app.use(attachSession(userStore));
   app.use(createHealthRouter());
   app.use("/auth", createAuthRouter(userStore));
+  app.use("/kits", createKitsRouter());
 
   app.use((_req, res) => {
     sendError(res, 404, "NOT_FOUND", "Route not found.");

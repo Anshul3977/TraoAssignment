@@ -37,7 +37,7 @@ Clients must send cookies (`credentials: 'include'` / same-origin fetch). Do not
 
 ---
 
-## Routes (T17a)
+## Routes (T17a + T17b)
 
 ### `GET /health`
 
@@ -127,9 +127,34 @@ Public (idempotent). Clears the session cookie.
 
 ---
 
-## Not in T17a (documented later)
+### `GET /kits/:id`
 
-Kit CRUD, generation jobs, practice, regenerate, and Mongo persistence land in T17b–T20. Those tasks will extend this file. Do not call kit/job routes until they appear here.
+**Protected.** Returns one kit owned by the current user. Queries are always scoped by `userId` — another user's id yields `404 NOT_FOUND` (no existence leak).
+
+**Response `200`**
+
+```json
+{
+  "kit": {
+    "id": "objectId",
+    "userId": "objectId",
+    "version": 1,
+    "title": "Engineer",
+    "input": { "jd": "...", "company_url": "https://...", "days": 5 },
+    "kit": { "...": "Appendix A kit document" },
+    "createdAt": "ISO-8601",
+    "updatedAt": "ISO-8601"
+  }
+}
+```
+
+| Status | Code | Meaning |
+|---|---|---|
+| 401 | `UNAUTHENTICATED` | No session cookie |
+| 401 | `SESSION_EXPIRED` | Invalid/expired session |
+| 404 | `NOT_FOUND` | Unknown id, or kit belongs to another user |
+
+Create / list / jobs / practice / regenerate routes arrive in T18–T20.
 
 ---
 
@@ -147,10 +172,10 @@ Kit CRUD, generation jobs, practice, regenerate, and Mongo persistence land in T
 ## Running the API locally
 
 ```bash
-# from repo root — requires JWT_SECRET in .env (see .env.example)
+# from repo root — requires JWT_SECRET and MONGODB_URI in .env (see .env.example)
 npm run dev --workspace=@prep/api
 # or
 npm start --workspace=@prep/api
 ```
 
-Listens on `PORT` (default **4000**). Users are stored **in memory** until T17b; restart clears accounts.
+Listens on `PORT` (default **4000**). Users, kits, jobs, and practice state persist in MongoDB (Mongoose).
