@@ -16,7 +16,7 @@ npm workspaces:
 npm install
 ```
 
-Requires Node ≥ 20. Copy `.env.example` to `.env` and fill values as needed. Do not commit secrets.
+Requires Node ≥ 20. Copy `.env.example` to `.env` and fill values as needed. Do not commit secrets. Default Gemini model is `gemini-2.5-flash` (set `GEMINI_MODEL` to override; `gemini-2.0-flash` is retired).
 
 ## Commands
 
