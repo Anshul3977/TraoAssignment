@@ -55,6 +55,8 @@ On some Windows npm versions, `--input` / `--output` are eaten as unknown npm co
 
 Company research uses `safeFetch` + `cleanPage` + `crawl` / `rankLinks` (and optional `searchDiscussion`). Crawl stays on the seed’s **registrable domain** (eTLD+1 via [`tldts`](https://github.com/remusao/tldts)), so links like `handbook.gitlab.com` from `about.gitlab.com` are followed; same-host seeds still respect the path prefix (e.g. `/acme/`). Pages where cheerio extracts almost no text are logged as *little extractable content (likely client-rendered)* and are not treated as confirmed missing hiring pages.
 
+Requirement priorities are re-checked in code: evidence/text cues (preferred, familiarity with, …), then nearest JD section heading, then the model’s label. LLM calls use temperature 0. Company briefs append an explicit note when no about or hiring page was crawled, and strip false “no hiring” claims when a hiring page was found.
+
 Coverage loop: after must-gap fallbacks, if the question bank is still empty, seed a deterministic fallback question for every grounded requirement so thin/nice-only JDs never produce all-empty schedule days.
 
 ## Pipeline (`runPipeline`)
