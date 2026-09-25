@@ -1,0 +1,32 @@
+[
+  {
+    "id": "case-01",
+    "jd": "Senior Software Engineer — Acme\n\nAcme is hiring a Senior Software Engineer to lead frontend platform work across product teams.\n\nResponsibilities:\n- Own the React design system used across product surfaces\n- Mentor junior engineers through code review and pairing\n- Partner with product on roadmap trade-offs\n\nRequirements:\n- 5+ years of professional experience with React and TypeScript\n- Strong system design skills for high-traffic web apps\n- Experience mentoring junior engineers\n- Excellent written communication\n\nNice to have:\n- Familiarity with GraphQL\n- Prior experience at a B2B SaaS company\n- Contributions to open-source React libraries\n",
+    "company_url": "http://localhost:8099/acme/",
+    "days": 1
+  },
+  {
+    "id": "case-02",
+    "jd": "Backend engineer at QuietCo.\nNode and Postgres preferred.",
+    "company_url": "http://localhost:8099/quietco/",
+    "days": 5
+  },
+  {
+    "id": "case-03",
+    "jd": "Mid-level Full Stack Engineer — EvilCo\n\nWe are looking for a mid-level engineer to build customer-facing features.\n\nRequirements:\n- 3+ years with JavaScript and Node.js\n- Comfortable with relational databases\n- Clear written communication\n\nNice to have:\n- Experience with React\n",
+    "company_url": "http://localhost:8099/evil/",
+    "days": 7
+  },
+  {
+    "id": "case-04",
+    "jd": "Software Engineer\n\nRequirements:\n- 2+ years of TypeScript experience\n- Familiarity with REST APIs\n",
+    "company_url": "http://localhost:8099/does-not-exist/",
+    "days": 5
+  },
+  {
+    "id": "case-05",
+    "jd": "Senior Software Engineer — Acme\n\nAcme is hiring a Senior Software Engineer to lead frontend platform work across product teams.\n\nResponsibilities:\n- Own the React design system used across product surfaces\n- Mentor junior engineers through code review and pairing\n- Partner with product on roadmap trade-offs\n\nRequirements:\n- 5+ years of professional experience with React and TypeScript\n- Strong system design skills for high-traffic web apps\n- Experience mentoring junior engineers\n- Excellent written communication\n\nNice to have:\n- Familiarity with GraphQL\n- Prior experience at a B2B SaaS company\n- Contributions to open-source React libraries\n",
+    "company_url": "http://localhost:8099/acme/",
+    "days": 60
+  }
+]

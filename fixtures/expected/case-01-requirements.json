@@ -1,0 +1,14 @@
+{
+  "case_id": "case-01",
+  "must": [
+    "5+ years of professional experience with React and TypeScript",
+    "Strong system design skills for high-traffic web apps",
+    "Experience mentoring junior engineers",
+    "Excellent written communication"
+  ],
+  "nice": [
+    "Familiarity with GraphQL",
+    "Prior experience at a B2B SaaS company",
+    "Contributions to open-source React libraries"
+  ]
+}

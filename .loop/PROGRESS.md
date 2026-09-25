@@ -13,3 +13,8 @@
 - Changed: `packages/core/src/schema/` (kit.ts, batch.ts, validateKit.ts + test, index), core package.json (zod), `packages/core/src/index.ts` exports
 - Decisions: `validateKit` returns `{ok, kit|issues}` with human-readable dotted/bracket paths rather than throwing — because callers (pipeline, CLI, API) need to surface every cross-ref failure at once; optional `research_log`/`notes`/per-item `meta` as `z.record` so later tasks can extend without loosening Appendix A required fields; difficulty as literal union {1,2,3} and minutes as `int().min(0)` in zod so schema violations share the same path format as cross-ref checks
 - Limitations / follow-ups: status/kit/error consistency on Appendix B entries not enforced (schema allows any combination); uncovered_requirement_ids not cross-checked against role.requirements yet
+
+## 2026-09-25 T03 Fixtures
+- Changed: `fixtures/sites/acme/` (home/about/blog + buried handbook hiring page + robots-disallowed secret), `fixtures/sites/quietco/`, `fixtures/sites/evil/`, `fixtures/cases.json` (5 cases), `fixtures/expected/case-01-requirements.json`, `scripts/serve-fixtures.ts` (static node:http server)
+- Decisions: hiring content only reachable Home → footer Handbook → handbook index → how-we-hire — because T06 must prove keyword ranking finds a non-obvious path, not a hard-coded `/careers`; case-01 uses `days: 1` and case-05 reuses the rich Acme JD with `days: 60` — because edge-case §10 needs both schedule extremes among the mandatory five cases; expected labels are exact JD bullet strings — because T09a grounding compares evidence against the JD text
+- Limitations / follow-ups: no sitemap.xml yet (T06 treats it as optional); expected/ only covers the rich JD must/nice split, not stub/evil/unreachable outcomes
