@@ -1,0 +1,56 @@
+=== try-crawl: https://basecamp.com ===
+elapsed_ms=11192 total_requests=21 timed_out=false
+max_page_budget=15
+
+--- pages fetched (order) ---
+1. [about] score=21 textChars=4989 https://basecamp.com/
+2. [about] score=28 textChars=1417 https://basecamp.com/handbook
+3. [about] score=20 textChars=3620 https://basecamp.com/handbook/moonlighting
+4. [other] score=2 textChars=3374 https://basecamp.com/about
+5. [about] score=12 textChars=2075 https://basecamp.com/gettingreal/01.2-about-basecamp
+6. [about] score=26 textChars=4320 https://basecamp.com/gettingreal/11.1-theres-nothing-functional-about-afunctional-spec
+7. [about] score=40 textChars=12000 https://basecamp.com/handbook/benefits-and-perks
+8. [about] score=7 textChars=2810 https://basecamp.com/handbook/code-of-conduct
+9. [about] score=22 textChars=3207 https://basecamp.com/handbook/getting-started
+10. [about] score=48 textChars=5340 https://basecamp.com/handbook/how-we-work
+11. [about] score=40 textChars=6183 https://basecamp.com/handbook/making-a-career
+12. [other] score=12 textChars=2860 https://basecamp.com/handbook/managing-work-devices
+13. [about] score=8 textChars=2709 https://basecamp.com/handbook/our-internal-systems
+14. [about] score=14 textChars=2025 https://basecamp.com/handbook/our-rituals
+15. [other] score=5 textChars=1269 https://basecamp.com/handbook/severance
+
+--- skipped sources ---
+- budget_exhausted: 181 URLs left in frontier (see JSON log for full list)
+    e.g. https://basecamp.com/2
+    e.g. https://basecamp.com/2/integrations
+    e.g. https://basecamp.com/5
+    e.g. https://basecamp.com/accessibility
+    e.g. https://basecamp.com/agents
+    e.g. https://basecamp.com/apps
+    e.g. https://basecamp.com/before-and-after
+    e.g. https://basecamp.com/books
+    ... +173 more
+
+--- robots decisions ---
+- fetched https://basecamp.com (status_200)
+
+--- discussion ---
+companyName=Basecamp
+pages=0
+log:
+  - brave skipped no_search_api_key
+  - tavily skipped no_search_api_key
+  - hn_algolia empty q="Basecamp interview process" no_hits
+  - hn_algolia empty q="Basecamp interview experience" no_hits
+  - duckduckgo empty q="Basecamp interview process" no_hits
+  - duckduckgo empty q="Basecamp interview experience" no_hits
+  - searchDiscussion empty no_discussion_found
+
+--- bundle summary ---
+unreachable=false
+hiring=[]
+about=["https://basecamp.com/","https://basecamp.com/handbook","https://basecamp.com/handbook/moonlighting","https://basecamp.com/gettingreal/01.2-about-basecamp","https://basecamp.com/gettingreal/11.1-theres-nothing-functional-about-afunctional-spec","https://basecamp.com/handbook/benefits-and-perks","https://basecamp.com/handbook/code-of-conduct","https://basecamp.com/handbook/getting-started","https://basecamp.com/handbook/how-we-work","https://basecamp.com/handbook/making-a-career","https://basecamp.com/handbook/our-internal-systems","https://basecamp.com/handbook/our-rituals"]
+other_count=3
+
+--- problems ---
+(none)

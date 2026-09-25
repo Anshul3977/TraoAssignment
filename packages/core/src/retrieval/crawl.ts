@@ -1,3 +1,4 @@
+import { parse as parseDomain } from "tldts";
 import { cleanPage, type CleanPageResult } from "./cleanPage.js";
 import {
   classifyPage,
@@ -10,6 +11,13 @@ import { safeFetch, type SafeFetchOptions } from "./safeFetch.js";
 
 export const MAX_CRAWL_DEPTH = 3;
 export const MAX_PAGE_BUDGET = 15;
+
+/** Extracted main text shorter than this is treated as a likely client-rendered shell. */
+export const LITTLE_EXTRACTABLE_TEXT_CHARS = 40;
+
+/** Recorded on `skipped` when cheerio yields almost no text — not a confirmed missing hiring page. */
+export const LITTLE_EXTRACTABLE_REASON =
+  "little extractable content (likely client-rendered)";
 
 export type CrawledPage = {
   url: string;
@@ -86,6 +94,35 @@ export function isSameOriginUnderPrefix(candidate: URL, start: URL, prefix: stri
   return path === prefix.slice(0, -1) || path.startsWith(prefix);
 }
 
+/**
+ * True when both hosts share the same registrable domain (eTLD+1 via tldts),
+ * e.g. about.gitlab.com ↔ handbook.gitlab.com, or foo.example.co.uk ↔ bar.example.co.uk.
+ * Hostnames without a public suffix (localhost, IPs) only match when hostnames are equal.
+ */
+export function sameRegistrableDomain(a: URL, b: URL): boolean {
+  const da = parseDomain(a.hostname);
+  const db = parseDomain(b.hostname);
+  if (da.domain && db.domain) {
+    return da.domain === db.domain;
+  }
+  // localhost / IP literals / unknown suffixes: require exact hostname match
+  return a.hostname === b.hostname;
+}
+
+/**
+ * Crawl scope: same registrable domain as the seed. Same-origin URLs must stay under the
+ * seed path prefix (fixture isolation). Different subdomains of that domain are allowed
+ * on any path (e.g. careers.company.com from www.company.com).
+ */
+export function isAllowedCrawlTarget(candidate: URL, start: URL, prefix: string): boolean {
+  if (candidate.protocol !== start.protocol) return false;
+  if (!sameRegistrableDomain(candidate, start)) return false;
+  if (candidate.host === start.host) {
+    return isSameOriginUnderPrefix(candidate, start, prefix);
+  }
+  return true;
+}
+
 function toCrawledPage(cleaned: CleanPageResult, kind: PageKind, score: number): CrawledPage {
   return {
     url: cleaned.url,
@@ -108,7 +145,7 @@ function parseSitemapLocs(xml: string, start: URL, prefix: string): string[] {
     if (!norm) continue;
     try {
       const u = new URL(norm);
-      if (!isSameOriginUnderPrefix(u, start, prefix)) continue;
+      if (!isAllowedCrawlTarget(u, start, prefix)) continue;
       locs.push(norm);
     } catch {
       // skip
@@ -182,8 +219,8 @@ function enqueue(
 }
 
 /**
- * Crawl from company_url: same-origin + path-prefix, BFS depth ≤ 3, ≤ 15 pages,
- * fetching frontier URLs in deterministic score order.
+ * Crawl from company_url: same registrable domain (+ path-prefix on the seed host),
+ * BFS depth ≤ 3, ≤ 15 pages, fetching frontier URLs in deterministic score order.
  */
 export async function crawl(companyUrl: string, opts: CrawlOptions = {}): Promise<ResearchBundle> {
   const maxDepth = opts.maxDepth ?? MAX_CRAWL_DEPTH;
@@ -263,7 +300,7 @@ export async function crawl(companyUrl: string, opts: CrawlOptions = {}): Promis
       skipped.push({ url: next.url, reason: "invalid_redirect" });
       continue;
     }
-    if (!isSameOriginUnderPrefix(finalUrl, start, prefix)) {
+    if (!isAllowedCrawlTarget(finalUrl, start, prefix)) {
       skipped.push({ url: finalNorm, reason: "off_prefix_redirect" });
       continue;
     }
@@ -272,9 +309,16 @@ export async function crawl(companyUrl: string, opts: CrawlOptions = {}): Promis
     pagesFetched += 1;
 
     const cleaned = cleanPage(fetchResult.body, finalNorm);
+    const thinShell = cleaned.text.trim().length < LITTLE_EXTRACTABLE_TEXT_CHARS;
+    if (thinShell) {
+      // Honest note: empty SPA shells are not evidence that hiring is missing.
+      skipped.push({ url: finalNorm, reason: LITTLE_EXTRACTABLE_REASON });
+    }
+
     const contentScores = scorePageContent(cleaned.text, cleaned.title, cleaned.description);
-    const kind = classifyPage(contentScores);
-    const page = toCrawledPage(cleaned, kind, contentScores.total);
+    // Thin shells must not classify as hiring/about from title-only noise.
+    const kind: PageKind = thinShell ? "other" : classifyPage(contentScores);
+    const page = toCrawledPage(cleaned, kind, thinShell ? 0 : contentScores.total);
 
     if (next.isSeed || finalNorm === seedNorm) {
       homepage = page;
@@ -296,7 +340,7 @@ export async function crawl(companyUrl: string, opts: CrawlOptions = {}): Promis
         } catch {
           continue;
         }
-        if (!isSameOriginUnderPrefix(child, start, prefix)) continue;
+        if (!isAllowedCrawlTarget(child, start, prefix)) continue;
         // Skip non-http already handled; skip obvious asset extensions
         if (/\.(css|js|png|jpe?g|gif|svg|ico|woff2?|ttf|zip|pdf)$/i.test(child.pathname)) {
           continue;

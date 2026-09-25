@@ -1,0 +1,37 @@
+=== try-crawl: http://localhost:8099/acme/ ===
+elapsed_ms=4903 total_requests=12 timed_out=false
+max_page_budget=15
+
+--- pages fetched (order) ---
+1. [other] score=4 textChars=158 http://localhost:8099/acme/
+2. [about] score=22 textChars=267 http://localhost:8099/acme/about.html
+3. [other] score=8 textChars=72 http://localhost:8099/acme/handbook/
+4. [hiring] score=34 textChars=441 http://localhost:8099/acme/handbook/people/how-we-hire.html
+5. [other] score=8 textChars=198 http://localhost:8099/acme/blog/
+
+--- skipped sources ---
+(none)
+
+--- robots decisions ---
+- missing_or_unreadable http://localhost:8099 (status_404)
+
+--- discussion ---
+companyName=Acme
+pages=0
+log:
+  - brave skipped no_search_api_key
+  - tavily skipped no_search_api_key
+  - hn_algolia empty q="Acme interview process" no_hits
+  - hn_algolia empty q="Acme interview experience" no_hits
+  - duckduckgo empty q="Acme interview process" no_hits
+  - duckduckgo empty q="Acme interview experience" no_hits
+  - searchDiscussion empty no_discussion_found
+
+--- bundle summary ---
+unreachable=false
+hiring=["http://localhost:8099/acme/handbook/people/how-we-hire.html"]
+about=["http://localhost:8099/acme/about.html"]
+other_count=3
+
+--- problems ---
+(none)

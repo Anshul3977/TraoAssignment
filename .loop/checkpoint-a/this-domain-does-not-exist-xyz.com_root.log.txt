@@ -1,0 +1,34 @@
+=== try-crawl: https://this-domain-does-not-exist-xyz.com ===
+elapsed_ms=8085 total_requests=16 timed_out=false
+max_page_budget=15
+
+--- pages fetched (order) ---
+(none)
+
+--- skipped sources ---
+- network_error: https://this-domain-does-not-exist-xyz.com/sitemap.xml
+- network_error: https://this-domain-does-not-exist-xyz.com/
+
+--- robots decisions ---
+(none recorded)
+
+--- discussion ---
+companyName=this-domain-does-not-exist-xyz
+pages=0
+log:
+  - brave skipped no_search_api_key
+  - tavily skipped no_search_api_key
+  - hn_algolia empty q="this-domain-does-not-exist-xyz interview process" no_hits
+  - hn_algolia empty q="this-domain-does-not-exist-xyz interview experience" no_hits
+  - duckduckgo empty q="this-domain-does-not-exist-xyz interview process" no_hits
+  - duckduckgo empty q="this-domain-does-not-exist-xyz interview experience" no_hits
+  - searchDiscussion empty no_discussion_found
+
+--- bundle summary ---
+unreachable=true
+hiring=[]
+about=[]
+other_count=0
+
+--- problems ---
+- company unreachable (seed failed or zero pages)

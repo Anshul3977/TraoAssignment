@@ -1,0 +1,111 @@
+{
+  "url": "http://localhost:8099/acme/",
+  "timedOut": false,
+  "elapsedMs": 4903,
+  "totalRequests": 12,
+  "pagesFetched": [
+    {
+      "order": 1,
+      "url": "http://localhost:8099/acme/",
+      "score": 4,
+      "kind": "other",
+      "textChars": 158
+    },
+    {
+      "order": 2,
+      "url": "http://localhost:8099/acme/about.html",
+      "score": 22,
+      "kind": "about",
+      "textChars": 267
+    },
+    {
+      "order": 3,
+      "url": "http://localhost:8099/acme/handbook/",
+      "score": 8,
+      "kind": "other",
+      "textChars": 72
+    },
+    {
+      "order": 4,
+      "url": "http://localhost:8099/acme/handbook/people/how-we-hire.html",
+      "score": 34,
+      "kind": "hiring",
+      "textChars": 441
+    },
+    {
+      "order": 5,
+      "url": "http://localhost:8099/acme/blog/",
+      "score": 8,
+      "kind": "other",
+      "textChars": 198
+    }
+  ],
+  "skipped": [],
+  "robots": [
+    {
+      "origin": "http://localhost:8099",
+      "event": "missing_or_unreadable",
+      "detail": "status_404"
+    }
+  ],
+  "discussion": {
+    "companyName": "Acme",
+    "pages": [],
+    "log": [
+      {
+        "provider": "brave",
+        "status": "skipped",
+        "detail": "no_search_api_key"
+      },
+      {
+        "provider": "tavily",
+        "status": "skipped",
+        "detail": "no_search_api_key"
+      },
+      {
+        "provider": "hn_algolia",
+        "status": "empty",
+        "query": "Acme interview process",
+        "detail": "no_hits"
+      },
+      {
+        "provider": "hn_algolia",
+        "status": "empty",
+        "query": "Acme interview experience",
+        "detail": "no_hits"
+      },
+      {
+        "provider": "duckduckgo",
+        "status": "empty",
+        "query": "Acme interview process",
+        "detail": "no_hits"
+      },
+      {
+        "provider": "duckduckgo",
+        "status": "empty",
+        "query": "Acme interview experience",
+        "detail": "no_hits"
+      },
+      {
+        "provider": "searchDiscussion",
+        "status": "empty",
+        "detail": "no_discussion_found"
+      }
+    ]
+  },
+  "bundleSummary": {
+    "unreachable": false,
+    "hiring": [
+      "http://localhost:8099/acme/handbook/people/how-we-hire.html"
+    ],
+    "about": [
+      "http://localhost:8099/acme/about.html"
+    ],
+    "other": [
+      "http://localhost:8099/acme/",
+      "http://localhost:8099/acme/handbook/",
+      "http://localhost:8099/acme/blog/"
+    ]
+  },
+  "problems": []
+}

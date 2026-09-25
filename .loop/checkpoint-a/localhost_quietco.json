@@ -1,0 +1,77 @@
+{
+  "url": "http://localhost:8099/quietco/",
+  "timedOut": false,
+  "elapsedMs": 3031,
+  "totalRequests": 8,
+  "pagesFetched": [
+    {
+      "order": 1,
+      "url": "http://localhost:8099/quietco/",
+      "score": 8,
+      "kind": "other",
+      "textChars": 149
+    }
+  ],
+  "skipped": [],
+  "robots": [
+    {
+      "origin": "http://localhost:8099",
+      "event": "missing_or_unreadable",
+      "detail": "status_404"
+    }
+  ],
+  "discussion": {
+    "companyName": "QuietCo",
+    "pages": [],
+    "log": [
+      {
+        "provider": "brave",
+        "status": "skipped",
+        "detail": "no_search_api_key"
+      },
+      {
+        "provider": "tavily",
+        "status": "skipped",
+        "detail": "no_search_api_key"
+      },
+      {
+        "provider": "hn_algolia",
+        "status": "empty",
+        "query": "QuietCo interview process",
+        "detail": "no_hits"
+      },
+      {
+        "provider": "hn_algolia",
+        "status": "empty",
+        "query": "QuietCo interview experience",
+        "detail": "no_company_mention"
+      },
+      {
+        "provider": "duckduckgo",
+        "status": "empty",
+        "query": "QuietCo interview process",
+        "detail": "no_hits"
+      },
+      {
+        "provider": "duckduckgo",
+        "status": "empty",
+        "query": "QuietCo interview experience",
+        "detail": "no_hits"
+      },
+      {
+        "provider": "searchDiscussion",
+        "status": "empty",
+        "detail": "no_discussion_found"
+      }
+    ]
+  },
+  "bundleSummary": {
+    "unreachable": false,
+    "hiring": [],
+    "about": [],
+    "other": [
+      "http://localhost:8099/quietco/"
+    ]
+  },
+  "problems": []
+}

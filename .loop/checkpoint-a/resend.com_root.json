@@ -1,0 +1,499 @@
+{
+  "url": "https://resend.com",
+  "timedOut": false,
+  "elapsedMs": 25378,
+  "totalRequests": 21,
+  "pagesFetched": [
+    {
+      "order": 1,
+      "url": "https://resend.com/",
+      "score": 57,
+      "kind": "about",
+      "textChars": 12000
+    },
+    {
+      "order": 2,
+      "url": "https://resend.com/about",
+      "score": 22,
+      "kind": "about",
+      "textChars": 4280
+    },
+    {
+      "order": 3,
+      "url": "https://resend.com/careers",
+      "score": 55,
+      "kind": "about",
+      "textChars": 8456
+    },
+    {
+      "order": 4,
+      "url": "https://resend.com/handbook/people/whats-the-hiring-process",
+      "score": 82,
+      "kind": "hiring",
+      "textChars": 4087
+    },
+    {
+      "order": 5,
+      "url": "https://resend.com/handbook/people/how-we-think-about-remote-work",
+      "score": 46,
+      "kind": "about",
+      "textChars": 4917
+    },
+    {
+      "order": 6,
+      "url": "https://resend.com/handbook/people/how-we-think-about-titles",
+      "score": 16,
+      "kind": "about",
+      "textChars": 1915
+    },
+    {
+      "order": 7,
+      "url": "https://resend.com/handbook/people/what-is-the-role-of-team-leads",
+      "score": 46,
+      "kind": "about",
+      "textChars": 2004
+    },
+    {
+      "order": 8,
+      "url": "https://resend.com/handbook/people/how-we-hire-great-people",
+      "score": 52,
+      "kind": "hiring",
+      "textChars": 3351
+    },
+    {
+      "order": 9,
+      "url": "https://resend.com/careers/01e6eb42-142b-4f33-9944-ca153bd3ae86",
+      "score": 30,
+      "kind": "about",
+      "textChars": 2299
+    },
+    {
+      "order": 10,
+      "url": "https://resend.com/handbook",
+      "score": 40,
+      "kind": "about",
+      "textChars": 1798
+    },
+    {
+      "order": 11,
+      "url": "https://resend.com/careers/053bde8f-294e-4cce-9d62-2301282120a2",
+      "score": 30,
+      "kind": "about",
+      "textChars": 2910
+    },
+    {
+      "order": 12,
+      "url": "https://resend.com/careers/50cc0eb8-4a93-455d-bcdb-fe8eb080b55d",
+      "score": 42,
+      "kind": "about",
+      "textChars": 3398
+    },
+    {
+      "order": 13,
+      "url": "https://resend.com/handbook/sales/how-we-think-about-buyer-experience",
+      "score": 22,
+      "kind": "about",
+      "textChars": 1459
+    },
+    {
+      "order": 14,
+      "url": "https://resend.com/careers/61dbb0e7-95a6-4cd9-ab2d-1a5471fe0dd8",
+      "score": 32,
+      "kind": "about",
+      "textChars": 3247
+    },
+    {
+      "order": 15,
+      "url": "https://resend.com/careers/6589bee8-3ec9-4620-90b6-890b23464c4d",
+      "score": 34,
+      "kind": "about",
+      "textChars": 3710
+    }
+  ],
+  "skipped": [
+    {
+      "url": "https://resend.com/blog/sitemap.xml",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/changelog/sitemap.xml",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/clubs/sitemap.xml",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/customers/sitemap.xml",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/docs/sitemap.xml",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/handbook/sitemap.xml",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/humans/sitemap.xml",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/legal/sitemap.xml",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/migrate/sitemap.xml",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/other/sitemap.xml",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/security/sitemap.xml",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/home",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/pricing",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/login",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/signup",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/forward",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/docs",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/enterprise",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/docs/dashboard/emails/send-test-emails",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/docs/webhooks/introduction",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/features/audiences",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/features/broadcasts",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/get-started",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/docs/send-with-nextjs",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/status",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/features/automations",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/features/inbound",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/features/templates",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/features/webhooks",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/features/dedicated-ips",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/changelog",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/security",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/security/soc-2",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/security/gdpr",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/brand",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/blog",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/clubs",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/customers",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/humans",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/philosophy",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/support",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/migrate",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/docs/knowledge-base/introduction",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/legal",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/events",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/insiders",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/open-source",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/wallpapers",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/humans/zeno-rocha",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/humans/bu-kinoshita",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/humans/jonni-lundy",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/humans/zeh-fernandes",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/blog/series-a",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/blog/y-combinator",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/blog/introducing-resend",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/careers/9b68ba51-3895-4d29-8fd1-364bdf8956e7",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/careers/8c290ac4-22b4-4072-86e0-b6f5a97213d6",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/careers/cde17f7c-4c70-435f-be38-ef5abe94ff22",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/careers/df2fe05d-87ca-4e87-a66d-50bb2c9c4859",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/handbook/people/what-are-the-benefits",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/handbook/people/how-we-work",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/handbook/people/how-the-onboarding-works",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/handbook/people/how-to-take-time-off",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/handbook/people/how-to-spend-money",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/handbook/people/how-we-eat",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/handbook/people/what-is-the-travel-policy",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/handbook/people/how-to-give-feedback",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/handbook/people/how-we-recognize-peers",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/handbook/people/how-to-lead-a-brainstorm",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/handbook/people/what-is-the-role-of-managers",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/handbook/people/how-we-meet-as-leaders",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/handbook/people/why-we-have-a-meeting-free-day",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/handbook/success/what-is-our-vision-for-exceptional-support",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/handbook/success/how-we-scale-support",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/handbook/sales/what-is-our-sales-philosophy",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/handbook/sales/what-is-the-role-of-sales-at-resend",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://resend.com/handbook/engineering/how-we-handle-on-call-rotations",
+      "reason": "budget_exhausted"
+    }
+  ],
+  "robots": [
+    {
+      "origin": "https://resend.com",
+      "event": "fetched",
+      "detail": "status_200"
+    }
+  ],
+  "discussion": {
+    "companyName": "Resend · Email for developers",
+    "pages": [],
+    "log": [
+      {
+        "provider": "brave",
+        "status": "skipped",
+        "detail": "no_search_api_key"
+      },
+      {
+        "provider": "tavily",
+        "status": "skipped",
+        "detail": "no_search_api_key"
+      },
+      {
+        "provider": "hn_algolia",
+        "status": "empty",
+        "query": "Resend · Email for developers interview process",
+        "detail": "no_hits"
+      },
+      {
+        "provider": "hn_algolia",
+        "status": "empty",
+        "query": "Resend · Email for developers interview experience",
+        "detail": "no_hits"
+      },
+      {
+        "provider": "duckduckgo",
+        "status": "empty",
+        "query": "Resend · Email for developers interview process",
+        "detail": "no_hits"
+      },
+      {
+        "provider": "duckduckgo",
+        "status": "empty",
+        "query": "Resend · Email for developers interview experience",
+        "detail": "no_hits"
+      },
+      {
+        "provider": "searchDiscussion",
+        "status": "empty",
+        "detail": "no_discussion_found"
+      }
+    ]
+  },
+  "bundleSummary": {
+    "unreachable": false,
+    "hiring": [
+      "https://resend.com/handbook/people/whats-the-hiring-process",
+      "https://resend.com/handbook/people/how-we-hire-great-people"
+    ],
+    "about": [
+      "https://resend.com/",
+      "https://resend.com/about",
+      "https://resend.com/careers",
+      "https://resend.com/handbook/people/how-we-think-about-remote-work",
+      "https://resend.com/handbook/people/how-we-think-about-titles",
+      "https://resend.com/handbook/people/what-is-the-role-of-team-leads",
+      "https://resend.com/careers/01e6eb42-142b-4f33-9944-ca153bd3ae86",
+      "https://resend.com/handbook",
+      "https://resend.com/careers/053bde8f-294e-4cce-9d62-2301282120a2",
+      "https://resend.com/careers/50cc0eb8-4a93-455d-bcdb-fe8eb080b55d",
+      "https://resend.com/handbook/sales/how-we-think-about-buyer-experience",
+      "https://resend.com/careers/61dbb0e7-95a6-4cd9-ab2d-1a5471fe0dd8",
+      "https://resend.com/careers/6589bee8-3ec9-4620-90b6-890b23464c4d"
+    ],
+    "other": []
+  },
+  "problems": []
+}

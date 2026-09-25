@@ -1,0 +1,1133 @@
+{
+  "url": "https://about.gitlab.com",
+  "timedOut": false,
+  "elapsedMs": 14764,
+  "totalRequests": 26,
+  "pagesFetched": [
+    {
+      "order": 1,
+      "url": "https://about.gitlab.com/",
+      "score": 22,
+      "kind": "about",
+      "textChars": 4213
+    },
+    {
+      "order": 2,
+      "url": "https://about.gitlab.com/company/",
+      "score": 41,
+      "kind": "about",
+      "textChars": 2477
+    },
+    {
+      "order": 3,
+      "url": "https://about.gitlab.com/company/team/e-group/",
+      "score": 3,
+      "kind": "other",
+      "textChars": 562
+    },
+    {
+      "order": 4,
+      "url": "https://about.gitlab.com/company/team/board-of-directors/",
+      "score": 2,
+      "kind": "other",
+      "textChars": 386
+    },
+    {
+      "order": 5,
+      "url": "https://about.gitlab.com/jobs/",
+      "score": 62,
+      "kind": "about",
+      "textChars": 3382
+    },
+    {
+      "order": 6,
+      "url": "https://about.gitlab.com/jobs/ai-interview-process/",
+      "score": 84,
+      "kind": "hiring",
+      "textChars": 4443
+    },
+    {
+      "order": 7,
+      "url": "https://about.gitlab.com/jobs/accessibility/",
+      "score": 82,
+      "kind": "about",
+      "textChars": 5795
+    },
+    {
+      "order": 8,
+      "url": "https://about.gitlab.com/jobs/all-jobs/",
+      "score": 16,
+      "kind": "hiring",
+      "textChars": 1118
+    },
+    {
+      "order": 9,
+      "url": "https://about.gitlab.com/blog/introducing-gitlab-flex/",
+      "score": 0,
+      "kind": "other",
+      "textChars": 78
+    },
+    {
+      "order": 10,
+      "url": "https://about.gitlab.com/blog/new-mcp-tools-for-automation/",
+      "score": 2,
+      "kind": "other",
+      "textChars": 78
+    },
+    {
+      "order": 11,
+      "url": "https://about.gitlab.com/blog/optimize-with-open-weight-models/",
+      "score": 2,
+      "kind": "other",
+      "textChars": 78
+    },
+    {
+      "order": 12,
+      "url": "https://about.gitlab.com/company/contact/",
+      "score": 6,
+      "kind": "other",
+      "textChars": 705
+    },
+    {
+      "order": 13,
+      "url": "https://about.gitlab.com/sales/",
+      "score": 12,
+      "kind": "about",
+      "textChars": 1193
+    },
+    {
+      "order": 14,
+      "url": "https://about.gitlab.com/de-de/company/",
+      "score": 30,
+      "kind": "about",
+      "textChars": 4723
+    },
+    {
+      "order": 15,
+      "url": "https://about.gitlab.com/es/company/",
+      "score": 8,
+      "kind": "about",
+      "textChars": 4598
+    }
+  ],
+  "skipped": [
+    {
+      "url": "https://about.gitlab.com/pages.xml",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/blog.xml",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/gitlab-duo-agent-platform/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/solutions/code-suggestions/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/solutions/continuous-integration/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/partners/technology-partners/aws/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/partners/technology-partners/google-cloud-platform/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/why-gitlab/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/solutions/source-code-management/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/solutions/agile-delivery/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/solutions/application-security-testing/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/solutions/software-compliance/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/solutions/supply-chain/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/gitlab-orbit/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/solutions/visibility-measurement/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/platform/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/assessments/devops-modernization-assessment/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/assessments/security-modernization-assessment/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/assessments/ai-modernization-assessment/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/enterprise/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/small-business/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/solutions/startups/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/solutions/finance/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/solutions/public-sector/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/solutions/telecommunications/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/solutions/automotive/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/solutions/education/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/solutions/aerospace/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/solutions/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/blog/gitlab-transcend-announcements/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/pricing/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/gitlab-technical-demo-series/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/demo-hub/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/services/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/blog/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/community/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/customers/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/partners/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/events/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/resources/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/whats-new/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/press/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/security/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/ai-transparency-center/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/sales/?contact-topic=request-demo&entry=nav",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/de-de/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/es/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/fr-fr/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/it-it/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/ja-jp/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/pt-br/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/events/transcend/virtual/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/customers/nvidia/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/customers/lockheed-martin/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/customers/thales/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/customers/ericsson/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/customers/deutsche-telekom/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/customers/agoda/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/customers/hackerone/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/customers/radiofrance/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/customers/cube/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/customers/caci/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/customers/intuitive-machines/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/customers/ally/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/customers/sigma-defense/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/customers/carfax/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/pricing/premium/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/pricing/ultimate/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/terms/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/privacy/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/topics/ci-cd/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/topics/gitops/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/topics/devops/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/topics/version-control/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/topics/devsecops/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/topics/cloud-native/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/topics/devops/ai-for-coding/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/topics/agentic-ai/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/solutions/gitops/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/solutions/value-stream-management/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/install/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/get-started/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/sustainability/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/diversity-inclusion-belonging/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/fr-fr/company/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/it-it/company/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/ja-jp/company/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/pt-br/company/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/press/press-kit/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/solutions/devops-platform/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/de-de/blog/introducing-gitlab-flex/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/fr-fr/blog/introducing-gitlab-flex/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/ja-jp/blog/introducing-gitlab-flex/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/blog/categories/ai/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/blog/authors/talia-armato-helle/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/blog/tags/ai/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/blog/tags/news/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/solutions/duo-agent-platform/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/sales/?contact-topic=pricing-quotes",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/blog/gpt6-astra-on-gitlab/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/de-de/blog/new-mcp-tools-for-automation/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/fr-fr/blog/new-mcp-tools-for-automation/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/ja-jp/blog/new-mcp-tools-for-automation/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/blog/authors/rebecca-carter/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/blog/tags/product/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/blog/tags/features/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/topics/ai/model-context-protocol/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/blog/gitlab-duo-self-hosted-models-on-microsoft-foundry/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/de-de/blog/optimize-with-open-weight-models/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/fr-fr/blog/optimize-with-open-weight-models/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/ja-jp/blog/optimize-with-open-weight-models/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/blog/authors/brittany-lutz/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/blog/open-weight-model-letter/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/get-help/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/de-de/sales/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/es/sales/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/fr-fr/sales/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/it-it/sales/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/ja-jp/sales/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/pt-br/sales/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/de-de/gitlab-duo-agent-platform/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/de-de/solutions/code-suggestions/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/de-de/solutions/continuous-integration/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/de-de/partners/technology-partners/aws/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/de-de/partners/technology-partners/google-cloud-platform/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/de-de/why-gitlab/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/de-de/solutions/source-code-management/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/de-de/solutions/agile-delivery/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/de-de/solutions/application-security-testing/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/de-de/solutions/software-compliance/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/de-de/solutions/supply-chain/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/de-de/gitlab-orbit/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/de-de/solutions/visibility-measurement/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/de-de/platform/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/de-de/assessments/devops-modernization-assessment/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/de-de/assessments/security-modernization-assessment/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/de-de/assessments/ai-modernization-assessment/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/de-de/enterprise/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/de-de/small-business/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/de-de/solutions/startups/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/de-de/solutions/finance/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/de-de/solutions/public-sector/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/de-de/solutions/telecommunications/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/de-de/solutions/automotive/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/de-de/solutions/education/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/de-de/solutions/aerospace/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/de-de/solutions/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/de-de/blog/gitlab-transcend-announcements/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/de-de/pricing/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/de-de/gitlab-technical-demo-series/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/de-de/demo-hub/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/de-de/services/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/de-de/blog/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/de-de/customers/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/de-de/partners/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/de-de/resources/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/de-de/whats-new/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/de-de/security/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/de-de/ai-transparency-center/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/de-de/sales/?contact-topic=request-demo",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/de-de/pricing/premium/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/de-de/pricing/ultimate/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/de-de/privacy/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/de-de/topics/ci-cd/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/de-de/topics/gitops/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/de-de/topics/devops/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/de-de/topics/version-control/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/de-de/topics/devsecops/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/de-de/topics/cloud-native/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/de-de/topics/devops/ai-for-coding/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/de-de/topics/agentic-ai/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/de-de/solutions/gitops/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/de-de/solutions/value-stream-management/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/de-de/install/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/de-de/get-started/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/de-de/diversity-inclusion-belonging/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/es/gitlab-duo-agent-platform/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/es/solutions/code-suggestions/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/es/solutions/continuous-integration/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/es/partners/technology-partners/aws/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/es/partners/technology-partners/google-cloud-platform/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/es/why-gitlab/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/es/solutions/source-code-management/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/es/solutions/agile-delivery/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/es/solutions/application-security-testing/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/es/solutions/software-compliance/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/es/solutions/supply-chain/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/es/gitlab-orbit/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/es/solutions/visibility-measurement/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/es/platform/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/es/assessments/devops-modernization-assessment/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/es/assessments/security-modernization-assessment/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/es/assessments/ai-modernization-assessment/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/es/enterprise/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/es/small-business/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/es/solutions/startups/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/es/solutions/finance/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/es/solutions/public-sector/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/es/solutions/telecommunications/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/es/solutions/automotive/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/es/solutions/education/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/es/solutions/aerospace/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/es/solutions/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/es/pricing/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/es/gitlab-technical-demo-series/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/es/demo-hub/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/es/services/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/es/customers/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/es/partners/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/es/resources/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/es/whats-new/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/es/security/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/es/ai-transparency-center/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/es/sales/?contact-topic=request-demo",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/es/pricing/premium/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/es/pricing/ultimate/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/es/privacy/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/es/topics/ci-cd/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/es/topics/gitops/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/es/topics/devops/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/es/topics/version-control/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/es/topics/devsecops/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/es/topics/cloud-native/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/es/topics/devops/ai-for-coding/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/es/topics/agentic-ai/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/es/solutions/gitops/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/es/solutions/value-stream-management/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/es/install/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/es/get-started/",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://about.gitlab.com/es/diversity-inclusion-belonging/",
+      "reason": "budget_exhausted"
+    }
+  ],
+  "robots": [
+    {
+      "origin": "https://about.gitlab.com",
+      "event": "fetched",
+      "detail": "status_200"
+    },
+    {
+      "origin": "https://lisp-journey.gitlab.io",
+      "event": "missing_or_unreadable",
+      "detail": "status_404"
+    },
+    {
+      "origin": "https://news.ycombinator.com",
+      "event": "fetched",
+      "detail": "status_200"
+    }
+  ],
+  "discussion": {
+    "companyName": "GitLab",
+    "pages": [
+      {
+        "url": "https://lisp-journey.gitlab.io/blog/lisp-interview-kina/",
+        "title": "Lisp Interview: questions to Alex Nygren of Kina Knowledge, using Common Lisp extensively in their document processing stack - Lisp journey",
+        "provider": "hn_algolia"
+      },
+      {
+        "url": "https://news.ycombinator.com/item?id=27742048",
+        "title": "Ask HN: Are GitHub, GitLab, and similars just a fad? | Hacker News",
+        "provider": "hn_algolia"
+      },
+      {
+        "url": "https://news.ycombinator.com/item?id=13711878",
+        "title": "Lost in Tassie | Hacker News",
+        "provider": "hn_algolia"
+      }
+    ],
+    "log": [
+      {
+        "provider": "brave",
+        "status": "skipped",
+        "detail": "no_search_api_key"
+      },
+      {
+        "provider": "tavily",
+        "status": "skipped",
+        "detail": "no_search_api_key"
+      },
+      {
+        "provider": "hn_algolia",
+        "status": "ok",
+        "query": "GitLab interview process",
+        "detail": "1_hits"
+      },
+      {
+        "provider": "hn_algolia",
+        "status": "ok",
+        "query": "GitLab interview experience",
+        "detail": "2_hits"
+      },
+      {
+        "provider": "duckduckgo",
+        "status": "empty",
+        "query": "GitLab interview process",
+        "detail": "no_hits"
+      },
+      {
+        "provider": "duckduckgo",
+        "status": "empty",
+        "query": "GitLab interview experience",
+        "detail": "no_hits"
+      }
+    ]
+  },
+  "bundleSummary": {
+    "unreachable": false,
+    "hiring": [
+      "https://about.gitlab.com/jobs/ai-interview-process/",
+      "https://about.gitlab.com/jobs/all-jobs/"
+    ],
+    "about": [
+      "https://about.gitlab.com/",
+      "https://about.gitlab.com/company/",
+      "https://about.gitlab.com/jobs/",
+      "https://about.gitlab.com/jobs/accessibility/",
+      "https://about.gitlab.com/sales/",
+      "https://about.gitlab.com/de-de/company/",
+      "https://about.gitlab.com/es/company/"
+    ],
+    "other": [
+      "https://about.gitlab.com/company/team/e-group/",
+      "https://about.gitlab.com/company/team/board-of-directors/",
+      "https://about.gitlab.com/blog/introducing-gitlab-flex/",
+      "https://about.gitlab.com/blog/new-mcp-tools-for-automation/",
+      "https://about.gitlab.com/blog/optimize-with-open-weight-models/",
+      "https://about.gitlab.com/company/contact/"
+    ]
+  },
+  "problems": []
+}

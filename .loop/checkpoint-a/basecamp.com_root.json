@@ -1,0 +1,915 @@
+{
+  "url": "https://basecamp.com",
+  "timedOut": false,
+  "elapsedMs": 11192,
+  "totalRequests": 21,
+  "pagesFetched": [
+    {
+      "order": 1,
+      "url": "https://basecamp.com/",
+      "score": 21,
+      "kind": "about",
+      "textChars": 4989
+    },
+    {
+      "order": 2,
+      "url": "https://basecamp.com/handbook",
+      "score": 28,
+      "kind": "about",
+      "textChars": 1417
+    },
+    {
+      "order": 3,
+      "url": "https://basecamp.com/handbook/moonlighting",
+      "score": 20,
+      "kind": "about",
+      "textChars": 3620
+    },
+    {
+      "order": 4,
+      "url": "https://basecamp.com/about",
+      "score": 2,
+      "kind": "other",
+      "textChars": 3374
+    },
+    {
+      "order": 5,
+      "url": "https://basecamp.com/gettingreal/01.2-about-basecamp",
+      "score": 12,
+      "kind": "about",
+      "textChars": 2075
+    },
+    {
+      "order": 6,
+      "url": "https://basecamp.com/gettingreal/11.1-theres-nothing-functional-about-afunctional-spec",
+      "score": 26,
+      "kind": "about",
+      "textChars": 4320
+    },
+    {
+      "order": 7,
+      "url": "https://basecamp.com/handbook/benefits-and-perks",
+      "score": 40,
+      "kind": "about",
+      "textChars": 12000
+    },
+    {
+      "order": 8,
+      "url": "https://basecamp.com/handbook/code-of-conduct",
+      "score": 7,
+      "kind": "about",
+      "textChars": 2810
+    },
+    {
+      "order": 9,
+      "url": "https://basecamp.com/handbook/getting-started",
+      "score": 22,
+      "kind": "about",
+      "textChars": 3207
+    },
+    {
+      "order": 10,
+      "url": "https://basecamp.com/handbook/how-we-work",
+      "score": 48,
+      "kind": "about",
+      "textChars": 5340
+    },
+    {
+      "order": 11,
+      "url": "https://basecamp.com/handbook/making-a-career",
+      "score": 40,
+      "kind": "about",
+      "textChars": 6183
+    },
+    {
+      "order": 12,
+      "url": "https://basecamp.com/handbook/managing-work-devices",
+      "score": 12,
+      "kind": "other",
+      "textChars": 2860
+    },
+    {
+      "order": 13,
+      "url": "https://basecamp.com/handbook/our-internal-systems",
+      "score": 8,
+      "kind": "about",
+      "textChars": 2709
+    },
+    {
+      "order": 14,
+      "url": "https://basecamp.com/handbook/our-rituals",
+      "score": 14,
+      "kind": "about",
+      "textChars": 2025
+    },
+    {
+      "order": 15,
+      "url": "https://basecamp.com/handbook/severance",
+      "score": 5,
+      "kind": "other",
+      "textChars": 1269
+    }
+  ],
+  "skipped": [
+    {
+      "url": "https://basecamp.com/2",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/2/integrations",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/5",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/accessibility",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/agents",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/apps",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/before-and-after",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/books",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/bootstrapped",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/breakfast",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/classes",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/cloud-exit",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/community",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/customers",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/discounts",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/features",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/guides/group-chat-problems",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/guides/how-we-communicate",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/guides/how-we-make-decisions",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/guides/seven-shipping-principles",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/guides/why-we-choose-profit",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/help",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/hill-charts",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/integrations",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/keyboard",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/learn",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/live",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/managers",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/newsletter",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/overkill",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/paths",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/pricing",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/reliable",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/shapeup",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/small",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/support",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/support/testimonials",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/underdogs",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/yes",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/retired/tadalist",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/retired/backpack",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/retired/writeboard",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/retired/campfire",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/shapeup/0.1-foreword",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/shapeup/0.2-acknowledgements",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/shapeup/0.3-chapter-01",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/shapeup/1.1-chapter-02",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/shapeup/1.2-chapter-03",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/shapeup/1.3-chapter-04",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/shapeup/1.4-chapter-05",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/shapeup/1.5-chapter-06",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/shapeup/2.1-chapter-07",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/shapeup/2.2-chapter-08",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/shapeup/2.3-chapter-09",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/shapeup/3.1-chapter-10",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/shapeup/3.2-chapter-11",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/shapeup/3.3-chapter-12",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/shapeup/3.4-chapter-13",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/shapeup/3.5-chapter-14",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/shapeup/3.6-chapter-15",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/shapeup/3.7-conclusion",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/shapeup/4.0-appendix-01",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/shapeup/4.1-appendix-02",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/shapeup/4.2-appendix-03",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/shapeup/4.5-appendix-06",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/shapeup/4.6-appendix-07",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/01.1-what-is-getting-real",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/01.3-caveats-disclaimers-and-other-preemptive-strikes",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/02.1-build-less",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/02.2-whats-your-problem",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/02.3-fund-yourself",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/02.4-fix-time-and-budget-flex-scope",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/02.5-have-an-enemy",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/02.6-it-shouldnt-be-a-chore",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/03.1-less-mass",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/03.2-lower-your-cost-of-change",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/03.3-the-three-musketeers",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/03.4-embrace-constraints",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/03.5-be-yourself",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/04.1-whats-the-big-idea",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/04.2-ignore-details-early-on",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/04.3-its-a-problem-when-its-a-problem",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/04.4-hire-the-right-customers",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/04.5-scale-later",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/04.6-make-opinionated-software",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/05.1-half-not-half-assed",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/05.2-it-just-doesnt-matter",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/05.3-start-with-no",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/05.4-hidden-costs",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/05.5-can-you-handle-it",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/05.6-human-solutions",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/05.7-forget-feature-requests",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/05.8-hold-the-mayo",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/06.1-race-to-running-software",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/06.2-rinse-and-repeat",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/06.3-from-idea-to-implementation",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/06.4-avoid-preferences",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/06.5-done",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/06.6-test-in-the-wild",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/06.7-shrink-your-time",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/07.1-unity",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/07.2-alone-time",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/07.3-meetings-are-toxic",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/07.4-seek-and-celebrate-small-victories",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/08.1-hire-less-and-hire-later",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/08.2-kick-the-tires",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/08.3-actions-not-words",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/08.4-get-well-rounded-individuals",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/08.5-you-cant-fake-enthusiasm",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/08.6-wordsmiths",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/09.1-interface-first",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/09.2-epicenter-design",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/09.3-three-state-solution",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/09.4-the-blank-slate",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/09.5-get-defensive",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/09.6-context-over-consistency",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/09.7-copywriting-is-interface-design",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/09.8-one-interface",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/10.1-less-software",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/10.2-optimize-for-happiness",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/10.3-code-speaks",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/10.4-manage-debt",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/10.5-open-doors",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/11.2-dont-do-dead-documents",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/11.3-tell-me-a-quick-story",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/11.4-use-real-words",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/11.5-personify-your-product",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/12.1-free-samples",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/12.2-easy-on-easy-off",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/12.3-silly-rabbit-tricks-are-for-kids",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/12.4-a-softer-bullet",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/13.1-hollywood-launch",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/13.2-a-powerful-promo-site",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/13.3-ride-the-blog-wave",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/13.4-solicit-early",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/13.5-promote-through-education",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/13.6-feature-food",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/13.7-track-your-logs",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/13.8-inline-upsell",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/13.9-name-hook",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/14.1-feel-the-pain",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/14.2-zero-training",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/14.3-answer-quick",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/14.4-tough-love",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/14.5-in-fine-forum",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/14.6-publicize-your-screwups",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/15.1-one-month-tuneup",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/15.2-keep-the-posts-coming",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/15.3-better-not-beta",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/15.4-all-bugs-are-not-created-equal",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/15.5-ride-out-the-storm",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/15.6-keep-up-with-the-joneses",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/15.7-beware-the-bloat-monster",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/15.8-go-with-the-flow",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/gettingreal/16.1-start-your-engines",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/handbook/state-fmla",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/handbook/titles-for-designers",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/handbook/titles-for-ops",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/handbook/titles-for-programmers",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/handbook/titles-for-qa",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/handbook/titles-for-support",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/managers/fundamental-resources",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/managers/manager-standards",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/managers/boundaries",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/managers/hiring",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/managers/onboarding",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/managers/performance-management-model",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/managers/performance-reviews",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/managers/giving-feedback",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/managers/underperformance-and-terminations",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/managers/navigating-difficult-conversations",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/managers/1-1s",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/managers/coaching",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/managers/recognition",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/managers/promotion",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/managers/multiplier-managers",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/managers/conclusion",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/privacy",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/security",
+      "reason": "budget_exhausted"
+    },
+    {
+      "url": "https://basecamp.com/books/remote",
+      "reason": "budget_exhausted"
+    }
+  ],
+  "robots": [
+    {
+      "origin": "https://basecamp.com",
+      "event": "fetched",
+      "detail": "status_200"
+    }
+  ],
+  "discussion": {
+    "companyName": "Basecamp",
+    "pages": [],
+    "log": [
+      {
+        "provider": "brave",
+        "status": "skipped",
+        "detail": "no_search_api_key"
+      },
+      {
+        "provider": "tavily",
+        "status": "skipped",
+        "detail": "no_search_api_key"
+      },
+      {
+        "provider": "hn_algolia",
+        "status": "empty",
+        "query": "Basecamp interview process",
+        "detail": "no_hits"
+      },
+      {
+        "provider": "hn_algolia",
+        "status": "empty",
+        "query": "Basecamp interview experience",
+        "detail": "no_hits"
+      },
+      {
+        "provider": "duckduckgo",
+        "status": "empty",
+        "query": "Basecamp interview process",
+        "detail": "no_hits"
+      },
+      {
+        "provider": "duckduckgo",
+        "status": "empty",
+        "query": "Basecamp interview experience",
+        "detail": "no_hits"
+      },
+      {
+        "provider": "searchDiscussion",
+        "status": "empty",
+        "detail": "no_discussion_found"
+      }
+    ]
+  },
+  "bundleSummary": {
+    "unreachable": false,
+    "hiring": [],
+    "about": [
+      "https://basecamp.com/",
+      "https://basecamp.com/handbook",
+      "https://basecamp.com/handbook/moonlighting",
+      "https://basecamp.com/gettingreal/01.2-about-basecamp",
+      "https://basecamp.com/gettingreal/11.1-theres-nothing-functional-about-afunctional-spec",
+      "https://basecamp.com/handbook/benefits-and-perks",
+      "https://basecamp.com/handbook/code-of-conduct",
+      "https://basecamp.com/handbook/getting-started",
+      "https://basecamp.com/handbook/how-we-work",
+      "https://basecamp.com/handbook/making-a-career",
+      "https://basecamp.com/handbook/our-internal-systems",
+      "https://basecamp.com/handbook/our-rituals"
+    ],
+    "other": [
+      "https://basecamp.com/about",
+      "https://basecamp.com/handbook/managing-work-devices",
+      "https://basecamp.com/handbook/severance"
+    ]
+  },
+  "problems": []
+}

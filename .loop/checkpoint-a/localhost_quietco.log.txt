@@ -1,0 +1,33 @@
+=== try-crawl: http://localhost:8099/quietco/ ===
+elapsed_ms=3031 total_requests=8 timed_out=false
+max_page_budget=15
+
+--- pages fetched (order) ---
+1. [other] score=8 textChars=149 http://localhost:8099/quietco/
+
+--- skipped sources ---
+(none)
+
+--- robots decisions ---
+- missing_or_unreadable http://localhost:8099 (status_404)
+
+--- discussion ---
+companyName=QuietCo
+pages=0
+log:
+  - brave skipped no_search_api_key
+  - tavily skipped no_search_api_key
+  - hn_algolia empty q="QuietCo interview process" no_hits
+  - hn_algolia empty q="QuietCo interview experience" no_company_mention
+  - duckduckgo empty q="QuietCo interview process" no_hits
+  - duckduckgo empty q="QuietCo interview experience" no_hits
+  - searchDiscussion empty no_discussion_found
+
+--- bundle summary ---
+unreachable=false
+hiring=[]
+about=[]
+other_count=1
+
+--- problems ---
+(none)

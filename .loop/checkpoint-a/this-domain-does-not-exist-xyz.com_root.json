@@ -1,0 +1,72 @@
+{
+  "url": "https://this-domain-does-not-exist-xyz.com",
+  "timedOut": false,
+  "elapsedMs": 8085,
+  "totalRequests": 16,
+  "pagesFetched": [],
+  "skipped": [
+    {
+      "url": "https://this-domain-does-not-exist-xyz.com/sitemap.xml",
+      "reason": "network_error"
+    },
+    {
+      "url": "https://this-domain-does-not-exist-xyz.com/",
+      "reason": "network_error"
+    }
+  ],
+  "robots": [],
+  "discussion": {
+    "companyName": "this-domain-does-not-exist-xyz",
+    "pages": [],
+    "log": [
+      {
+        "provider": "brave",
+        "status": "skipped",
+        "detail": "no_search_api_key"
+      },
+      {
+        "provider": "tavily",
+        "status": "skipped",
+        "detail": "no_search_api_key"
+      },
+      {
+        "provider": "hn_algolia",
+        "status": "empty",
+        "query": "this-domain-does-not-exist-xyz interview process",
+        "detail": "no_hits"
+      },
+      {
+        "provider": "hn_algolia",
+        "status": "empty",
+        "query": "this-domain-does-not-exist-xyz interview experience",
+        "detail": "no_hits"
+      },
+      {
+        "provider": "duckduckgo",
+        "status": "empty",
+        "query": "this-domain-does-not-exist-xyz interview process",
+        "detail": "no_hits"
+      },
+      {
+        "provider": "duckduckgo",
+        "status": "empty",
+        "query": "this-domain-does-not-exist-xyz interview experience",
+        "detail": "no_hits"
+      },
+      {
+        "provider": "searchDiscussion",
+        "status": "empty",
+        "detail": "no_discussion_found"
+      }
+    ]
+  },
+  "bundleSummary": {
+    "unreachable": true,
+    "hiring": [],
+    "about": [],
+    "other": []
+  },
+  "problems": [
+    "company unreachable (seed failed or zero pages)"
+  ]
+}

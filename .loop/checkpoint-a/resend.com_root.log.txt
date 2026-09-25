@@ -1,0 +1,56 @@
+=== try-crawl: https://resend.com ===
+elapsed_ms=25378 total_requests=21 timed_out=false
+max_page_budget=15
+
+--- pages fetched (order) ---
+1. [about] score=57 textChars=12000 https://resend.com/
+2. [about] score=22 textChars=4280 https://resend.com/about
+3. [about] score=55 textChars=8456 https://resend.com/careers
+4. [hiring] score=82 textChars=4087 https://resend.com/handbook/people/whats-the-hiring-process
+5. [about] score=46 textChars=4917 https://resend.com/handbook/people/how-we-think-about-remote-work
+6. [about] score=16 textChars=1915 https://resend.com/handbook/people/how-we-think-about-titles
+7. [about] score=46 textChars=2004 https://resend.com/handbook/people/what-is-the-role-of-team-leads
+8. [hiring] score=52 textChars=3351 https://resend.com/handbook/people/how-we-hire-great-people
+9. [about] score=30 textChars=2299 https://resend.com/careers/01e6eb42-142b-4f33-9944-ca153bd3ae86
+10. [about] score=40 textChars=1798 https://resend.com/handbook
+11. [about] score=30 textChars=2910 https://resend.com/careers/053bde8f-294e-4cce-9d62-2301282120a2
+12. [about] score=42 textChars=3398 https://resend.com/careers/50cc0eb8-4a93-455d-bcdb-fe8eb080b55d
+13. [about] score=22 textChars=1459 https://resend.com/handbook/sales/how-we-think-about-buyer-experience
+14. [about] score=32 textChars=3247 https://resend.com/careers/61dbb0e7-95a6-4cd9-ab2d-1a5471fe0dd8
+15. [about] score=34 textChars=3710 https://resend.com/careers/6589bee8-3ec9-4620-90b6-890b23464c4d
+
+--- skipped sources ---
+- budget_exhausted: 77 URLs left in frontier (see JSON log for full list)
+    e.g. https://resend.com/blog/sitemap.xml
+    e.g. https://resend.com/changelog/sitemap.xml
+    e.g. https://resend.com/clubs/sitemap.xml
+    e.g. https://resend.com/customers/sitemap.xml
+    e.g. https://resend.com/docs/sitemap.xml
+    e.g. https://resend.com/handbook/sitemap.xml
+    e.g. https://resend.com/humans/sitemap.xml
+    e.g. https://resend.com/legal/sitemap.xml
+    ... +69 more
+
+--- robots decisions ---
+- fetched https://resend.com (status_200)
+
+--- discussion ---
+companyName=Resend · Email for developers
+pages=0
+log:
+  - brave skipped no_search_api_key
+  - tavily skipped no_search_api_key
+  - hn_algolia empty q="Resend · Email for developers interview process" no_hits
+  - hn_algolia empty q="Resend · Email for developers interview experience" no_hits
+  - duckduckgo empty q="Resend · Email for developers interview process" no_hits
+  - duckduckgo empty q="Resend · Email for developers interview experience" no_hits
+  - searchDiscussion empty no_discussion_found
+
+--- bundle summary ---
+unreachable=false
+hiring=["https://resend.com/handbook/people/whats-the-hiring-process","https://resend.com/handbook/people/how-we-hire-great-people"]
+about=["https://resend.com/","https://resend.com/about","https://resend.com/careers","https://resend.com/handbook/people/how-we-think-about-remote-work","https://resend.com/handbook/people/how-we-think-about-titles","https://resend.com/handbook/people/what-is-the-role-of-team-leads","https://resend.com/careers/01e6eb42-142b-4f33-9944-ca153bd3ae86","https://resend.com/handbook","https://resend.com/careers/053bde8f-294e-4cce-9d62-2301282120a2","https://resend.com/careers/50cc0eb8-4a93-455d-bcdb-fe8eb080b55d","https://resend.com/handbook/sales/how-we-think-about-buyer-experience","https://resend.com/careers/61dbb0e7-95a6-4cd9-ab2d-1a5471fe0dd8","https://resend.com/careers/6589bee8-3ec9-4620-90b6-890b23464c4d"]
+other_count=0
+
+--- problems ---
+(none)

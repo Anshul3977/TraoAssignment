@@ -1,0 +1,60 @@
+=== try-crawl: https://about.gitlab.com ===
+elapsed_ms=14764 total_requests=26 timed_out=false
+max_page_budget=15
+
+--- pages fetched (order) ---
+1. [about] score=22 textChars=4213 https://about.gitlab.com/
+2. [about] score=41 textChars=2477 https://about.gitlab.com/company/
+3. [other] score=3 textChars=562 https://about.gitlab.com/company/team/e-group/
+4. [other] score=2 textChars=386 https://about.gitlab.com/company/team/board-of-directors/
+5. [about] score=62 textChars=3382 https://about.gitlab.com/jobs/
+6. [hiring] score=84 textChars=4443 https://about.gitlab.com/jobs/ai-interview-process/
+7. [about] score=82 textChars=5795 https://about.gitlab.com/jobs/accessibility/
+8. [hiring] score=16 textChars=1118 https://about.gitlab.com/jobs/all-jobs/
+9. [other] score=0 textChars=78 https://about.gitlab.com/blog/introducing-gitlab-flex/
+10. [other] score=2 textChars=78 https://about.gitlab.com/blog/new-mcp-tools-for-automation/
+11. [other] score=2 textChars=78 https://about.gitlab.com/blog/optimize-with-open-weight-models/
+12. [other] score=6 textChars=705 https://about.gitlab.com/company/contact/
+13. [about] score=12 textChars=1193 https://about.gitlab.com/sales/
+14. [about] score=30 textChars=4723 https://about.gitlab.com/de-de/company/
+15. [about] score=8 textChars=4598 https://about.gitlab.com/es/company/
+
+--- skipped sources ---
+- budget_exhausted: 230 URLs left in frontier (see JSON log for full list)
+    e.g. https://about.gitlab.com/pages.xml
+    e.g. https://about.gitlab.com/blog.xml
+    e.g. https://about.gitlab.com/gitlab-duo-agent-platform/
+    e.g. https://about.gitlab.com/solutions/code-suggestions/
+    e.g. https://about.gitlab.com/solutions/continuous-integration/
+    e.g. https://about.gitlab.com/partners/technology-partners/aws/
+    e.g. https://about.gitlab.com/partners/technology-partners/google-cloud-platform/
+    e.g. https://about.gitlab.com/why-gitlab/
+    ... +222 more
+
+--- robots decisions ---
+- fetched https://about.gitlab.com (status_200)
+- missing_or_unreadable https://lisp-journey.gitlab.io (status_404)
+- fetched https://news.ycombinator.com (status_200)
+
+--- discussion ---
+companyName=GitLab
+pages=3
+  - [hn_algolia] Lisp Interview: questions to Alex Nygren of Kina Knowledge, using Common Lisp extensively in their document processing stack - Lisp journey · https://lisp-journey.gitlab.io/blog/lisp-interview-kina/
+  - [hn_algolia] Ask HN: Are GitHub, GitLab, and similars just a fad? | Hacker News · https://news.ycombinator.com/item?id=27742048
+  - [hn_algolia] Lost in Tassie | Hacker News · https://news.ycombinator.com/item?id=13711878
+log:
+  - brave skipped no_search_api_key
+  - tavily skipped no_search_api_key
+  - hn_algolia ok q="GitLab interview process" 1_hits
+  - hn_algolia ok q="GitLab interview experience" 2_hits
+  - duckduckgo empty q="GitLab interview process" no_hits
+  - duckduckgo empty q="GitLab interview experience" no_hits
+
+--- bundle summary ---
+unreachable=false
+hiring=["https://about.gitlab.com/jobs/ai-interview-process/","https://about.gitlab.com/jobs/all-jobs/"]
+about=["https://about.gitlab.com/","https://about.gitlab.com/company/","https://about.gitlab.com/jobs/","https://about.gitlab.com/jobs/accessibility/","https://about.gitlab.com/sales/","https://about.gitlab.com/de-de/company/","https://about.gitlab.com/es/company/"]
+other_count=6
+
+--- problems ---
+(none)

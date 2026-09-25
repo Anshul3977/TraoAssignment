@@ -3,7 +3,14 @@ import { readFile, stat } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { crawl, pathPrefixForStart } from "./crawl.js";
+import {
+  crawl,
+  isAllowedCrawlTarget,
+  LITTLE_EXTRACTABLE_REASON,
+  LITTLE_EXTRACTABLE_TEXT_CHARS,
+  pathPrefixForStart,
+  sameRegistrableDomain,
+} from "./crawl.js";
 import { resetHostLimiter } from "./hostLimiter.js";
 import {
   classifyPage,
@@ -219,4 +226,117 @@ describe("crawl", () => {
     expect(combined).not.toMatch(/\/jobs\b/);
     expect(combined).not.toMatch(/handbook\/people/);
   });
+
+  it("sameRegistrableDomain allows sibling subdomains and .co.uk eTLD+1", () => {
+    expect(
+      sameRegistrableDomain(
+        new URL("https://about.gitlab.com/"),
+        new URL("https://handbook.gitlab.com/"),
+      ),
+    ).toBe(true);
+    expect(
+      sameRegistrableDomain(
+        new URL("https://www.example.co.uk/"),
+        new URL("https://careers.example.co.uk/"),
+      ),
+    ).toBe(true);
+    expect(
+      sameRegistrableDomain(new URL("https://a.example.com/"), new URL("https://evil.com/")),
+    ).toBe(false);
+    expect(
+      sameRegistrableDomain(new URL("http://localhost/acme/"), new URL("http://localhost/quietco/")),
+    ).toBe(true);
+  });
+
+  it("isAllowedCrawlTarget follows subdomains but keeps path prefix on the seed host", () => {
+    const start = new URL("https://about.example.com/");
+    const prefix = pathPrefixForStart(start);
+    expect(
+      isAllowedCrawlTarget(new URL("https://handbook.example.com/people"), start, prefix),
+    ).toBe(true);
+    expect(isAllowedCrawlTarget(new URL("https://evil.com/jobs"), start, prefix)).toBe(false);
+
+    const prefixed = new URL("http://127.0.0.1:8099/acme/");
+    const acmePrefix = pathPrefixForStart(prefixed);
+    expect(
+      isAllowedCrawlTarget(new URL("http://127.0.0.1:8099/acme/about.html"), prefixed, acmePrefix),
+    ).toBe(true);
+    expect(
+      isAllowedCrawlTarget(new URL("http://127.0.0.1:8099/quietco/"), prefixed, acmePrefix),
+    ).toBe(false);
+  });
+
+  it("follows same-registrable-domain subdomain links during crawl", async () => {
+    const pages: Record<string, string> = {
+      "https://about.example.com/": `<!doctype html><html><head><title>About Example</title></head>
+<body><main><h1>About Example</h1><p>Our company mission and values.</p>
+<a href="https://handbook.example.com/hiring">Hiring handbook</a></main></body></html>`,
+      "https://handbook.example.com/hiring": `<!doctype html><html><head><title>How we hire</title></head>
+<body><main><h1>How we hire</h1>
+<p>Our interview process includes a take-home exercise and an onsite system design round for hiring.
+Recruiters walk candidates through the handbook process.</p></main></body></html>`,
+    };
+
+    const fetchImpl: typeof fetch = async (input) => {
+      const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
+      if (url.endsWith("/robots.txt") || url.includes("sitemap.xml")) {
+        return new Response("Not found", { status: 404, headers: { "content-type": "text/plain" } });
+      }
+      const body = pages[url];
+      if (!body) {
+        return new Response("Not found", { status: 404, headers: { "content-type": "text/plain" } });
+      }
+      return new Response(body, { status: 200, headers: { "content-type": "text/html; charset=utf-8" } });
+    };
+
+    const bundle = await crawl("https://about.example.com/", {
+      allowPrivateHosts: true,
+      fetchImpl,
+      lookup: async () => ["93.184.216.34"],
+    });
+
+    expect(bundle.unreachable).toBe(false);
+    expect(bundle.hiringPages.some((p) => p.url.includes("handbook.example.com"))).toBe(true);
+    const fetched = [
+      bundle.homepage,
+      ...bundle.aboutPages,
+      ...bundle.hiringPages,
+      ...bundle.otherPages,
+    ]
+      .filter(Boolean)
+      .map((p) => p!.url);
+    expect(fetched.some((u) => u.startsWith("https://handbook.example.com/"))).toBe(true);
+  }, 30_000);
+
+  it("records thin client-rendered shells without treating them as hiring pages", async () => {
+    const spa = `<!doctype html><html><head><title>Careers</title></head>
+<body><div id="root"></div><script src="/app.js"></script></body></html>`;
+
+    const fetchImpl: typeof fetch = async (input) => {
+      const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
+      if (url.endsWith("/robots.txt") || url.includes("sitemap.xml")) {
+        return new Response("Not found", { status: 404, headers: { "content-type": "text/plain" } });
+      }
+      return new Response(spa, {
+        status: 200,
+        headers: { "content-type": "text/html; charset=utf-8" },
+      });
+    };
+
+    const bundle = await crawl("https://spa.example.com/", {
+      allowPrivateHosts: true,
+      fetchImpl,
+      lookup: async () => ["93.184.216.34"],
+    });
+
+    expect(bundle.unreachable).toBe(false);
+    expect(bundle.hiringPages).toEqual([]);
+    expect(
+      bundle.skipped.some(
+        (s) =>
+          s.reason === LITTLE_EXTRACTABLE_REASON && s.url.startsWith("https://spa.example.com"),
+      ),
+    ).toBe(true);
+    expect(bundle.homepage?.text.trim().length).toBeLessThan(LITTLE_EXTRACTABLE_TEXT_CHARS);
+  }, 15_000);
 });
