@@ -9,11 +9,45 @@ import {
 } from "@prep/core";
 import { KitModel } from "../models/Kit.js";
 import { JobModel } from "../models/Job.js";
+import {
+  crawl,
+  type ResearchBundle,
+} from "../lib/prepCore.js";
+
+/** Pipeline result plus optional crawl bundle for T19b regenerate. */
+export type PipelineRunnerResult = PipelineResult & {
+  researchBundle?: ResearchBundle;
+};
 
 export type PipelineRunner = (
   input: PipelineInput,
   opts: PipelineOptions,
-) => Promise<PipelineResult>;
+) => Promise<PipelineRunnerResult>;
+
+/**
+ * Default runner: capture the crawl bundle via injectable crawlFn so Kit
+ * documents store research for section regenerate (no re-crawl).
+ */
+async function runPipelineWithBundle(
+  input: PipelineInput,
+  opts: PipelineOptions,
+): Promise<PipelineRunnerResult> {
+  let researchBundle: ResearchBundle | undefined;
+  const result = await runPipeline(input, {
+    ...opts,
+    crawlFn: async (companyUrl, crawlOpts) => {
+      if (opts.crawlFn) {
+        const bundle = await opts.crawlFn(companyUrl, crawlOpts);
+        researchBundle = bundle as ResearchBundle;
+        return bundle;
+      }
+      const bundle = await crawl(companyUrl, crawlOpts);
+      researchBundle = bundle;
+      return bundle;
+    },
+  });
+  return { kit: result.kit, researchBundle };
+}
 
 export type JobWorkerOptions = {
   runPipeline?: PipelineRunner;
@@ -43,7 +77,7 @@ export class JobWorker {
   private readonly concurrency: number;
 
   constructor(options: JobWorkerOptions = {}) {
-    this.runner = options.runPipeline ?? runPipeline;
+    this.runner = options.runPipeline ?? runPipelineWithBundle;
     this.allowPrivateHosts =
       options.allowPrivateHosts ?? process.env.ALLOW_PRIVATE_HOSTS === "true";
     this.concurrency = Math.max(1, options.concurrency ?? 1);
@@ -141,6 +175,9 @@ export class JobWorker {
           days: input.days,
         },
         kit: validated.kit,
+        ...(result.researchBundle
+          ? { researchBundle: result.researchBundle }
+          : {}),
       });
 
       await JobModel.updateOne(

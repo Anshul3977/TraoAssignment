@@ -12,6 +12,7 @@ import {
   type PipelineRunner,
 } from "./jobs/worker.js";
 import { createKitsRouter } from "./kits/routes.js";
+import type { RegenerateDeps } from "./kits/regenerate.js";
 import { attachSession } from "./middleware/auth.js";
 import { createHealthRouter } from "./routes/health.js";
 
@@ -23,6 +24,8 @@ export type CreateAppOptions = {
   runPipeline?: PipelineRunner;
   allowPrivateHosts?: boolean;
   workerConcurrency?: number;
+  /** Injected regenerate helpers (tests). */
+  regenerateDeps?: RegenerateDeps;
 };
 
 export function createApp(options: CreateAppOptions = {}): {
@@ -61,7 +64,7 @@ export function createApp(options: CreateAppOptions = {}): {
   app.use(attachSession(userStore));
   app.use(createHealthRouter());
   app.use("/auth", createAuthRouter(userStore));
-  app.use("/kits", createKitsRouter(worker));
+  app.use("/kits", createKitsRouter(worker, options.regenerateDeps));
   app.use("/jobs", createJobsRouter(worker));
 
   app.use((_req, res) => {

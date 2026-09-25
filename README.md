@@ -32,7 +32,7 @@ npm run evaluate -- --input fixtures/cases-real.json --output out/kits-real.json
 npm run dev                                               # workspace dev scripts if present
 ```
 
-### API (`apps/api`) — T17a + T17b + T18
+### API (`apps/api`) — T17a + T17b + T18 + T19b
 
 Express base with helmet, rate limiting, cookie sessions, and zod request validation. Contract: [`docs/API.md`](docs/API.md).
 
@@ -40,7 +40,9 @@ Auth routes: `GET /health`, `POST /auth/register`, `POST /auth/login`, `POST /au
 
 **Persistence (T17b):** Mongoose models `User`, `Kit`, `Job`, `PracticeState`. Kit reads (`GET /kits/:id`) always filter by `userId` — another owner's id returns `404 NOT_FOUND`.
 
-**Generation jobs (T18):** `POST /kits` and `POST /kits/batch` enqueue an in-process worker that runs `runPipeline`, persisting step progress on the Job for polling via `GET /jobs/:id`. Idempotency key = `sha256(userId + normalised JD + URL + days)` — a second submit returns the same job (`200`) instead of starting another run. `POST /jobs/:id/retry` re-queues failed jobs (including boot-time `INTERRUPTED`). Kits are `validateKit`'d before save. Edit/regenerate/practice routes arrive in T19b–T20.
+**Generation jobs (T18):** `POST /kits` and `POST /kits/batch` enqueue an in-process worker that runs `runPipeline`, persisting step progress on the Job for polling via `GET /jobs/:id`. Idempotency key = `sha256(userId + normalised JD + URL + days)` — a second submit returns the same job (`200`) instead of starting another run. `POST /jobs/:id/retry` re-queues failed jobs (including boot-time `INTERRUPTED`). Kits are `validateKit`'d before save. The worker also stores the crawl `researchBundle` on the Kit so regenerate can skip a re-crawl.
+
+**Edit + regenerate (T19b):** `PATCH /kits/:id` applies a batch of ops (`update` / `add` / `delete` / `reorder` / `move`) with optimistic concurrency via `baseVersion` (mismatch → `409 VERSION_CONFLICT` + current kit). Deleting a generated question records its normalised prompt in `kit.meta.dismissed`. `POST /kits/:id/regenerate` merges via `mergeRegenerated` (brief / schedule / one question category); schedule re-allocates with `allocateSchedule` when questions change. Practice routes arrive in T20.
 
 ```bash
 # requires JWT_SECRET and MONGODB_URI in .env (see .env.example); default PORT=4000

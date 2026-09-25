@@ -297,7 +297,107 @@ Array length 1–50. Each element validated like `POST /kits`.
 | 404 | `NOT_FOUND` | Unknown or not owned |
 | 409 | `NOT_RETRYABLE` | Job is not `failed` (still queued/running/done) |
 
-Edit / regenerate / practice routes arrive in T19b–T20.
+---
+
+### `PATCH /kits/:id`
+
+**Protected.** Apply a batch of edit ops with optimistic concurrency. Each question/flashcard carries `meta: { origin, edited, pinned, updated_at }`; the company brief carries `meta.edited`. Document `version` increments on success.
+
+**Request body**
+
+```json
+{
+  "baseVersion": 1,
+  "ops": [
+    { "op": "update", "target": "brief", "set": { "summary": "…" } },
+    { "op": "update", "target": "question", "id": "q1", "set": { "prompt": "…", "pinned": true } },
+    { "op": "update", "target": "flashcard", "id": "f1", "set": { "front": "…" } },
+    { "op": "update", "target": "requirement", "id": "r1", "set": { "text": "…" } },
+    { "op": "add", "target": "question", "value": { "prompt": "…", "answer_outline": "…", "category": "technical", "difficulty": 2, "requirement_ids": ["r1"] } },
+    { "op": "add", "target": "flashcard", "value": { "front": "…", "back": "…", "requirement_ids": ["r1"] } },
+    { "op": "delete", "target": "question", "id": "q2" },
+    { "op": "reorder", "target": "questions", "category": "technical", "ids": ["q2", "q1"] },
+    { "op": "move", "target": "question", "id": "q1", "category": "behavioural" }
+  ]
+}
+```
+
+| Field | Rules |
+|---|---|
+| `baseVersion` | Required integer ≥ 1; must equal the kit’s current `version` |
+| `ops` | 1–100 ops; see shapes above |
+
+Content edits set `meta.edited=true` and `meta.updated_at`. User-added items get `meta.origin=user`. Deleting a **generated** or **fallback** question appends its normalised prompt to `kit.meta.dismissed` so regenerate will not resurrect it. Schedule `question_ids` are pruned when questions are deleted.
+
+**Response `200`**
+
+```json
+{ "kit": { "…": "same shape as GET /kits/:id" } }
+```
+
+| Status | Code | Meaning |
+|---|---|---|
+| 400 | `VALIDATION_ERROR` / `INVALID_OP` / `INVALID_KIT` | Bad body, bad op, or post-op kit fails validation |
+| 401 | `UNAUTHENTICATED` / `SESSION_EXPIRED` | Auth |
+| 404 | `NOT_FOUND` | Unknown id, foreign kit, or op target id missing |
+| 409 | `VERSION_CONFLICT` | `baseVersion` mismatch — body includes current `kit` |
+
+**409 body**
+
+```json
+{
+  "error": { "code": "VERSION_CONFLICT", "message": "Kit was modified; reload and retry." },
+  "kit": { "…": "current owned kit" }
+}
+```
+
+---
+
+### `POST /kits/:id/regenerate`
+
+**Protected.** Regenerate one section using the **stored** research bundle (no re-crawl). Merges via `mergeRegenerated` so user / edited / pinned items survive; dismissed prompts are not resurrected. Re-allocates the schedule with `allocateSchedule` when questions change (or when `section=schedule`).
+
+**Request body**
+
+```json
+{ "section": "brief", "force": false }
+```
+
+```json
+{ "section": "questions", "category": "technical" }
+```
+
+```json
+{ "section": "schedule" }
+```
+
+| Field | Rules |
+|---|---|
+| `section` | `brief` \| `schedule` \| `questions` |
+| `category` | Required when `section=questions`: `technical` \| `behavioural` \| `system-design` \| `company-fit` |
+| `force` | Optional; for `brief`, override skip when `company_brief.meta.edited` |
+
+Brief regeneration is skipped when the brief is edited unless `force=true` (`briefSkipped: true`, kit unchanged aside from version bump). Missing research bundle on brief regen → `409 MISSING_RESEARCH`.
+
+**Response `200`**
+
+```json
+{
+  "kit": { "…": "same shape as GET /kits/:id" },
+  "briefSkipped": false,
+  "questionsChanged": true
+}
+```
+
+| Status | Code | Meaning |
+|---|---|---|
+| 400 | `VALIDATION_ERROR` / `INVALID_KIT` | Bad body or post-merge kit invalid |
+| 401 | `UNAUTHENTICATED` / `SESSION_EXPIRED` | Auth |
+| 404 | `NOT_FOUND` | Unknown or not owned |
+| 409 | `MISSING_RESEARCH` | Brief regen needs a stored research bundle |
+| 409 | `VERSION_CONFLICT` | Concurrent write — body includes current `kit` |
+
+Practice routes arrive in T20.
 
 ---
 
@@ -306,8 +406,12 @@ Edit / regenerate / practice routes arrive in T19b–T20.
 | Code | Typical status | Meaning |
 |---|---|---|
 | `VALIDATION_ERROR` | 400 | Request body/query/params failed schema |
+| `INVALID_OP` | 400 | Op could not be applied (e.g. bad reorder permutation) |
+| `INVALID_KIT` | 400 | Kit failed `validateKit` after edit/regenerate |
 | `NOT_FOUND` | 404 | Unknown route or missing/foreign resource |
 | `NOT_RETRYABLE` | 409 | Retry called on a non-failed job |
+| `VERSION_CONFLICT` | 409 | PATCH/regenerate lost the optimistic version race |
+| `MISSING_RESEARCH` | 409 | Brief regenerate without a stored research bundle |
 | `RATE_LIMITED` | 429 | express-rate-limit window exceeded |
 | `INTERNAL_ERROR` | 500 | Unexpected server error |
 
