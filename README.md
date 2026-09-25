@@ -159,6 +159,51 @@ npx tsx scripts/try-crawl.ts http://localhost:8099/acme/
 
 Writes JSON + log under `.loop/checkpoint-a/`. Review notes: `.loop/checkpoint-a.md`.
 
+## Production deploy (T28) — config only until dashboards are filled
+
+There is **no live deployment URL** in this repo yet. Wire the three free-tier services, then paste the Vercel URL into the submission.
+
+**Do not add CORS.** The browser only calls same-origin `/api/*` on the Next app; `next.config.ts` rewrites that prefix to Express (`API_ORIGIN`).
+
+### MongoDB Atlas (M0)
+
+1. Create an M0 cluster and a database user.
+2. Network access: allow `0.0.0.0/0` (Render free egress IPs are not stable) or pin Render IPs if you upgrade.
+3. Copy the `mongodb+srv://…` URI into Render as `MONGODB_URI`.
+
+### API — Render free web service (`render.yaml`)
+
+Blueprint: [`render.yaml`](render.yaml). Create the service from this repo (or paste the `buildCommand` / `startCommand`). Fill **sync:false** secrets in the Render dashboard:
+
+| Name | Required | Notes |
+|---|---|---|
+| `NODE_ENV` | yes | `production` (blocks private/loopback fetches unless `ALLOW_PRIVATE_HOSTS=true`) |
+| `PORT` | set by Render | Listen binds `0.0.0.0` |
+| `JWT_SECRET` | yes | Long random string. `Secure` cookies are on when `NODE_ENV=production` |
+| `MONGODB_URI` | yes | Atlas SRV URI |
+| `LLM_PROVIDER` | yes | `gemini` (default) or `groq` |
+| `GEMINI_API_KEY` | if Gemini | Free-tier key |
+| `GEMINI_MODEL` | no | Default `gemini-flash-lite-latest` |
+| `GROQ_API_KEY` / `GROQ_MODEL` | optional fallback | |
+| `SEARCH_API_KEY` | no | Discussion search |
+| `ALLOW_PRIVATE_HOSTS` | **no** | Leave unset/false in production |
+
+Health: `GET /health` → `{ ok: true }` (`healthCheckPath` in the blueprint).
+
+**Sleep:** free instances sleep after idle; the first hit after sleep is often **~50s**. Boot marks leftover `running` jobs `failed` with `INTERRUPTED` (retry via `POST /jobs/:id/retry`). `POST /kits` stays async (~90s pipeline on the worker). **`POST /kits/:id/regenerate` is synchronous** (LLM). Node request timeout is 3 minutes on the API; the **Vercel rewrite proxy** may still cut it shorter (Hobby ~10s, Pro ~60s). If regen 504s, retry after the API is warm or raise the Vercel plan.
+
+### Web — Vercel (`apps/web`)
+
+Root Directory: `apps/web` (install/build already `cd ../..` in [`apps/web/vercel.json`](apps/web/vercel.json)).
+
+| Name | Required | Notes |
+|---|---|---|
+| `API_ORIGIN` | yes | Public Render origin, **no trailing slash**, e.g. `https://YOUR-SERVICE.onrender.com` once you have it. **Baked at `next build`** — redeploy the web app after the API URL changes. |
+
+No `JWT_SECRET` or Mongo on Vercel. No CORS plugin.
+
+You must log into **Vercel**, **Render**, and **Atlas** (and paste `GEMINI_API_KEY` / `JWT_SECRET` / `MONGODB_URI` / `API_ORIGIN`) before T28’s live-URL acceptance is met.
+
 ## Known limitations
 
 - **Batch evaluate without an LLM key** prints a startup `WARNING`, then records every case as `failed` with code `LLM_NOT_CONFIGURED` and a message pointing at `.env` / `.env.example` (`GEMINI_API_KEY` or `GROQ_API_KEY` for the active `LLM_PROVIDER`). Put a free-tier key in `.env` for real kits.

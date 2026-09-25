@@ -10,6 +10,8 @@ coverage/
 .env.*.local
 .loop/agent.log
 .loop/verify.out
+.loop/tmp-batch-*.json
+.loop/checkpoint-d-results.json
 .llm-cache/
 .DS_Store
 *.log

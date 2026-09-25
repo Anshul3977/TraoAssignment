@@ -37,6 +37,8 @@ for (const id of await listQueuedJobIds()) {
   worker.enqueue(id);
 }
 
-app.listen(PORT, () => {
-  console.log(`API listening on http://localhost:${PORT}`);
+const server = app.listen(PORT, "0.0.0.0", () => {
+  console.log(`API listening on http://0.0.0.0:${PORT}`);
 });
+// Category regen is a synchronous LLM POST; Render/Node defaults can cut it off.
+server.setTimeout(3 * 60 * 1000);

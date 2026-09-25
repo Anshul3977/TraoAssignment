@@ -1,0 +1,38 @@
+# Render Blueprint for the Express API (T28). Fill secrets in the dashboard —
+# this file does not contain a live URL or keys.
+#
+# Free web services sleep after idle (~15 min). The first request after sleep
+# often takes ~50s. In-flight jobs become failed / INTERRUPTED on process
+# restart; clients retry with POST /jobs/:id/retry.
+
+services:
+  - type: web
+    name: prep-kit-api
+    runtime: node
+    plan: free
+    buildCommand: npm install && npm run typecheck --workspace=@prep/api
+    startCommand: npm start --workspace=@prep/api
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "4000"
+      - key: JWT_SECRET
+        generateValue: true
+      - key: MONGODB_URI
+        sync: false
+      - key: LLM_PROVIDER
+        value: gemini
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_MODEL
+        value: gemini-flash-lite-latest
+      - key: GROQ_API_KEY
+        sync: false
+      - key: GROQ_MODEL
+        sync: false
+      - key: SEARCH_API_KEY
+        sync: false
+      - key: ALLOW_PRIVATE_HOSTS
+        value: "false"
