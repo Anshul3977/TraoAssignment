@@ -39,3 +39,18 @@ export {
   type MergeRegeneratedInput,
   type MergeRegeneratedResult,
 } from "./mergeRegenerated.js";
+
+export {
+  mapStoryBank,
+  hintStoriesForFlashcard,
+  assignStoryIds,
+  uncoveredMessage,
+  contentTokens,
+  MAX_STORIES,
+  MAX_CANDIDATES,
+  type StarStory,
+  type StoryDraft,
+  type StoryMatch,
+  type StoryBankMapping,
+  type UncoveredStoryRequirement,
+} from "./mapStories.js";

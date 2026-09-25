@@ -8,7 +8,7 @@ npm workspaces:
 
 - `packages/core` — schema, retrieval, LLM helpers, deterministic steps, pipeline pieces
 - `apps/api` — Express API (auth, Mongo persistence, scoped kits, async generation jobs — see `docs/API.md`)
-- `apps/web` — Next.js App Router UI (auth shell, dashboard, create-kit / batch upload, job progress, kit builder, practice, schedule + coverage matrix)
+- `apps/web` — Next.js App Router UI (auth shell, dashboard, create-kit / batch upload, job progress, kit builder, Story Bank, practice, schedule + coverage matrix)
 - `docs/API.md` — HTTP contract the web app builds against
 
 ## Setup
@@ -44,7 +44,9 @@ Auth routes: `GET /health`, `POST /auth/register`, `POST /auth/login`, `POST /au
 
 **Edit + regenerate (T19b):** `PATCH /kits/:id` applies a batch of ops (`update` / `add` / `delete` / `reorder` / `move`) with optimistic concurrency via `baseVersion` (mismatch → `409 VERSION_CONFLICT` + current kit). Deleting a generated question records its normalised prompt in `kit.meta.dismissed`. `POST /kits/:id/regenerate` merges via `mergeRegenerated` (brief / schedule / one question category); schedule re-allocates with `allocateSchedule` when questions change.
 
-**Practice (T20):** `POST /kits/:id/practice/review` records confidence (1–5) into Leitner boxes (≤2 → box 1, 3 → box 2, ≥4 → box+1 capped at 5). `GET /kits/:id/practice/next` returns the next-session queue (seen cards by box↑ / lastConfidence↑ / least-recently-seen; never-seen interleaved early). `GET /kits/:id/practice/stats` reports covered/not-covered per requirement (≥1 reviewed flashcard linked to that req).
+**Practice (T20):** `POST /kits/:id/practice/review` records confidence (1–5) into Leitner boxes (≤2 → box 1, 3 → box 2, ≥4 → box+1 capped at 5). `GET /kits/:id/practice/next` returns the next-session queue (seen cards by box↑ / lastConfidence↑ / least-recently-seen; never-seen interleaved early) plus optional `hintStories` from Story Bank. `GET /kits/:id/practice/stats` reports covered/not-covered per requirement (≥1 reviewed flashcard linked to that req).
+
+**Story Bank (T26):** `GET` / `PUT /kits/:id/story-bank` stores 0–6 STAR stories on the Kit (not Appendix A). Mapping onto behavioural requirements/questions is deterministic keyword overlap (no LLM). Uncovered behavioural requirements return `You have no story for '<text>'`. Practice cards show matching stories as hints. Does not bump kit `version`.
 
 ```bash
 # requires JWT_SECRET and MONGODB_URI in .env (see .env.example); default PORT=4000
@@ -54,7 +56,7 @@ npm run dev --workspace=@prep/api
 npm start --workspace=@prep/api
 ```
 
-### Web (`apps/web`) — T21 + T22a + T22b + T23a + T23b + T23c + T24 + T25
+### Web (`apps/web`) — T21 + T22a + T22b + T23a + T23b + T23c + T24 + T25 + T26
 
 Auth UI + app shell against [`docs/API.md`](docs/API.md) only (no invented routes). Login/register/logout, `middleware.ts` gate for signed-out visitors, same-origin API client (`credentials: 'include'`, 401 → `/login?next=`), TanStack Query provider, dashboard empty state.
 
@@ -70,7 +72,9 @@ Auth UI + app shell against [`docs/API.md`](docs/API.md) only (no invented route
 
 **Flashcards + Schedule / Brief regen (T23c):** Flashcards section with inline front/back edit, add / delete (+ undo), badges; ops via `PATCH` update/add/delete `flashcard`. Schedule section supports regenerate → `POST /kits/:id/regenerate` `{ section: "schedule" }` after flushing pending edits (does not clobber brief/questions/flashcards). Day-card detail and coverage matrix are T25. **Regenerate brief** confirm lists keep rules for edited/yours briefs; optional force → `{ section: "brief", force }` (skipped without force when edited; `MISSING_RESEARCH` surfaced from API).
 
-**Practice (T24):** `/kits/:id/practice` — one flashcard at a time from `GET /kits/:id/practice/next` (API next-session / Leitner order; client does not re-sort). Space or Enter reveals the back; keys **1–5** submit `POST /kits/:id/practice/review`. Progress bar through the queue; session summary lists ratings; per-requirement covered / not-covered grid from `GET /kits/:id/practice/stats`. **Next session** reloads the API queue. Builder header links to Practice. Desktop; keyboard-only session supported.
+**Practice (T24):** `/kits/:id/practice` — one flashcard at a time from `GET /kits/:id/practice/next` (API next-session / Leitner order; client does not re-sort). Space or Enter reveals the back; keys **1–5** submit `POST /kits/:id/practice/review`. Progress bar through the queue; session summary lists ratings; per-requirement covered / not-covered grid from `GET /kits/:id/practice/stats`. Matching Story Bank entries appear as a **Story hint** on the card. **Next session** reloads the API queue. Builder header links to Practice. Desktop; keyboard-only session supported.
+
+**Story Bank (T26):** Builder section on `/kits/:id` via `GET`/`PUT /kits/:id/story-bank`. Write 4–6 STAR stories; flags behavioural requirements with no overlapping story.
 
 **Schedule + coverage (T25):** Schedule day cards show focus, minutes, and questions linked by id (hash links to the Questions section). Interview date is derived client-side as kit `createdAt` local date + `days_available` (SPEC: days until the interview); the matching prep day gets a **Today** marker. Requirements × questions coverage matrix highlights rows in `coverage.uncovered_requirement_ids` (gap badge + amber row). Still uses only `GET /kits/:id` (+ existing regenerate). Desktop only.
 
@@ -83,7 +87,7 @@ npm run dev --workspace=@prep/api
 npm run dev --workspace=@prep/web
 ```
 
-Open `http://localhost:3000`. Signed-out visits to `/`, `/kits/new`, `/kits/batch`, `/kits/:id`, `/kits/:id/practice`, or `/jobs/:id` redirect to `/login`. After register/login, use **Create a kit** or **Batch upload** on the dashboard (list endpoint not in the contract yet — empty state only). Open a finished job’s **Open builder** link for Brief + Role + Questions + Flashcards + Schedule day cards + coverage matrix, then **Practice**.
+Open `http://localhost:3000`. Signed-out visits to `/`, `/kits/new`, `/kits/batch`, `/kits/:id`, `/kits/:id/practice`, or `/jobs/:id` redirect to `/login`. After register/login, use **Create a kit** or **Batch upload** on the dashboard (list endpoint not in the contract yet — empty state only). Open a finished job’s **Open builder** link for Brief + Role + Questions + Flashcards + Schedule day cards + coverage matrix + Story Bank, then **Practice**.
 
 
 ### Batch CLI (`npm run evaluate`) — T16

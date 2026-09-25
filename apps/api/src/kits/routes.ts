@@ -30,6 +30,7 @@ import {
   saveKitIfVersion,
 } from "./store.js";
 import { createPracticeRouter } from "../practice/routes.js";
+import { createStoryBankRouter } from "../stories/routes.js";
 
 function kitIdParam(raw: string | string[] | undefined): string | null {
   if (!raw) return null;
@@ -83,8 +84,9 @@ export function createKitsRouter(
     },
   );
 
-  // Practice before bare `/:id` so `/practice/*` is not captured as an id.
+  // Nested paths before bare `/:id`.
   router.use("/:id/practice", createPracticeRouter());
+  router.use("/:id/story-bank", createStoryBankRouter());
 
   router.get("/:id", requireAuth, async (req, res) => {
     const userId = req.user!.id;

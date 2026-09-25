@@ -480,7 +480,8 @@ A requirement is **covered** when at least one flashcard that lists its id has b
       "requirement_ids": ["r2"],
       "box": null,
       "lastConfidence": null,
-      "lastSeenAt": null
+      "lastSeenAt": null,
+      "hintStories": []
     },
     {
       "flashcardId": "f1",
@@ -495,7 +496,7 @@ A requirement is **covered** when at least one flashcard that lists its id has b
 }
 ```
 
-`box` is `null` for never-seen cards.
+`box` is `null` for never-seen cards. `hintStories` is the Story Bank overlap for that card (empty when no matching STAR story).
 
 | Status | Code | Meaning |
 |---|---|---|
@@ -529,6 +530,102 @@ A requirement is **covered** when at least one flashcard that lists its id has b
 |---|---|---|
 | 401 | `UNAUTHENTICATED` / `SESSION_EXPIRED` | Auth |
 | 404 | `NOT_FOUND` | Unknown or not owned |
+
+---
+
+## Story Bank (T26)
+
+User-written STAR stories (0–6) live on the Kit document (`storyBank`), not inside the Appendix A `kit` payload. Mapping onto behavioural requirements/questions is **deterministic keyword overlap** in `@prep/core` (no LLM). Ids are always `s1`… assigned in array order on write; client ids are ignored.
+
+### `GET /kits/:id/story-bank`
+
+**Protected.** Stories plus computed mapping and uncovered behavioural requirements.
+
+**Response `200`**
+
+```json
+{
+  "stories": [
+    {
+      "id": "s1",
+      "title": "Mentored a new hire",
+      "situation": "…",
+      "task": "…",
+      "action": "…",
+      "result": "…"
+    }
+  ],
+  "mapping": {
+    "requirements": [
+      {
+        "requirementId": "r2",
+        "text": "mentoring juniors",
+        "priority": "must",
+        "candidates": [
+          { "storyId": "s1", "score": 1, "overlappingTerms": ["mentor", "junior"] }
+        ]
+      }
+    ],
+    "questions": [
+      {
+        "questionId": "q2",
+        "prompt": "Tell me about mentoring a junior engineer",
+        "candidates": [{ "storyId": "s1", "score": 0.8, "overlappingTerms": ["mentor", "junior"] }]
+      }
+    ],
+    "uncovered": [
+      {
+        "requirementId": "r3",
+        "text": "owns on-call",
+        "message": "You have no story for 'owns on-call'"
+      }
+    ]
+  }
+}
+```
+
+An empty bank still returns every behavioural requirement in `mapping.requirements`; those with no overlapping story appear in `uncovered` with message `You have no story for '<requirement text>'`.
+
+| Status | Code | Meaning |
+|---|---|---|
+| 401 | `UNAUTHENTICATED` / `SESSION_EXPIRED` | Auth |
+| 404 | `NOT_FOUND` | Unknown or not owned |
+
+---
+
+### `PUT /kits/:id/story-bank`
+
+**Protected.** Replace the kit’s STAR stories. Does **not** increment kit `version` (independent of PATCH ops).
+
+**Request body**
+
+```json
+{
+  "stories": [
+    {
+      "title": "Mentored a new hire",
+      "situation": "…",
+      "task": "…",
+      "action": "…",
+      "result": "…"
+    }
+  ]
+}
+```
+
+| Field | Rules |
+|---|---|
+| `stories` | Array, max 6. Each field trimmed, non-empty: `title` ≤120, `situation`/`task`/`result` ≤2000, `action` ≤4000 |
+
+**Response `200`** — same shape as GET (stories include assigned ids).
+
+| Status | Code | Meaning |
+|---|---|---|
+| 400 | `VALIDATION_ERROR` | Body failed zod checks (including more than 6 stories) |
+| 401 | `UNAUTHENTICATED` / `SESSION_EXPIRED` | Auth |
+| 404 | `NOT_FOUND` | Unknown or not owned |
+
+Practice `GET /kits/:id/practice/next` items include `hintStories` (STAR fields + overlap `score`) for cards linked to matching stories.
 
 ---
 

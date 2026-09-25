@@ -26,6 +26,8 @@ const kitSchema = new Schema(
     kit: { type: Schema.Types.Mixed, required: true },
     /** Crawl/search bundle for section regenerate without re-fetch. */
     researchBundle: { type: Schema.Types.Mixed, required: false },
+    /** User STAR stories (T26 Story Bank). Not part of Appendix A. */
+    storyBank: { type: Schema.Types.Mixed, required: false },
   },
   { timestamps: true },
 );

@@ -7,8 +7,16 @@ export {
   allocateSchedule,
   mergeRegenerated,
   normalisePrompt,
+  mapStoryBank,
+  hintStoriesForFlashcard,
+  assignStoryIds,
+  MAX_STORIES,
   type MergeRegeneratedResult,
   type RegenerateSection,
+  type StarStory,
+  type StoryBankMapping,
+  type StoryDraft,
+  type StoryMatch,
 } from "../../../../packages/core/src/deterministic/index.js";
 
 export {

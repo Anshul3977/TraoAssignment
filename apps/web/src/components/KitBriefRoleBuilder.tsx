@@ -13,6 +13,7 @@ import {
 } from "@/components/KitQuestionsSection";
 import { CoverageMatrixSection } from "@/components/CoverageMatrixSection";
 import { KitScheduleSection } from "@/components/KitScheduleSection";
+import { KitStoryBankSection } from "@/components/KitStoryBankSection";
 import {
   ApiClientError,
   getKit,
@@ -920,6 +921,8 @@ export function KitBriefRoleBuilder({
         questions={localQuestions}
         uncoveredRequirementIds={uncovered}
       />
+
+      <KitStoryBankSection kitId={kitId} />
 
       <p className="text-sm text-zinc-600">
         <Link href="/" className="underline hover:text-zinc-900">

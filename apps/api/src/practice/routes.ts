@@ -5,6 +5,12 @@ import { requireAuth } from "../middleware/auth.js";
 import { validate } from "../middleware/validate.js";
 import { findKitForUser } from "../kits/store.js";
 import {
+  hintStoriesForFlashcard,
+  mapStoryBank,
+  type StarStory,
+} from "../lib/prepCore.js";
+import { storiesFromDoc } from "../stories/store.js";
+import {
   computeRequirementStats,
   orderNextSession,
 } from "./leitner.js";
@@ -89,6 +95,13 @@ export function createPracticeRouter(): Router {
     }
 
     const kit = asKit(doc.kit);
+    const stories: StarStory[] = storiesFromDoc(doc);
+    const storyMapping = mapStoryBank(
+      stories,
+      kit.role.requirements,
+      kit.questions,
+    );
+    const byStory = new Map(stories.map((st) => [st.id, st]));
     const state = await findPracticeState(kitId, userId);
     const map = practiceCardsToMap(state);
     const orderedIds = orderNextSession(
@@ -100,6 +113,7 @@ export function createPracticeRouter(): Router {
     const items = orderedIds.map((id) => {
       const f = byId.get(id)!;
       const s = map.get(id);
+      const hints = hintStoriesForFlashcard(stories, storyMapping, f);
       return {
         flashcardId: id,
         front: f.front,
@@ -110,6 +124,21 @@ export function createPracticeRouter(): Router {
         lastSeenAt: s?.lastSeenAt
           ? new Date(s.lastSeenAt).toISOString()
           : null,
+        hintStories: hints
+          .map((h) => {
+            const story = byStory.get(h.storyId);
+            if (!story) return null;
+            return {
+              id: story.id,
+              title: story.title,
+              situation: story.situation,
+              task: story.task,
+              action: story.action,
+              result: story.result,
+              score: h.score,
+            };
+          })
+          .filter((x): x is NonNullable<typeof x> => x != null),
       };
     });
 

@@ -299,6 +299,34 @@ function CardView({
             Answer hidden — press Space or Enter to reveal.
           </p>
         )}
+
+        {(card.hintStories?.length ?? 0) > 0 ? (
+          <aside
+            className="mt-6 rounded-md border border-zinc-100 bg-zinc-50 p-4"
+            data-testid="practice-story-hint"
+          >
+            <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
+              Story hint
+            </p>
+            {card.hintStories!.map((story) => (
+              <div key={story.id} className="mt-2 text-sm text-zinc-800">
+                <p className="font-medium">{story.title}</p>
+                <p className="mt-1 text-zinc-700">
+                  <span className="font-medium">S:</span> {story.situation}
+                </p>
+                <p className="mt-1 text-zinc-700">
+                  <span className="font-medium">T:</span> {story.task}
+                </p>
+                <p className="mt-1 text-zinc-700">
+                  <span className="font-medium">A:</span> {story.action}
+                </p>
+                <p className="mt-1 text-zinc-700">
+                  <span className="font-medium">R:</span> {story.result}
+                </p>
+              </div>
+            ))}
+          </aside>
+        ) : null}
       </div>
 
       <div className="flex flex-wrap items-center gap-2">

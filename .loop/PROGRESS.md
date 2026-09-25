@@ -267,3 +267,12 @@ pm run typecheck fails solely with TS2307 on ../deterministic/groundRequirements
 - Decisions: **Keep Story Bank** (not Replan) — because it is an original idea, maps reusable STAR stories to requirement ids with deterministic overlap, and is demoable in the video. Live API used mongodb-memory-server when local mongod was down — because README still requires `MONGODB_URI` and the worker is in-process Express.
 - Limitations / follow-ups: `PATCH` `baseVersion: 0` is 400 not 409 (`min(1)` in API.md); T26 Story Bank not started; did not re-run Checkpoint B evaluate
 
+## 2026-09-25 T26 Story Bank
+- Changed: `packages/core/src/deterministic/mapStories.ts` (+ tests), `apps/api` story-bank routes/store + `practice/next` hints, `apps/web` Story Bank section + practice hint, `docs/API.md`, `README.md`
+- Decisions:
+  - Mapping is stemmed keyword overlap in `deterministic/` (no LLM) — because the model must not assign coverage or citations; overlap is demoable (“no story for mentoring juniors”).
+  - Stories persist on Kit `storyBank`, not Appendix A — because the kit schema stays exact; ids `s1`… assigned in code on PUT.
+  - PUT does not bump kit `version` — because stories are independent of PATCH ops / regenerate concurrency.
+  - Practice `hintStories` come from linked behavioural requirement matches, then card text — because T26 asks for a linked story hint on practice cards.
+- Limitations / follow-ups: overlap is lexical (no synonyms); a11y/responsive pass is T27; empty STAR cards are omitted on save rather than stored as blanks.
+

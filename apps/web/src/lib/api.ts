@@ -605,6 +605,16 @@ export async function regenerateKitSchedule(
 }
 
 /** One item from GET /kits/:id/practice/next (docs/API.md Practice). */
+export type PracticeHintStory = {
+  id: string;
+  title: string;
+  situation: string;
+  task: string;
+  action: string;
+  result: string;
+  score: number;
+};
+
 export type PracticeNextItem = {
   flashcardId: string;
   front: string;
@@ -613,7 +623,78 @@ export type PracticeNextItem = {
   box: number | null;
   lastConfidence: number | null;
   lastSeenAt: string | null;
+  /** Linked STAR stories from Story Bank overlap (T26). */
+  hintStories?: PracticeHintStory[];
 };
+
+export type StarStory = {
+  id: string;
+  title: string;
+  situation: string;
+  task: string;
+  action: string;
+  result: string;
+};
+
+export type StoryDraft = Omit<StarStory, "id">;
+
+export type StoryMatch = {
+  storyId: string;
+  score: number;
+  overlappingTerms: string[];
+};
+
+export type StoryBankMapping = {
+  requirements: Array<{
+    requirementId: string;
+    text: string;
+    priority: string;
+    candidates: StoryMatch[];
+  }>;
+  questions: Array<{
+    questionId: string;
+    prompt: string;
+    candidates: StoryMatch[];
+  }>;
+  uncovered: Array<{
+    requirementId: string;
+    text: string;
+    message: string;
+  }>;
+};
+
+export type StoryBankResponse = {
+  stories: StarStory[];
+  mapping: StoryBankMapping;
+};
+
+/** GET /kits/:id/story-bank */
+export async function getStoryBank(
+  kitId: string,
+  deps?: ApiFetchDeps,
+): Promise<StoryBankResponse> {
+  return apiFetch(
+    `/kits/${encodeURIComponent(kitId)}/story-bank`,
+    { method: "GET" },
+    deps,
+  );
+}
+
+/** PUT /kits/:id/story-bank — replace 0–6 STAR stories (ids assigned server-side). */
+export async function putStoryBank(
+  kitId: string,
+  stories: StoryDraft[],
+  deps?: ApiFetchDeps,
+): Promise<StoryBankResponse> {
+  return apiFetch(
+    `/kits/${encodeURIComponent(kitId)}/story-bank`,
+    {
+      method: "PUT",
+      body: JSON.stringify({ stories }),
+    },
+    deps,
+  );
+}
 
 export type PracticeReviewBody = {
   flashcardId: string;

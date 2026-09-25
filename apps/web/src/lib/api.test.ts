@@ -17,6 +17,8 @@ import {
   regenerateKitSchedule,
   getPracticeNext,
   getPracticeStats,
+  getStoryBank,
+  putStoryBank,
   submitPracticeReview,
   retryJob,
 } from "./api";
@@ -623,6 +625,51 @@ describe("practice API (T24)", () => {
         method: "POST",
         credentials: "include",
         body: JSON.stringify({ flashcardId: "f1", confidence: 4 }),
+      }),
+    );
+  });
+
+  it("GET /api/kits/:id/story-bank", async () => {
+    const payload = {
+      stories: [],
+      mapping: { requirements: [], questions: [], uncovered: [] },
+    };
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify(payload), { status: 200 }),
+    );
+    const result = await getStoryBank("kit1", { fetch: fetchMock });
+    expect(result.stories).toEqual([]);
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/kits/kit1/story-bank",
+      expect.objectContaining({ method: "GET", credentials: "include" }),
+    );
+  });
+
+  it("PUT /api/kits/:id/story-bank sends drafts", async () => {
+    const story = {
+      title: "Mentored a new hire",
+      situation: "S",
+      task: "T",
+      action: "A",
+      result: "R",
+    };
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          stories: [{ id: "s1", ...story }],
+          mapping: { requirements: [], questions: [], uncovered: [] },
+        }),
+        { status: 200 },
+      ),
+    );
+    const result = await putStoryBank("kit1", [story], { fetch: fetchMock });
+    expect(result.stories[0]?.id).toBe("s1");
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/kits/kit1/story-bank",
+      expect.objectContaining({
+        method: "PUT",
+        credentials: "include",
+        body: JSON.stringify({ stories: [story] }),
       }),
     );
   });
