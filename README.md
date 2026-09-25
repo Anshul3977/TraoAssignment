@@ -23,10 +23,31 @@ Requires Node ≥ 20. Copy `.env.example` to `.env` and fill values as needed. D
 ```bash
 npm run typecheck
 npm test
-npm run fixtures   # serves fixtures/sites on :8099
-npm run evaluate   # batch CLI (after pipeline wiring)
-npm run dev        # workspace dev scripts if present
+npm run fixtures                                          # serves fixtures/sites on :8099
+npm run evaluate -- --input fixtures/cases.json --output out/kits.json
+npm run check-output -- --input out/kits.json             # validate Appendix B shape
+npm run dev                                               # workspace dev scripts if present
 ```
+
+### Batch CLI (`npm run evaluate`) — T16
+
+Runs every case in `fixtures/cases.json` (or any Appendix B input array) through the **same** `runPipeline` the API will use:
+
+- `--input` / `--output` via `node:util` `parseArgs`
+- Concurrency 2, shared LLM limiter, ~4 min per-case timeout
+- `allowPrivateHosts: true` so localhost fixtures work
+- One failing case never aborts the run; results are rewritten to `--output` after each case (partial Appendix B survives a crash)
+- Prints a summary table + elapsed time; exits 0 when the batch finishes
+
+Practical local run (needs a free-tier key in `.env` and fixtures up):
+
+```bash
+npm run fixtures   # separate terminal
+npm run evaluate -- --input fixtures/cases.json --output out/kits.json
+npm run check-output -- out/kits.json
+```
+
+On some Windows npm versions, `--input` / `--output` are eaten as unknown npm configs; the CLI still accepts the two paths as positionals (`npm run evaluate -- fixtures/cases.json out/kits.json`), which is what those npm versions forward.
 
 ## Research / crawl
 
@@ -71,6 +92,7 @@ Writes JSON + log under `.loop/checkpoint-a/`. Review notes: `.loop/checkpoint-a
 
 ## Known limitations
 
+- **Batch evaluate without an LLM key** records every case as `failed` (`GEMINI_API_KEY` / `GROQ_API_KEY` required); put a free-tier key in `.env` for real kits.
 - **Job-board hosts** (Greenhouse / Lever / Ashby) are off-site and not followed.
 - **Client-rendered shells:** if extracted text is near-empty after `cleanPage`, the crawl records *little extractable content (likely client-rendered)* on `skipped` and keeps the page as `other` — that is not evidence that a hiring page is missing.
 - Classification can still label careers hubs as **about** when hiring-process copy is thin; budget can exhaust before high-signal paths are fetched.
