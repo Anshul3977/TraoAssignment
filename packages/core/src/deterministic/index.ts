@@ -26,3 +26,16 @@ export {
   type AllocateScheduleResult,
   type AllocatedSchedule,
 } from "./allocateSchedule.js";
+
+export {
+  mergeRegenerated,
+  isProtectedItem,
+  normalisePrompt,
+  categoryForRequirementKind,
+  type ItemOrigin,
+  type RegenerateSection,
+  type KitNextIds,
+  type KitMergeMeta,
+  type MergeRegeneratedInput,
+  type MergeRegeneratedResult,
+} from "./mergeRegenerated.js";
