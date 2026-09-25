@@ -40,3 +40,26 @@ export {
   type DiscussionHit,
   type ResearchPage,
 } from "./researchPages.js";
+
+export {
+  generateQuestions,
+  generateTechnicalQuestions,
+  generateBehaviouralQuestions,
+  generateSystemDesignQuestions,
+  generateCompanyFitQuestions,
+  shouldIncludeSystemDesign,
+  clampDifficulty,
+  assignQuestionIds,
+  finalizeCategoryQuestions,
+  filterRequirementsForTechnical,
+  filterRequirementsForBehavioural,
+  isSeniorOrAbove,
+  requirementsMentionArchitectureOrScale,
+  CATEGORY_PROMPTS,
+  GeneratedQuestionItemSchema,
+  GeneratedQuestionsLlmSchema,
+  type GeneratedQuestionsLlm,
+  type GenerateQuestionsInput,
+  type GenerateCategoryQuestionsInput,
+  type GenerateQuestionsOptions,
+} from "./generateQuestions.js";
