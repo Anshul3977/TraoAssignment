@@ -1,0 +1,14 @@
+[
+  {
+    "id": "posthog",
+    "jd": "Product Engineer — PostHog\n\nPostHog is hiring a Product Engineer to build product analytics and experimentation features used by thousands of companies.\n\nResponsibilities:\n- Ship full-stack features across our React frontend and Python/Django backend\n- Own problems end-to-end from discovery through production\n- Collaborate with product and design on customer-facing workflows\n\nRequirements:\n- Strong experience with TypeScript and React\n- Comfortable with Python or a similar backend language\n- Experience shipping product features in a fast-moving SaaS company\n- Clear written communication in an async, remote culture\n\nNice to have:\n- Familiarity with ClickHouse, Postgres, or analytical databases\n- Prior experience with product analytics or experimentation products\n",
+    "company_url": "https://posthog.com",
+    "days": 7
+  },
+  {
+    "id": "gitlab",
+    "jd": "Senior Backend Engineer — GitLab\n\nGitLab is hiring a Senior Backend Engineer to work on the DevSecOps platform.\n\nResponsibilities:\n- Design and implement Ruby on Rails / Go services that power GitLab.com\n- Improve reliability and performance for large-scale git and CI workloads\n- Partner with security and product on secure-by-default features\n\nRequirements:\n- 5+ years of professional backend engineering experience\n- Strong experience with Ruby on Rails or Go\n- Experience operating services at scale\n- Excellent written communication in a remote-first handbook culture\n\nNice to have:\n- Familiarity with Kubernetes and cloud infrastructure\n- Prior contributions to open-source DevOps tooling\n",
+    "company_url": "https://about.gitlab.com",
+    "days": 7
+  }
+]

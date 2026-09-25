@@ -26,6 +26,8 @@ npm test
 npm run fixtures                                          # serves fixtures/sites on :8099
 npm run evaluate -- --input fixtures/cases.json --output out/kits.json
 npm run check-output -- --input out/kits.json             # validate Appendix B shape
+npx tsx scripts/review-kits.ts out/kits.json              # Checkpoint B per-case review
+npm run evaluate -- --input fixtures/cases-real.json --output out/kits-real.json
 npm run dev                                               # workspace dev scripts if present
 ```
 
