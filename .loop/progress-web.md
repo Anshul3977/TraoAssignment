@@ -17,3 +17,12 @@
   - Form stays on `/kits/new` after success with a link to `/jobs/:id` — because T22b owns the job progress page; do not invent poll UI here.
   - Client validation mirrors API.md field rules (non-empty JD ≤100k, http(s) URL ≤2048, days integer 1–60) before `POST /kits`.
 - Limitations / follow-ups: job timeline / batch upload are T22b; no kit list until a list route appears in API.md.
+
+## 2026-09-25 T22b Batch upload + job progress
+- Changed: `apps/web/` (batch parse/validate, `/kits/batch`, job view helpers + `/jobs/[id]` progress UI, API client `createKitsBatch` / `getJob` / `retryJob`, tests), root `README.md`
+- Decisions:
+  - Browser parses JSON/CSV locally into `{ jd, company_url, days }[]` then `POST /kits/batch` — because API.md says the web app parses the uploaded file; do not invent a multipart upload route.
+  - Job page polls `GET /jobs/:id` every 2s while queued/running — because generation is async (~90s) and progress is persisted (safe to leave and return).
+  - Sources found/skipped derived from step timeline details (done crawl/search/extract vs skipped+detail) — because the Job object has no separate sources field in API.md.
+  - Failed jobs expose Retry via `POST /jobs/:id/retry` only — because 409 `NOT_RETRYABLE` covers non-failed statuses.
+- Limitations / follow-ups: no kit list/builder until those routes land in API.md + T23a; desktop only.

@@ -191,6 +191,52 @@ export async function createKit(
   };
 }
 
+export type BatchJobResult = {
+  job: GenerationJob;
+  created: boolean;
+};
+
+/**
+ * POST /kits/batch — create jobs for an array of kit inputs (1–50).
+ * Each row uses the same idempotency rules as POST /kits.
+ */
+export async function createKitsBatch(
+  inputs: CreateKitInput[],
+  deps?: ApiFetchDeps,
+): Promise<{ jobs: BatchJobResult[] }> {
+  return apiFetch(
+    "/kits/batch",
+    {
+      method: "POST",
+      body: JSON.stringify(inputs),
+    },
+    deps,
+  );
+}
+
+/** GET /jobs/:id — poll job progress. */
+export async function getJob(
+  id: string,
+  deps?: ApiFetchDeps,
+): Promise<{ job: GenerationJob }> {
+  return apiFetch(`/jobs/${encodeURIComponent(id)}`, { method: "GET" }, deps);
+}
+
+/**
+ * POST /jobs/:id/retry — re-queue a failed job.
+ * API returns 409 NOT_RETRYABLE when status is not failed.
+ */
+export async function retryJob(
+  id: string,
+  deps?: ApiFetchDeps,
+): Promise<{ job: GenerationJob }> {
+  return apiFetch(
+    `/jobs/${encodeURIComponent(id)}/retry`,
+    { method: "POST" },
+    deps,
+  );
+}
+
 export async function register(
   email: string,
   password: string,

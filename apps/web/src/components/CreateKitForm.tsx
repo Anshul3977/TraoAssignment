@@ -209,6 +209,12 @@ export function CreateKitForm() {
             {pending ? "Starting…" : "Create kit"}
           </button>
           <Link
+            href="/kits/batch"
+            className="text-sm text-zinc-600 underline hover:text-zinc-900"
+          >
+            Batch upload
+          </Link>
+          <Link
             href="/"
             className="text-sm text-zinc-600 underline hover:text-zinc-900"
           >

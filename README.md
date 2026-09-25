@@ -8,7 +8,7 @@ npm workspaces:
 
 - `packages/core` — schema, retrieval, LLM helpers, deterministic steps, pipeline pieces
 - `apps/api` — Express API (auth, kits/jobs — see `docs/API.md`)
-- `apps/web` — Next.js App Router UI (auth shell, dashboard, create-kit form)
+- `apps/web` — Next.js App Router UI (auth shell, dashboard, create-kit / batch upload, job progress)
 - `docs/API.md` — HTTP contract the web app builds against
 
 ## Setup
@@ -45,11 +45,15 @@ npm run dev --workspace=@prep/api
 npm start --workspace=@prep/api
 ```
 
-### Web (`apps/web`) — T21 + T22a
+### Web (`apps/web`) — T21 + T22a + T22b
 
 Auth UI + app shell against [`docs/API.md`](docs/API.md) only (no invented routes). Login/register/logout, `middleware.ts` gate for signed-out visitors, same-origin API client (`credentials: 'include'`, 401 → `/login?next=`), TanStack Query provider, dashboard empty state.
 
-**Create kit** (`/kits/new`): JD textarea (char count + thin-JD warning under 80 chars), company URL, prep days 1–60. Client validation for empty JD / bad URL / days bounds. Submits `POST /kits`; a `200` (idempotent existing job) shows a duplicate-submit notice instead of starting a second run. Job progress UI is T22b.
+**Create kit** (`/kits/new`): JD textarea (char count + thin-JD warning under 80 chars), company URL, prep days 1–60. Client validation for empty JD / bad URL / days bounds. Submits `POST /kits`; a `200` (idempotent existing job) shows a duplicate-submit notice instead of starting a second run.
+
+**Batch upload** (`/kits/batch`): JSON or CSV file → preview table with per-row validation → `POST /kits/batch` (1–50 `{ jd, company_url, days }`). Links to each job’s progress page.
+
+**Job progress** (`/jobs/:id`): polls `GET /jobs/:id` while queued/running; step timeline (spinner / ✓ / skipped+reason / failed); sources found vs skipped from step details; elapsed time; safe-to-leave notice; `POST /jobs/:id/retry` when failed.
 
 Browser calls go to `/api/*`; Next rewrites strip the prefix to the Express origin (`API_ORIGIN`, default `http://localhost:4000`).
 
@@ -60,7 +64,7 @@ npm run dev --workspace=@prep/api
 npm run dev --workspace=@prep/web
 ```
 
-Open `http://localhost:3000`. Signed-out visits to `/` or `/kits/new` redirect to `/login`. After register/login, use **Create a kit** on the dashboard (list endpoint not in the contract yet — empty state only).
+Open `http://localhost:3000`. Signed-out visits to `/`, `/kits/new`, `/kits/batch`, or `/jobs/:id` redirect to `/login`. After register/login, use **Create a kit** or **Batch upload** on the dashboard (list endpoint not in the contract yet — empty state only).
 
 
 ### Batch CLI (`npm run evaluate`) — T16

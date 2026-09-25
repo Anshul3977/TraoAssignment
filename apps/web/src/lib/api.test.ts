@@ -4,9 +4,12 @@ import {
   apiFetch,
   apiPath,
   createKit,
+  createKitsBatch,
+  getJob,
   login,
   loginRedirectUrl,
   logout,
+  retryJob,
 } from "./api";
 
 describe("apiPath", () => {
@@ -177,5 +180,76 @@ describe("createKit", () => {
     );
     expect(result.created).toBe(false);
     expect(result.job.status).toBe("running");
+  });
+});
+
+describe("createKitsBatch", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("POSTs array to /api/kits/batch", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          jobs: [{ job: sampleJob, created: true }],
+        }),
+        { status: 200 },
+      ),
+    );
+    const result = await createKitsBatch(
+      [
+        {
+          jd: "Senior engineer…",
+          company_url: "https://example.com",
+          days: 5,
+        },
+      ],
+      { fetch: fetchMock },
+    );
+    expect(result.jobs[0]!.created).toBe(true);
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/kits/batch",
+      expect.objectContaining({
+        method: "POST",
+        credentials: "include",
+      }),
+    );
+  });
+});
+
+describe("getJob / retryJob", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("GETs /api/jobs/:id", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(
+        JSON.stringify({ job: { ...sampleJob, status: "running" } }),
+        { status: 200 },
+      ),
+    );
+    const result = await getJob("job1", { fetch: fetchMock });
+    expect(result.job.status).toBe("running");
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/jobs/job1",
+      expect.objectContaining({ method: "GET", credentials: "include" }),
+    );
+  });
+
+  it("POSTs /api/jobs/:id/retry", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(
+        JSON.stringify({ job: { ...sampleJob, status: "queued", steps: [] } }),
+        { status: 200 },
+      ),
+    );
+    const result = await retryJob("job1", { fetch: fetchMock });
+    expect(result.job.status).toBe("queued");
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/jobs/job1/retry",
+      expect.objectContaining({ method: "POST", credentials: "include" }),
+    );
   });
 });
