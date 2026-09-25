@@ -299,6 +299,7 @@ function SortableQuestionCard({
           ? "rounded-md border border-zinc-300 bg-white p-3 shadow-md"
           : "rounded-md border border-zinc-200 bg-zinc-50/50 p-3"
       }
+      id={`question-${question.id}`}
       data-testid={`question-${question.id}`}
     >
       <div className="mb-2 flex flex-wrap items-center gap-2">

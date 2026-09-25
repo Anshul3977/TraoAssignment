@@ -11,6 +11,7 @@ import {
   VersionConflictPrompt,
   type UndoDeletePayload,
 } from "@/components/KitQuestionsSection";
+import { CoverageMatrixSection } from "@/components/CoverageMatrixSection";
 import { KitScheduleSection } from "@/components/KitScheduleSection";
 import {
   ApiClientError,
@@ -904,8 +905,20 @@ export function KitBriefRoleBuilder({
 
       <KitScheduleSection
         schedule={record.kit.schedule}
+        questions={localQuestions}
+        createdAt={record.createdAt}
         regenerating={regenerating}
         onRequestRegenerate={onRequestScheduleRegenerate}
+      />
+
+      <CoverageMatrixSection
+        requirements={record.kit.role.requirements.map((r) => ({
+          id: r.id,
+          text: r.text,
+          priority: String(r.priority),
+        }))}
+        questions={localQuestions}
+        uncoveredRequirementIds={uncovered}
       />
 
       <p className="text-sm text-zinc-600">

@@ -63,3 +63,12 @@
   - Summary + coverage grid from `GET /kits/:id/practice/stats` after the queue finishes — because contract separates next vs stats; covered = reviewed flashcard requirement ids.
   - Practice lives at `/kits/:id/practice` with a builder header link — because T25 owns schedule/coverage matrix views; keep practice scoped to flashcards.
 - Limitations / follow-ups: schedule day cards + requirements×questions matrix are T25; desktop only.
+
+## 2026-09-25 T25 Schedule + coverage views
+- Changed: `apps/web/` (`schedule-views` helpers + tests, `KitScheduleSection` day cards + Today marker, `CoverageMatrixSection`, builder wiring, question `#question-:id` anchors), root `README.md`, `.loop/progress-web.md`
+- Decisions:
+  - Interview date = local calendar day of kit `createdAt` + `schedule.days_available` — because SPEC says days-until-interview and API.md has no interview-date field; do not invent a PATCH.
+  - Today marker = schedule day whose calendar date matches local today within the prep window (null outside) — because day 1 is the created date and day N is the last prep day before the interview date.
+  - Day cards link question ids to `#question-:id` with prompt/category — because T25 asks for questions linked; hash anchors avoid inventing navigation routes.
+  - Coverage matrix gaps use kit `coverage.uncovered_requirement_ids` only (not client recompute) — because §8 visibility must match pipeline coverage; Verify requires highlighting those ids.
+- Limitations / follow-ups: desktop only; no Story Bank (T26); a11y/responsive pass is T27.

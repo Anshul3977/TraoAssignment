@@ -8,7 +8,7 @@ npm workspaces:
 
 - `packages/core` — schema, retrieval, LLM helpers, deterministic steps, pipeline pieces
 - `apps/api` — Express API (auth, kits/jobs — see `docs/API.md`)
-- `apps/web` — Next.js App Router UI (auth shell, dashboard, create-kit / batch upload, job progress, kit builder, practice mode)
+- `apps/web` — Next.js App Router UI (auth shell, dashboard, create-kit / batch upload, job progress, kit builder, practice, schedule + coverage matrix)
 - `docs/API.md` — HTTP contract the web app builds against
 
 ## Setup
@@ -45,7 +45,7 @@ npm run dev --workspace=@prep/api
 npm start --workspace=@prep/api
 ```
 
-### Web (`apps/web`) — T21 + T22a + T22b + T23a + T23b + T23c + T24
+### Web (`apps/web`) — T21 + T22a + T22b + T23a + T23b + T23c + T24 + T25
 
 Auth UI + app shell against [`docs/API.md`](docs/API.md) only (no invented routes). Login/register/logout, `middleware.ts` gate for signed-out visitors, same-origin API client (`credentials: 'include'`, 401 → `/login?next=`), TanStack Query provider, dashboard empty state.
 
@@ -59,9 +59,11 @@ Auth UI + app shell against [`docs/API.md`](docs/API.md) only (no invented route
 
 **Questions (T23b):** category tabs (technical / behavioural / system-design / company-fit); inline edit prompt + answer outline; optimistic reorder via `@dnd-kit` (PointerSensor + KeyboardSensor); move-to-category select; add / delete with undo toast; pin toggle; badges AI / Edited / Yours / Pinned. **Regenerate category** opens a confirm dialog listing protected items that will be kept (user / edited / pinned); pending text edits flush before `POST /kits/:id/regenerate` `{ section: "questions", category }`. `409 VERSION_CONFLICT` opens a merge prompt (reload latest) — never silent overwrite. Structural ops use `PATCH` reorder / move / update(pinned) / add / delete.
 
-**Flashcards + Schedule / Brief regen (T23c):** Flashcards section with inline front/back edit, add / delete (+ undo), badges; ops via `PATCH` update/add/delete `flashcard`. Schedule section is read-only (day focus, minutes, question ids) with **Regenerate schedule** → `POST /kits/:id/regenerate` `{ section: "schedule" }` after flushing pending edits (does not clobber brief/questions/flashcards). **Regenerate brief** confirm lists keep rules for edited/yours briefs; optional force → `{ section: "brief", force }` (skipped without force when edited; `MISSING_RESEARCH` surfaced from API).
+**Flashcards + Schedule / Brief regen (T23c):** Flashcards section with inline front/back edit, add / delete (+ undo), badges; ops via `PATCH` update/add/delete `flashcard`. Schedule section supports regenerate → `POST /kits/:id/regenerate` `{ section: "schedule" }` after flushing pending edits (does not clobber brief/questions/flashcards). Day-card detail and coverage matrix are T25. **Regenerate brief** confirm lists keep rules for edited/yours briefs; optional force → `{ section: "brief", force }` (skipped without force when edited; `MISSING_RESEARCH` surfaced from API).
 
 **Practice (T24):** `/kits/:id/practice` — one flashcard at a time from `GET /kits/:id/practice/next` (API next-session / Leitner order; client does not re-sort). Space or Enter reveals the back; keys **1–5** submit `POST /kits/:id/practice/review`. Progress bar through the queue; session summary lists ratings; per-requirement covered / not-covered grid from `GET /kits/:id/practice/stats`. **Next session** reloads the API queue. Builder header links to Practice. Desktop; keyboard-only session supported.
+
+**Schedule + coverage (T25):** Schedule day cards show focus, minutes, and questions linked by id (hash links to the Questions section). Interview date is derived client-side as kit `createdAt` local date + `days_available` (SPEC: days until the interview); the matching prep day gets a **Today** marker. Requirements × questions coverage matrix highlights rows in `coverage.uncovered_requirement_ids` (gap badge + amber row). Still uses only `GET /kits/:id` (+ existing regenerate). Desktop only.
 
 Browser calls go to `/api/*`; Next rewrites strip the prefix to the Express origin (`API_ORIGIN`, default `http://localhost:4000`).
 
@@ -72,7 +74,7 @@ npm run dev --workspace=@prep/api
 npm run dev --workspace=@prep/web
 ```
 
-Open `http://localhost:3000`. Signed-out visits to `/`, `/kits/new`, `/kits/batch`, `/kits/:id`, `/kits/:id/practice`, or `/jobs/:id` redirect to `/login`. After register/login, use **Create a kit** or **Batch upload** on the dashboard (list endpoint not in the contract yet — empty state only). Open a finished job’s **Open builder** link for Brief + Role + Questions + Flashcards + Schedule, then **Practice**.
+Open `http://localhost:3000`. Signed-out visits to `/`, `/kits/new`, `/kits/batch`, `/kits/:id`, `/kits/:id/practice`, or `/jobs/:id` redirect to `/login`. After register/login, use **Create a kit** or **Batch upload** on the dashboard (list endpoint not in the contract yet — empty state only). Open a finished job’s **Open builder** link for Brief + Role + Questions + Flashcards + Schedule day cards + coverage matrix, then **Practice**.
 
 
 ### Batch CLI (`npm run evaluate`) — T16

@@ -1,24 +1,40 @@
 "use client";
 
-import { useId, useState } from "react";
-import type { KitSchedule } from "@/lib/api";
+import { useId, useMemo, useState } from "react";
+import type { KitQuestion, KitSchedule } from "@/lib/api";
 import { scheduleSummary } from "@/lib/kit-builder";
+import {
+  buildScheduleDayCards,
+  interviewDateFromCreatedAt,
+  toLocalDateKey,
+} from "@/lib/schedule-views";
 
 type KitScheduleSectionProps = {
   schedule: KitSchedule;
+  questions: readonly KitQuestion[];
+  /** Kit createdAt — used to derive interview date and the Today marker. */
+  createdAt: string;
   regenerating: boolean;
   onRequestRegenerate: () => void;
 };
 
 export function KitScheduleSection({
   schedule,
+  questions,
+  createdAt,
   regenerating,
   onRequestRegenerate,
 }: KitScheduleSectionProps) {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const titleId = useId();
   const summary = scheduleSummary(schedule);
-  const days = schedule.days ?? [];
+  const cards = useMemo(
+    () => buildScheduleDayCards(schedule, questions, createdAt),
+    [schedule, questions, createdAt],
+  );
+  const interviewKey = toLocalDateKey(
+    interviewDateFromCreatedAt(createdAt, schedule.days_available),
+  );
 
   return (
     <section
@@ -46,38 +62,86 @@ export function KitScheduleSection({
         {summary.daysAvailable} available · {summary.totalMinutes} minutes
         total
       </p>
+      <p className="mt-1 text-sm text-zinc-600" data-testid="interview-date">
+        Interview date:{" "}
+        <time dateTime={interviewKey}>{interviewKey}</time>
+        <span className="text-zinc-500">
+          {" "}
+          (from kit created date + {schedule.days_available} prep day
+          {schedule.days_available === 1 ? "" : "s"})
+        </span>
+      </p>
       <p className="mt-1 text-xs text-zinc-500">
         Regenerating reallocates days from current questions. Brief, role,
         questions, and flashcards are left unchanged.
       </p>
 
-      {days.length === 0 ? (
+      {cards.length === 0 ? (
         <p className="mt-4 text-sm text-zinc-500">No schedule days yet.</p>
       ) : (
-        <ul className="mt-4 space-y-2" data-testid="schedule-days">
-          {days.map((d) => (
+        <ul className="mt-4 grid gap-3" data-testid="schedule-days">
+          {cards.map((card) => (
             <li
-              key={d.day}
-              className="rounded-md border border-zinc-200 bg-zinc-50/50 px-3 py-2 text-sm"
-              data-testid={`schedule-day-${d.day}`}
+              key={card.day}
+              className={`rounded-lg border px-4 py-3 text-sm ${
+                card.isToday
+                  ? "border-sky-400 bg-sky-50 ring-1 ring-sky-300"
+                  : "border-zinc-200 bg-zinc-50/50"
+              }`}
+              data-testid={`schedule-day-${card.day}`}
+              data-today={card.isToday ? "true" : "false"}
             >
               <div className="flex flex-wrap items-baseline justify-between gap-2">
-                <span className="font-medium text-zinc-900">
-                  Day {d.day}
-                  {d.focus ? (
-                    <span className="font-normal text-zinc-600">
-                      {" "}
-                      — {d.focus}
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="font-medium text-zinc-900">
+                    Day {card.day}
+                  </span>
+                  {card.isToday ? (
+                    <span
+                      className="rounded-full bg-sky-600 px-2 py-0.5 text-xs font-medium text-white"
+                      data-testid={`schedule-today-${card.day}`}
+                    >
+                      Today
                     </span>
                   ) : null}
-                </span>
-                <span className="text-xs text-zinc-500">{d.minutes} min</span>
+                  <span className="text-xs text-zinc-500">
+                    <time dateTime={card.date}>{card.date}</time>
+                  </span>
+                </div>
+                <span className="text-xs text-zinc-500">{card.minutes} min</span>
               </div>
-              <p className="mt-1 font-mono text-xs text-zinc-500">
-                {d.question_ids.length > 0
-                  ? d.question_ids.join(", ")
-                  : "No questions"}
-              </p>
+              {card.focus ? (
+                <p className="mt-1 text-zinc-700" data-testid={`schedule-focus-${card.day}`}>
+                  {card.focus}
+                </p>
+              ) : null}
+              {card.questions.length === 0 ? (
+                <p className="mt-2 text-xs text-zinc-500">No questions</p>
+              ) : (
+                <ul
+                  className="mt-2 space-y-1"
+                  data-testid={`schedule-questions-${card.day}`}
+                >
+                  {card.questions.map((q) => (
+                    <li
+                      key={q.id}
+                      className="flex flex-wrap items-baseline gap-2 text-xs text-zinc-700"
+                      data-testid={`schedule-q-${card.day}-${q.id}`}
+                    >
+                      <a
+                        href={`#question-${q.id}`}
+                        className="font-mono text-sky-800 underline hover:text-sky-950"
+                      >
+                        {q.id}
+                      </a>
+                      <span className="text-zinc-800">{q.prompt}</span>
+                      {q.category ? (
+                        <span className="text-zinc-400">{q.category}</span>
+                      ) : null}
+                    </li>
+                  ))}
+                </ul>
+              )}
             </li>
           ))}
         </ul>
