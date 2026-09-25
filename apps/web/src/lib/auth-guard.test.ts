@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { decideAuthRedirect, isPublicPath } from "./auth-guard";
+import { decideAuthRedirect, isApiProxyPath, isPublicPath } from "./auth-guard";
 
 describe("isPublicPath", () => {
   it("allows login and register only", () => {
@@ -40,5 +40,15 @@ describe("decideAuthRedirect", () => {
 
   it("allows signed-in visitors on protected routes", () => {
     expect(decideAuthRedirect("/", true)).toEqual({ action: "allow" });
+  });
+});
+
+describe("isApiProxyPath", () => {
+  it("matches the Next → Express rewrite prefix", () => {
+    expect(isApiProxyPath("/api")).toBe(true);
+    expect(isApiProxyPath("/api/auth/register")).toBe(true);
+    expect(isApiProxyPath("/api/kits")).toBe(true);
+    expect(isApiProxyPath("/register")).toBe(false);
+    expect(isApiProxyPath("/apiculture")).toBe(false);
   });
 });

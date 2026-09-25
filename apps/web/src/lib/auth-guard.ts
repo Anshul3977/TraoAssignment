@@ -8,6 +8,15 @@ export function isPublicPath(pathname: string): boolean {
   return PUBLIC_PATHS.has(pathname);
 }
 
+/**
+ * Next rewrites `/api/*` to Express. Middleware must not treat those as
+ * page routes — a 307 to `/login` would swallow register/login and strip
+ * Set-Cookie before the rewrite runs.
+ */
+export function isApiProxyPath(pathname: string): boolean {
+  return pathname === "/api" || pathname.startsWith("/api/");
+}
+
 export type GuardDecision =
   | { action: "allow" }
   | { action: "redirect"; to: string };
