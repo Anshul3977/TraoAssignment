@@ -8,3 +8,26 @@ export {
   type CleanPageResult,
   type CleanPageLink,
 } from "./cleanPage.js";
+export {
+  crawl,
+  pathPrefixForStart,
+  isSameOriginUnderPrefix,
+  MAX_CRAWL_DEPTH,
+  MAX_PAGE_BUDGET,
+  type CrawlOptions,
+  type CrawledPage,
+  type ResearchBundle,
+  type SkippedPage,
+} from "./crawl.js";
+export {
+  scoreLink,
+  scorePageContent,
+  classifyPage,
+  rankLinks,
+  CONTENT_SCORE_THRESHOLD,
+  HIRING_SIGNALS,
+  ABOUT_SIGNALS,
+  PENALTY_SIGNALS,
+  type LinkScoreBreakdown,
+  type PageKind,
+} from "./rankLinks.js";

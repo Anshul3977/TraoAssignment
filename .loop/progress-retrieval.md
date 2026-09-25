@@ -18,3 +18,8 @@
 - Decisions: collect all [href] links (absolutized via 
 ew URL(href, pageUrl)) before stripping nav/footer/header/form — because T05 requires chrome links for crawl ranking; prefer main then rticle then ody for text; insert trailing spaces on block tags before whitespace collapse so adjacent elements do not glue words; skip mailto/javascript/data/tel hrefs; soft-cap text at 12_000 chars
 - Limitations / follow-ups: still not re-exported from package root index.ts; fragment-only links kept (T06 may penalize); TASKS.md left untouched per lane override (T05 remains [ ] there until a serial sync)
+
+## 2026-09-25 T06 crawl + rankLinks
+- Changed: packages/core/src/retrieval/ (rankLinks.ts, crawl.ts, crawl.test.ts, index.ts)
+- Decisions: path-prefix confinement from company_url (e.g. /acme/) so sibling fixture hosts stay out; frontier fetched in deterministic score order (hiring/about signals minus penalties); optional sitemap.xml at prefix then origin root; CONTENT_SCORE_THRESHOLD=8 so denial copy like quietco ("no careers/hiring handbook") stays other while real hiring/about pages classify; seed score 1000 so homepage is always fetched first; no new dependencies
+- Limitations / follow-ups: still not re-exported from package root index.ts; homepage also appears in its kind bucket; TASKS.md left untouched per lane override (T06 remains [ ] there until serial sync); did not start T07
