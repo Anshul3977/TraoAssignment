@@ -54,6 +54,7 @@ describe("gemini provider (mocked fetch)", () => {
     const fetchMock: typeof fetch = async (_url, init) => {
       const body = JSON.parse(String(init?.body));
       expect(body.generationConfig.responseMimeType).toBe("application/json");
+      expect(body.generationConfig.temperature).toBe(0);
       return new Response(
         JSON.stringify({
           candidates: [{ content: { parts: [{ text: '{"a":1}' }] } }],

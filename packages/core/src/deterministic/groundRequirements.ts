@@ -97,15 +97,41 @@ function cuePriority(haystack: string): Priority | null {
 /**
  * Override LLM priority from section heading, then evidence line cues;
  * otherwise keep the extracted priority.
+ * When `jd` is provided, also infer the nearest section heading above the
+ * evidence so mislabelled LLM sections cannot flip must/nice.
  */
 export function overridePriority(
   extracted: Pick<ExtractedRequirement, "priority" | "evidence" | "section">,
+  jd?: string,
 ): Priority {
+  if (jd) {
+    const inferred = inferSectionHeading(jd, extracted.evidence || "");
+    const fromInferred = cuePriority(inferred ?? "");
+    if (fromInferred) return fromInferred;
+  }
   const fromSection = cuePriority(extracted.section ?? "");
   if (fromSection) return fromSection;
   const fromEvidence = cuePriority(extracted.evidence);
   if (fromEvidence) return fromEvidence;
   return extracted.priority;
+}
+
+/** Find the nearest Requirements / Nice-to-have style heading above evidence. */
+export function inferSectionHeading(jd: string, evidence: string): string | null {
+  if (!evidence.trim()) return null;
+  const j = jd;
+  const idx = jdIndex(jd, evidence);
+  if (!Number.isFinite(idx) || idx === Number.POSITIVE_INFINITY) return null;
+  // Walk the normalised JD up to the evidence index looking for heading lines.
+  const before = normalize(j).slice(0, Math.min(idx + 1, normalize(j).length));
+  const headingRe =
+    /\b(nice to have|nice-to-have|bonus|preferred qualifications|requirements|you will need|you have|minimum qualifications)\b/gi;
+  let last: string | null = null;
+  let m: RegExpExecArray | null;
+  while ((m = headingRe.exec(before)) !== null) {
+    last = m[1] ?? null;
+  }
+  return last;
 }
 
 function jdIndex(jd: string, needle: string): number {
@@ -144,7 +170,7 @@ export function groundRequirements(
     if (!evidenceInJd(item.evidence, jd)) continue;
     grounded.push({
       item,
-      priority: overridePriority(item),
+      priority: overridePriority(item, jd),
       order: jdIndex(jd, item.evidence || item.text),
     });
   }

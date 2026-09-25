@@ -136,6 +136,35 @@ describe("overridePriority", () => {
       }),
     ).toBe("must");
   });
+
+  it("infers must/nice from JD section headings when the LLM mislabels section", () => {
+    const jd = [
+      "Requirements:",
+      "- 5+ years of professional experience with React and TypeScript",
+      "Nice to have:",
+      "- Familiarity with GraphQL",
+    ].join("\n");
+    expect(
+      overridePriority(
+        {
+          priority: "must",
+          evidence: "Familiarity with GraphQL",
+          section: "Requirements",
+        },
+        jd,
+      ),
+    ).toBe("nice");
+    expect(
+      overridePriority(
+        {
+          priority: "nice",
+          evidence: "5+ years of professional experience with React and TypeScript",
+          section: "Nice to have",
+        },
+        jd,
+      ),
+    ).toBe("must");
+  });
 });
 
 describe("groundRequirements", () => {
