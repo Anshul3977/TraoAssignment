@@ -255,3 +255,15 @@ pm run typecheck fails solely with TS2307 on ../deterministic/groundRequirements
   - Day cards link question ids to `#question-:id` with prompt/category — because T25 asks for questions linked; hash anchors avoid inventing navigation routes.
   - Coverage matrix gaps use kit `coverage.uncovered_requirement_ids` only (not client recompute) — because §8 visibility must match pipeline coverage; Verify requires highlighting those ids.
 - Limitations / follow-ups: desktop only; no Story Bank (T26); a11y/responsive pass is T27.
+
+## 2026-09-25 Checkpoint C
+- Changed: `.loop/checkpoint-c.md`, `.loop/TASKS.md` (C ticked), `.loop/PROMPT.md` (README-only-when-documentable — prior commit), `packages/core/src/deterministic/mergeRegenerated.test.ts` (moved-category + un-normalised dismissed)
+- Decisions: **Keep Story Bank** (not Replan) — because it is an original idea, maps reusable STAR stories to requirement ids with deterministic overlap, and is demoable in the video. Live API used mongodb-memory-server when local mongod was down — because README still requires `MONGODB_URI` and the worker is in-process Express.
+- Limitations / follow-ups: `PATCH` `baseVersion: 0` is 400 not 409 (`min(1)` in API.md); T26 Story Bank not started; did not re-run Checkpoint B evaluate
+
+
+## 2026-09-25 Checkpoint C
+- Changed: `.loop/checkpoint-c.md`, `.loop/TASKS.md` (C ticked), `.loop/PROMPT.md` (README-only-when-documentable — prior commit), `packages/core/src/deterministic/mergeRegenerated.test.ts` (moved-category + un-normalised dismissed)
+- Decisions: **Keep Story Bank** (not Replan) — because it is an original idea, maps reusable STAR stories to requirement ids with deterministic overlap, and is demoable in the video. Live API used mongodb-memory-server when local mongod was down — because README still requires `MONGODB_URI` and the worker is in-process Express.
+- Limitations / follow-ups: `PATCH` `baseVersion: 0` is 400 not 409 (`min(1)` in API.md); T26 Story Bank not started; did not re-run Checkpoint B evaluate
+

@@ -228,11 +228,58 @@ describe("mergeRegenerated — questions", () => {
     );
   });
 
+  it("keeps a generated question that was moved out of the regenerated category", () => {
+    const kit = baseKit({
+      questions: [
+        q({
+          id: "q1",
+          category: "behavioural",
+          prompt: "Moved React Q",
+          requirement_ids: ["r1"],
+          meta: { origin: "generated", edited: false, pinned: false },
+        }),
+        q({
+          id: "q2",
+          category: "technical",
+          prompt: "When would you choose GraphQL?",
+          requirement_ids: ["r3"],
+        }),
+        q({
+          id: "q3",
+          category: "behavioural",
+          prompt: "Mentoring",
+          requirement_ids: ["r2"],
+        }),
+      ],
+    });
+
+    const { kit: out } = mergeRegenerated({
+      kit,
+      section: "questions",
+      category: "technical",
+      questions: [
+        q({
+          id: "x",
+          category: "technical",
+          prompt: "Fresh technical",
+          requirement_ids: ["r1"],
+        }),
+      ],
+    });
+
+    const moved = out.questions.find((x) => x.id === "q1");
+    expect(moved?.category).toBe("behavioural");
+    expect(moved?.prompt).toBe("Moved React Q");
+    expect(out.questions.filter((x) => x.category === "technical").map((x) => x.prompt)).toEqual([
+      "Fresh technical",
+    ]);
+  });
+
   it("does not resurrect dismissed prompts", () => {
     const kit = baseKit({
       meta: {
         next_ids: { question: 10 },
-        dismissed: [normalisePrompt("When would you choose GraphQL?")],
+        dismissed: ["  WHEN would you   choose GraphQL? "],
       },
     });
 
