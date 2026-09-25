@@ -276,3 +276,14 @@ pm run typecheck fails solely with TS2307 on ../deterministic/groundRequirements
   - Practice `hintStories` come from linked behavioural requirement matches, then card text — because T26 asks for a linked story hint on practice cards.
 - Limitations / follow-ups: overlap is lexical (no synonyms); a11y/responsive pass is T27; empty STAR cards are omitted on save rather than stored as blanks.
 
+## 2026-09-25 T27 A11y + responsive pass
+- Changed: `apps/web/` (FocusTrapDialog, AppErrorBoundary, LoadingSkeleton, PHONE_LAYOUT tokens, keyboard checklist tests), root `README.md`, `.loop/TASKS.md`
+- Decisions:
+  - Shared `nextFocusIndex` + `FocusTrapDialog` for every confirm/conflict modal — because T27 requires Tab trap, Escape, and restore-focus; four copy-pasted backdrops would drift.
+  - Keyboard checklist is a data table in `a11y.ts` covered by unit tests — because Verify asks for a keyboard-only walkthrough without adding a browser-driver dep.
+  - 375px uses `px-4` gutters, wrapping toolbars, and `overflow-x-auto` tables — because SPEC §12 is laptop + phone; 375 is iPhone SE width and the named smoke target.
+  - Loading skeletons keep `role="status"` `aria-live="polite"`; save status and job timeline already live-announce — because progress/save must be spoken without a visual-only spinner.
+  - App-level ErrorBoundary in Providers — because §12 asks for error states on long-running generation and in-flight edits, not only inline alerts.
+- Limitations / follow-ups: no automated axe/browser 375px screenshot (unit smoke + tokens only); Checkpoint D is the human phone + laptop keyboard run. Did not start T28 deploy.
+
+

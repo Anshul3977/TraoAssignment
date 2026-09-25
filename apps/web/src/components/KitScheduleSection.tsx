@@ -8,6 +8,8 @@ import {
   interviewDateFromCreatedAt,
   toLocalDateKey,
 } from "@/lib/schedule-views";
+import { PHONE_LAYOUT } from "@/lib/a11y";
+import { FocusTrapDialog } from "./FocusTrapDialog";
 
 type KitScheduleSectionProps = {
   schedule: KitSchedule;
@@ -39,7 +41,7 @@ export function KitScheduleSection({
   return (
     <section
       aria-labelledby={titleId}
-      className="rounded-lg border border-zinc-200 bg-white p-6"
+      className={`rounded-lg border border-zinc-200 bg-white ${PHONE_LAYOUT.section}`}
       data-testid="schedule-section"
     >
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
@@ -172,20 +174,12 @@ function ScheduleRegenConfirmDialog({
 }) {
   const titleId = useId();
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
-      role="presentation"
-      data-testid="schedule-regen-backdrop"
-      onClick={onCancel}
+    <FocusTrapDialog
+      titleId={titleId}
+      onClose={onCancel}
+      testId="schedule-regen-dialog"
+      backdropTestId="schedule-regen-backdrop"
     >
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={titleId}
-        className="w-full max-w-md rounded-lg border border-zinc-200 bg-white p-5 shadow-lg"
-        data-testid="schedule-regen-dialog"
-        onClick={(e) => e.stopPropagation()}
-      >
         <h3 id={titleId} className="text-base font-semibold text-zinc-900">
           Regenerate schedule?
         </h3>
@@ -194,7 +188,7 @@ function ScheduleRegenConfirmDialog({
           current question set. Pending text edits will be saved first. Brief,
           questions, and flashcards will not be overwritten.
         </p>
-        <div className="mt-5 flex justify-end gap-2">
+        <div className="mt-5 flex flex-wrap justify-end gap-2">
           <button
             type="button"
             onClick={onCancel}
@@ -213,7 +207,6 @@ function ScheduleRegenConfirmDialog({
             Regenerate
           </button>
         </div>
-      </div>
-    </div>
+    </FocusTrapDialog>
   );
 }

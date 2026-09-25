@@ -10,6 +10,8 @@ import {
   type PracticeNextItem,
   type PracticeStats,
 } from "@/lib/api";
+import { LoadingSkeleton } from "@/components/LoadingSkeleton";
+import { PHONE_LAYOUT } from "@/lib/a11y";
 import {
   applyPracticeKey,
   createPracticeSession,
@@ -171,7 +173,7 @@ export function PracticeMode({ kitId }: PracticeModeProps) {
   }, [view, onReveal, submitConfidence]);
 
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">
+    <div className={`mx-auto flex w-full max-w-2xl ${PHONE_LAYOUT.minWidth} flex-col gap-6`}>
       <header className="flex flex-col gap-2">
         <div className="flex flex-wrap items-baseline justify-between gap-3">
           <h1 className="text-2xl font-semibold tracking-tight">Practice</h1>
@@ -189,9 +191,7 @@ export function PracticeMode({ kitId }: PracticeModeProps) {
       </header>
 
       {view.kind === "loading" ? (
-        <p className="text-sm text-zinc-500" role="status">
-          Loading session…
-        </p>
+        <LoadingSkeleton label="Loading session…" lines={4} />
       ) : null}
 
       {view.kind === "error" ? (
@@ -269,7 +269,7 @@ function CardView({
       <ProgressBar progress={progress} />
 
       <div
-        className="rounded-lg border border-zinc-200 bg-white p-6"
+        className={`rounded-lg border border-zinc-200 bg-white ${PHONE_LAYOUT.section}`}
         aria-live="polite"
       >
         <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
@@ -425,7 +425,7 @@ function SummaryView({
 }) {
   return (
     <div className="flex flex-col gap-6" data-testid="practice-summary">
-      <section className="rounded-lg border border-zinc-200 bg-white p-6">
+      <section className={`rounded-lg border border-zinc-200 bg-white ${PHONE_LAYOUT.section}`}>
         <h2 className="text-lg font-semibold tracking-tight">Session summary</h2>
         <p className="mt-1 text-sm text-zinc-600">
           Reviewed {reviews.length} card{reviews.length === 1 ? "" : "s"} this
@@ -471,7 +471,7 @@ function SummaryView({
 function CoverageGrid({ stats }: { stats: PracticeStats }) {
   return (
     <section
-      className="rounded-lg border border-zinc-200 bg-white p-6"
+      className={`rounded-lg border border-zinc-200 bg-white ${PHONE_LAYOUT.section}`}
       aria-labelledby="coverage-heading"
       data-testid="practice-coverage"
     >

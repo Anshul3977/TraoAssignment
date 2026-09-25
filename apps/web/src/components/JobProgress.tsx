@@ -8,6 +8,8 @@ import {
   retryJob,
   type GenerationJob,
 } from "@/lib/api";
+import { LoadingSkeleton } from "@/components/LoadingSkeleton";
+import { PHONE_LAYOUT } from "@/lib/a11y";
 import {
   extractSources,
   formatElapsed,
@@ -85,11 +87,7 @@ export function JobProgress({ jobId, initialJob = null }: JobProgressProps) {
   }
 
   if (!job && !error) {
-    return (
-      <p className="text-sm text-zinc-600" role="status">
-        Loading job…
-      </p>
-    );
+    return <LoadingSkeleton label="Loading job…" lines={5} />;
   }
 
   if (!job) {
@@ -108,7 +106,7 @@ export function JobProgress({ jobId, initialJob = null }: JobProgressProps) {
   const safeToLeave = shouldPollJob(job.status) || job.status === "queued";
 
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-col gap-8">
+    <div className={`mx-auto flex w-full max-w-2xl ${PHONE_LAYOUT.minWidth} flex-col gap-8`}>
       <header className="flex flex-col gap-2">
         <div className="flex flex-wrap items-baseline justify-between gap-3">
           <h1 className="text-2xl font-semibold tracking-tight">
@@ -117,6 +115,8 @@ export function JobProgress({ jobId, initialJob = null }: JobProgressProps) {
           <span
             className="rounded-full bg-zinc-100 px-3 py-1 text-xs font-medium uppercase tracking-wide text-zinc-700"
             data-testid="job-status"
+            role="status"
+            aria-live="polite"
           >
             {jobStatusLabel(job.status)}
           </span>
@@ -182,7 +182,11 @@ export function JobProgress({ jobId, initialJob = null }: JobProgressProps) {
               : "No steps recorded yet."}
           </p>
         ) : (
-          <ol className="mt-3 space-y-2" data-testid="job-timeline">
+          <ol
+            className="mt-3 space-y-2"
+            data-testid="job-timeline"
+            aria-live="polite"
+          >
             {steps.map((s, i) => (
               <li
                 key={`${s.step}-${i}`}
@@ -211,7 +215,7 @@ export function JobProgress({ jobId, initialJob = null }: JobProgressProps) {
         <h2 id="sources-heading" className="text-sm font-semibold text-zinc-800">
           Sources
         </h2>
-        <div className="mt-3 grid gap-4 sm:grid-cols-2">
+        <div className={`mt-3 grid gap-4 sm:grid-cols-2`}>
           <div>
             <h3 className="text-xs font-medium uppercase tracking-wide text-zinc-500">
               Found

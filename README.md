@@ -56,7 +56,7 @@ npm run dev --workspace=@prep/api
 npm start --workspace=@prep/api
 ```
 
-### Web (`apps/web`) — T21 + T22a + T22b + T23a + T23b + T23c + T24 + T25 + T26
+### Web (`apps/web`) — T21 + T22a + T22b + T23a + T23b + T23c + T24 + T25 + T26 + T27
 
 Auth UI + app shell against [`docs/API.md`](docs/API.md) only (no invented routes). Login/register/logout, `middleware.ts` gate for signed-out visitors, same-origin API client (`credentials: 'include'`, 401 → `/login?next=`), TanStack Query provider, dashboard empty state.
 
@@ -72,11 +72,13 @@ Auth UI + app shell against [`docs/API.md`](docs/API.md) only (no invented route
 
 **Flashcards + Schedule / Brief regen (T23c):** Flashcards section with inline front/back edit, add / delete (+ undo), badges; ops via `PATCH` update/add/delete `flashcard`. Schedule section supports regenerate → `POST /kits/:id/regenerate` `{ section: "schedule" }` after flushing pending edits (does not clobber brief/questions/flashcards). Day-card detail and coverage matrix are T25. **Regenerate brief** confirm lists keep rules for edited/yours briefs; optional force → `{ section: "brief", force }` (skipped without force when edited; `MISSING_RESEARCH` surfaced from API).
 
-**Practice (T24):** `/kits/:id/practice` — one flashcard at a time from `GET /kits/:id/practice/next` (API next-session / Leitner order; client does not re-sort). Space or Enter reveals the back; keys **1–5** submit `POST /kits/:id/practice/review`. Progress bar through the queue; session summary lists ratings; per-requirement covered / not-covered grid from `GET /kits/:id/practice/stats`. Matching Story Bank entries appear as a **Story hint** on the card. **Next session** reloads the API queue. Builder header links to Practice. Desktop; keyboard-only session supported.
+**Practice (T24):** `/kits/:id/practice` — one flashcard at a time from `GET /kits/:id/practice/next` (API next-session / Leitner order; client does not re-sort). Space or Enter reveals the back; keys **1–5** submit `POST /kits/:id/practice/review`. Progress bar through the queue; session summary lists ratings; per-requirement covered / not-covered grid from `GET /kits/:id/practice/stats`. Matching Story Bank entries appear as a **Story hint** on the card. **Next session** reloads the API queue. Builder header links to Practice. Keyboard-only session supported.
 
 **Story Bank (T26):** Builder section on `/kits/:id` via `GET`/`PUT /kits/:id/story-bank`. Write 4–6 STAR stories; flags behavioural requirements with no overlapping story.
 
-**Schedule + coverage (T25):** Schedule day cards show focus, minutes, and questions linked by id (hash links to the Questions section). Interview date is derived client-side as kit `createdAt` local date + `days_available` (SPEC: days until the interview); the matching prep day gets a **Today** marker. Requirements × questions coverage matrix highlights rows in `coverage.uncovered_requirement_ids` (gap badge + amber row). Still uses only `GET /kits/:id` (+ existing regenerate). Desktop only.
+**Schedule + coverage (T25):** Schedule day cards show focus, minutes, and questions linked by id (hash links to the Questions section). Interview date is derived client-side as kit `createdAt` local date + `days_available` (SPEC: days until the interview); the matching prep day gets a **Today** marker. Requirements × questions coverage matrix highlights rows in `coverage.uncovered_requirement_ids` (gap badge + amber row). Still uses only `GET /kits/:id` (+ existing regenerate). Wide tables scroll horizontally on phone.
+
+**A11y + responsive (T27):** Keyboard-only walkthrough of auth → create/batch → job → builder → practice → Story Bank. Confirm/conflict dialogs trap Tab, close on Escape, and restore focus. Save status and job step timeline use `aria-live="polite"`. Loading skeletons replace bare “Loading…” copy. A React error boundary wraps the app. Layout tokens target **375px** (compact gutters, wrapping toolbars, overflow-x on tables). Skip link → `#main`.
 
 Browser calls go to `/api/*`; Next rewrites strip the prefix to the Express origin (`API_ORIGIN`, default `http://localhost:4000`).
 

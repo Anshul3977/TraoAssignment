@@ -9,6 +9,8 @@ import {
   type StoryBankMapping,
   type StoryDraft,
 } from "@/lib/api";
+import { LoadingSkeleton } from "@/components/LoadingSkeleton";
+import { PHONE_LAYOUT } from "@/lib/a11y";
 import {
   MAX_STORIES,
   completeStories,
@@ -141,9 +143,7 @@ export function KitStoryBankSection({ kitId }: KitStoryBankSectionProps) {
       </div>
 
       {load.kind === "loading" ? (
-        <p className="text-sm text-zinc-500" role="status">
-          Loading stories…
-        </p>
+        <LoadingSkeleton label="Loading stories…" lines={4} />
       ) : null}
 
       {load.kind === "error" ? (
@@ -185,7 +185,7 @@ export function KitStoryBankSection({ kitId }: KitStoryBankSectionProps) {
             {drafts.map((draft, index) => (
               <article
                 key={index}
-                className="rounded-lg border border-zinc-200 bg-white p-4"
+                className={`rounded-lg border border-zinc-200 bg-white ${PHONE_LAYOUT.section}`}
                 data-testid={`story-card-${index}`}
               >
                 <div className="mb-3 flex items-center justify-between gap-2">
@@ -256,6 +256,11 @@ export function KitStoryBankSection({ kitId }: KitStoryBankSectionProps) {
               {saving ? "Saving…" : "Save stories"}
             </button>
           </div>
+          {saving ? (
+            <p className="text-sm text-zinc-500" role="status" aria-live="polite">
+              Saving stories…
+            </p>
+          ) : null}
           {saveError ? (
             <p className="text-sm text-amber-800" role="alert">
               {saveError}

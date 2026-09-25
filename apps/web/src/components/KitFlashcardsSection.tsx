@@ -3,6 +3,7 @@
 import { useId, useRef, useState } from "react";
 import type { KitFlashcard } from "@/lib/api";
 import { itemBadges, type FlashcardDraft } from "@/lib/kit-builder";
+import { PHONE_LAYOUT } from "@/lib/a11y";
 
 export type UndoFlashcardDeletePayload = {
   flashcard: KitFlashcard;
@@ -55,7 +56,7 @@ export function KitFlashcardsSection({
   return (
     <section
       aria-labelledby={titleId}
-      className="rounded-lg border border-zinc-200 bg-white p-6"
+      className={`rounded-lg border border-zinc-200 bg-white ${PHONE_LAYOUT.section}`}
       data-testid="flashcards-section"
     >
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">

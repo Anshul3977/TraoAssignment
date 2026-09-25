@@ -13,6 +13,7 @@ import {
   validateCreateKit,
   type CreateKitFieldErrors,
 } from "@/lib/create-kit-validation";
+import { PHONE_LAYOUT } from "@/lib/a11y";
 
 type SubmitResult = {
   job: GenerationJob;
@@ -63,7 +64,7 @@ export function CreateKitForm() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-2xl">
+    <div className={`mx-auto w-full max-w-2xl ${PHONE_LAYOUT.minWidth}`}>
       <form onSubmit={onSubmit} className="flex flex-col gap-6" noValidate>
         <label className="flex flex-col gap-1.5 text-sm">
           <span className="font-medium text-zinc-700">Job description</span>
@@ -200,7 +201,7 @@ export function CreateKitForm() {
           </div>
         ) : null}
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <button
             type="submit"
             disabled={pending}

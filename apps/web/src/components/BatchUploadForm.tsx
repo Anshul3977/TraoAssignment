@@ -13,6 +13,7 @@ import {
   validBatchInputs,
   type BatchPreviewRow,
 } from "@/lib/batch-parse";
+import { PHONE_LAYOUT } from "@/lib/a11y";
 
 export function BatchUploadForm() {
   const [rows, setRows] = useState<BatchPreviewRow[]>([]);
@@ -75,7 +76,7 @@ export function BatchUploadForm() {
     rows.length > 0 && !batchHasRowErrors(rows) && !fileError && !pending;
 
   return (
-    <div className="mx-auto flex w-full max-w-4xl flex-col gap-6">
+    <div className={`mx-auto flex w-full max-w-4xl ${PHONE_LAYOUT.minWidth} flex-col gap-6`}>
       <label className="flex flex-col gap-1.5 text-sm">
         <span className="font-medium text-zinc-700">Upload JSON or CSV</span>
         <input
@@ -101,7 +102,7 @@ export function BatchUploadForm() {
       ) : null}
 
       {rows.length > 0 ? (
-        <div className="overflow-x-auto rounded-md border border-zinc-200 bg-white">
+        <div className={`${PHONE_LAYOUT.overflowX} rounded-md border border-zinc-200 bg-white`}>
           <table className="min-w-full text-left text-sm">
             <thead className="border-b border-zinc-200 bg-zinc-50 text-xs uppercase tracking-wide text-zinc-500">
               <tr>
@@ -183,7 +184,7 @@ export function BatchUploadForm() {
         </div>
       ) : null}
 
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center gap-3">
         <button
           type="button"
           disabled={!canSubmit}

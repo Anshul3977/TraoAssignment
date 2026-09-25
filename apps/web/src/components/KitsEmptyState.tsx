@@ -7,7 +7,7 @@ import Link from "next/link";
  */
 export function KitsEmptyState() {
   return (
-    <section className="rounded-lg border border-dashed border-zinc-300 bg-white px-8 py-16 text-center">
+    <section className="rounded-lg border border-dashed border-zinc-300 bg-white px-4 py-12 text-center sm:px-8 sm:py-16">
       <h2 className="text-xl font-semibold tracking-tight">No kits yet</h2>
       <p className="mx-auto mt-2 max-w-md text-sm text-zinc-600">
         Create a prep kit from a job description and company URL. Your kits will

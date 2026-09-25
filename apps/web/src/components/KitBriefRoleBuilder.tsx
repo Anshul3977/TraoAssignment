@@ -14,6 +14,9 @@ import {
 import { CoverageMatrixSection } from "@/components/CoverageMatrixSection";
 import { KitScheduleSection } from "@/components/KitScheduleSection";
 import { KitStoryBankSection } from "@/components/KitStoryBankSection";
+import { LoadingSkeleton } from "@/components/LoadingSkeleton";
+import { FocusTrapDialog } from "@/components/FocusTrapDialog";
+import { PHONE_LAYOUT } from "@/lib/a11y";
 import {
   ApiClientError,
   getKit,
@@ -653,9 +656,7 @@ export function KitBriefRoleBuilder({
     !localFlashcards
   ) {
     return (
-      <p className="text-sm text-zinc-600" role="status">
-        Loading kit…
-      </p>
+      <LoadingSkeleton label="Loading kit…" lines={6} />
     );
   }
 
@@ -664,7 +665,7 @@ export function KitBriefRoleBuilder({
   const briefProtected = isProtectedBrief(record.kit.company_brief.meta);
 
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-col gap-10">
+    <div className={`mx-auto flex w-full max-w-3xl ${PHONE_LAYOUT.minWidth} flex-col gap-10`}>
       <header className="flex flex-col gap-2">
         <div className="flex flex-wrap items-baseline justify-between gap-3">
           <h1 className="text-2xl font-semibold tracking-tight">
@@ -726,7 +727,7 @@ export function KitBriefRoleBuilder({
 
       <section
         aria-labelledby="brief-heading"
-        className="rounded-lg border border-zinc-200 bg-white p-6"
+        className={`rounded-lg border border-zinc-200 bg-white ${PHONE_LAYOUT.section}`}
         data-testid="brief-section"
       >
         <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
@@ -795,7 +796,7 @@ export function KitBriefRoleBuilder({
 
       <section
         aria-labelledby="role-heading"
-        className="rounded-lg border border-zinc-200 bg-white p-6"
+        className={`rounded-lg border border-zinc-200 bg-white ${PHONE_LAYOUT.section}`}
         data-testid="role-section"
       >
         <h2
@@ -972,20 +973,12 @@ function BriefRegenConfirmDialog({
 }) {
   const titleId = useId();
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
-      role="presentation"
-      data-testid="brief-regen-backdrop"
-      onClick={onCancel}
+    <FocusTrapDialog
+      titleId={titleId}
+      onClose={onCancel}
+      testId="brief-regen-dialog"
+      backdropTestId="brief-regen-backdrop"
     >
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={titleId}
-        className="w-full max-w-md rounded-lg border border-zinc-200 bg-white p-5 shadow-lg"
-        data-testid="brief-regen-dialog"
-        onClick={(e) => e.stopPropagation()}
-      >
         <h3 id={titleId} className="text-base font-semibold text-zinc-900">
           Regenerate brief?
         </h3>
@@ -1014,7 +1007,7 @@ function BriefRegenConfirmDialog({
             Nothing protected — the AI brief will be replaced.
           </p>
         )}
-        <div className="mt-5 flex justify-end gap-2">
+        <div className="mt-5 flex flex-wrap justify-end gap-2">
           <button
             type="button"
             onClick={onCancel}
@@ -1033,8 +1026,7 @@ function BriefRegenConfirmDialog({
             Regenerate
           </button>
         </div>
-      </div>
-    </div>
+    </FocusTrapDialog>
   );
 }
 

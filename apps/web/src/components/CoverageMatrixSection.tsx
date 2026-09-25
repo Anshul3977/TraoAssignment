@@ -3,6 +3,7 @@
 import { useId, useMemo } from "react";
 import type { KitQuestion } from "@/lib/api";
 import { buildCoverageMatrix } from "@/lib/schedule-views";
+import { PHONE_LAYOUT } from "@/lib/a11y";
 
 type CoverageMatrixSectionProps = {
   requirements: readonly {
@@ -34,7 +35,7 @@ export function CoverageMatrixSection({
   return (
     <section
       aria-labelledby={titleId}
-      className="rounded-lg border border-zinc-200 bg-white p-6"
+      className={`rounded-lg border border-zinc-200 bg-white ${PHONE_LAYOUT.section}`}
       data-testid="coverage-matrix"
     >
       <h2 id={titleId} className="text-lg font-semibold tracking-tight">
@@ -62,7 +63,7 @@ export function CoverageMatrixSection({
           Need requirements and questions to show the matrix.
         </p>
       ) : (
-        <div className="mt-4 overflow-x-auto">
+        <div className={`mt-4 ${PHONE_LAYOUT.overflowX}`}>
           <table className="min-w-full border-collapse text-left text-xs">
             <thead>
               <tr className="border-b border-zinc-200">

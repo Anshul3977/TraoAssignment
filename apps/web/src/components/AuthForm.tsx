@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { ApiClientError, login, register } from "@/lib/api";
+import { PHONE_LAYOUT } from "@/lib/a11y";
 
 type Mode = "login" | "register";
 
@@ -55,7 +56,7 @@ export function AuthForm({ mode, nextPath }: AuthFormProps) {
     mode === "login" ? "Need an account? Register" : "Already have an account? Log in";
 
   return (
-    <div className="mx-auto w-full max-w-md rounded-lg border border-zinc-200 bg-white p-8 shadow-sm">
+    <div className={`mx-auto w-full max-w-md ${PHONE_LAYOUT.minWidth} rounded-lg border border-zinc-200 bg-white p-6 shadow-sm sm:p-8`}>
       <h1 className="mb-6 text-2xl font-semibold tracking-tight">{title}</h1>
       <form onSubmit={onSubmit} className="flex flex-col gap-4">
         <label className="flex flex-col gap-1.5 text-sm">

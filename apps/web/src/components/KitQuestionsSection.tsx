@@ -17,7 +17,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { useId, useRef, useState } from "react";
+import { useId, useRef, useState, type KeyboardEvent } from "react";
 import type { KitQuestion, QuestionCategory } from "@/lib/api";
 import {
   QUESTION_CATEGORIES,
@@ -28,6 +28,8 @@ import {
   questionsReplacedOnRegen,
   type QuestionDraft,
 } from "@/lib/kit-builder";
+import { PHONE_LAYOUT, isTabKey, nextCategoryIndex } from "@/lib/a11y";
+import { FocusTrapDialog } from "./FocusTrapDialog";
 
 export type UndoDeletePayload = {
   question: KitQuestion;
@@ -114,7 +116,7 @@ export function KitQuestionsSection({
   return (
     <section
       aria-labelledby={titleId}
-      className="rounded-lg border border-zinc-200 bg-white p-6"
+      className={`rounded-lg border border-zinc-200 bg-white ${PHONE_LAYOUT.section}`}
       data-testid="questions-section"
     >
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
@@ -156,8 +158,24 @@ export function KitQuestionsSection({
               type="button"
               role="tab"
               aria-selected={selected}
+              aria-controls={`q-panel-${cat}`}
               id={`q-tab-${cat}`}
+              tabIndex={selected ? 0 : -1}
               onClick={() => setTab(cat)}
+              onKeyDown={(e: KeyboardEvent<HTMLButtonElement>) => {
+                if (!isTabKey(e.key)) return;
+                e.preventDefault();
+                const i = QUESTION_CATEGORIES.indexOf(cat);
+                const next = nextCategoryIndex(
+                  QUESTION_CATEGORIES.length,
+                  i,
+                  e.key,
+                );
+                const nextCat = QUESTION_CATEGORIES[next];
+                if (!nextCat) return;
+                setTab(nextCat);
+                document.getElementById(`q-tab-${nextCat}`)?.focus();
+              }}
               className={
                 selected
                   ? "-mb-px border-b-2 border-zinc-900 px-3 py-2 text-sm font-medium text-zinc-900"
@@ -174,7 +192,9 @@ export function KitQuestionsSection({
 
       <div
         role="tabpanel"
+        id={`q-panel-${tab}`}
         aria-labelledby={`q-tab-${tab}`}
+        tabIndex={0}
         data-testid={`question-panel-${tab}`}
       >
         {inTab.length === 0 ? (
@@ -405,20 +425,12 @@ function RegenConfirmDialog({
 }) {
   const titleId = useId();
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
-      role="presentation"
-      data-testid="regen-confirm-backdrop"
-      onClick={onCancel}
+    <FocusTrapDialog
+      titleId={titleId}
+      onClose={onCancel}
+      testId="regen-confirm-dialog"
+      backdropTestId="regen-confirm-backdrop"
     >
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={titleId}
-        className="w-full max-w-md rounded-lg border border-zinc-200 bg-white p-5 shadow-lg"
-        data-testid="regen-confirm-dialog"
-        onClick={(e) => e.stopPropagation()}
-      >
         <h3 id={titleId} className="text-base font-semibold text-zinc-900">
           Regenerate {categoryTabLabel(category)}?
         </h3>
@@ -454,7 +466,7 @@ function RegenConfirmDialog({
             })}
           </ul>
         )}
-        <div className="mt-5 flex justify-end gap-2">
+        <div className="mt-5 flex flex-wrap justify-end gap-2">
           <button
             type="button"
             onClick={onCancel}
@@ -473,8 +485,7 @@ function RegenConfirmDialog({
             Regenerate
           </button>
         </div>
-      </div>
-    </div>
+    </FocusTrapDialog>
   );
 }
 
@@ -490,20 +501,12 @@ export function VersionConflictPrompt({
 }) {
   const titleId = useId();
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
-      role="presentation"
-      data-testid="version-conflict-backdrop"
-      onClick={onDismiss}
+    <FocusTrapDialog
+      titleId={titleId}
+      onClose={onDismiss}
+      testId="version-conflict-dialog"
+      backdropTestId="version-conflict-backdrop"
     >
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={titleId}
-        className="w-full max-w-md rounded-lg border border-zinc-200 bg-white p-5 shadow-lg"
-        data-testid="version-conflict-dialog"
-        onClick={(e) => e.stopPropagation()}
-      >
         <h3 id={titleId} className="text-base font-semibold text-zinc-900">
           Kit was modified elsewhere
         </h3>
@@ -513,7 +516,7 @@ export function VersionConflictPrompt({
           manually. Your unsaved local edits will not overwrite the server
           silently.
         </p>
-        <div className="mt-5 flex justify-end gap-2">
+        <div className="mt-5 flex flex-wrap justify-end gap-2">
           <button
             type="button"
             onClick={onDismiss}
@@ -531,7 +534,6 @@ export function VersionConflictPrompt({
             Reload latest
           </button>
         </div>
-      </div>
-    </div>
+    </FocusTrapDialog>
   );
 }

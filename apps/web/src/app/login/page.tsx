@@ -7,8 +7,11 @@ type PageProps = {
 export default async function LoginPage({ searchParams }: PageProps) {
   const params = await searchParams;
   return (
-    <div className="flex min-h-screen items-center justify-center px-4 py-12">
+    <main
+      id="main"
+      className="flex min-h-screen items-center justify-center px-4 py-12"
+    >
       <AuthForm mode="login" nextPath={params.next} />
-    </div>
+    </main>
   );
 }
