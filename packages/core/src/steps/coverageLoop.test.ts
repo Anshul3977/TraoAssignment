@@ -257,6 +257,39 @@ describe("runCoverageLoop", () => {
     );
   });
 
+  it("seeds fallbacks for every requirement when the draft bank is empty", async () => {
+    const niceOnly: Requirement[] = [
+      {
+        id: "r1",
+        text: "Node preferred",
+        kind: "technical",
+        priority: "nice",
+      },
+      {
+        id: "r2",
+        text: "Postgres preferred",
+        kind: "technical",
+        priority: "nice",
+      },
+    ];
+    const provider = fakeProvider("gemini", () => {
+      throw new Error("no LLM for empty-bank fallback");
+    });
+    const client = testClient(provider);
+
+    const result = await runCoverageLoop(client, {
+      requirements: niceOnly,
+      draftQuestions: [],
+      seniority: "mid",
+    });
+
+    expect(result.questions).toHaveLength(2);
+    expect(result.questions.every((q) => q.meta?.origin === "fallback")).toBe(
+      true,
+    );
+    expect(result.coverage.uncovered_requirement_ids).toEqual([]);
+  });
+
   it("records correct passes when draft already covers all musts", async () => {
     const draft = draftCovering(["r1", "r2", "r3"]);
     const provider = fakeProvider("gemini", () => {

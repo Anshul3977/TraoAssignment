@@ -230,6 +230,23 @@ export async function runCoverageLoop(
     });
   }
 
+  // Empty draft + nice-only (or failed LLM) ⇒ no must-fallback path. Seed at
+  // least one deterministic question per requirement so schedules are never
+  // all-empty when the JD stated requirements.
+  if (questions.length === 0 && input.requirements.length > 0) {
+    const fallbacks = input.requirements.map((req) => fallbackQuestionFor(req));
+    const added = assignQuestionIds(fallbacks, nextQuestionStart(questions));
+    questions = [...questions, ...added];
+    const after = snapshotGaps();
+    coverage_passes.push({
+      pass: passes,
+      must_gaps: after.must,
+      nice_gaps: after.nice,
+      added_question_ids: added.map((q) => q.id),
+      origin: "fallback",
+    });
+  }
+
   const uncovered = findGaps([...input.requirements], questions);
 
   return {
