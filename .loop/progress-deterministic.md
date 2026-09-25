@@ -13,3 +13,8 @@
 - Changed: `packages/core/src/deterministic/findGaps.ts`, `findGaps.test.ts`, `index.ts`
 - Decisions: covered = any question lists the req id in `requirement_ids`; uncovered sorted must-then-nice preserving input order within each priority — because §4 gaps drive the coverage loop and musts must be closed first; accept `Pick` shapes only — because callers may pass partials before full kit assembly
 - Limitations / follow-ups: did **not** re-export from `packages/core/src/index.ts` (outside owned folder); TASKS.md left untouched per lane rules; T14/T19a not started
+
+## 2026-09-25 T14 allocateSchedule (deterministic)
+- Changed: `packages/core/src/deterministic/allocateSchedule.ts`, `allocateSchedule.test.ts`, `index.ts`
+- Decisions: score = max(must=2,nice=1)×10 + difficulty×3 + sole-must-cover bonus 5 — because §8 wants harder/higher-priority earlier without an LLM; learning days = max(1, ceil(N×0.7)), fill by least-minutes/earliest-tiebreak under a 180-min cap — because that front-loads high scorers while balancing load; review days revisit must/hard with spacing and last day focus is always "Mock interview + weak spots"; empty days seeded from the score-sorted bank when N > questions; overflow noted in `notes.schedule_overflow` / `overflow_minutes` rather than dropping questions — because every must must still appear; `AllocatedSchedule` typed locally — because `Schedule` is not exported from schema (outside owned folder)
+- Limitations / follow-ups: did **not** re-export from `packages/core/src/index.ts` (outside owned folder); did **not** add `export type Schedule` to schema; TASKS.md left untouched per lane rules; T19a not started
