@@ -63,3 +63,18 @@ export {
   type GenerateCategoryQuestionsInput,
   type GenerateQuestionsOptions,
 } from "./generateQuestions.js";
+
+export {
+  generateFlashcards,
+  finalizeFlashcards,
+  assignFlashcardIds,
+  coveredRequirementIds,
+  ensureMustFlashcards,
+  fallbackFlashcardFor,
+  FLASHCARD_PROMPT,
+  GeneratedFlashcardItemSchema,
+  GeneratedFlashcardsLlmSchema,
+  type GeneratedFlashcardsLlm,
+  type GenerateFlashcardsInput,
+  type GenerateFlashcardsOptions,
+} from "./generateFlashcards.js";
