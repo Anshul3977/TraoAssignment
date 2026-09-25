@@ -21,6 +21,8 @@ export const PHONE_LAYOUT = {
   overflowX: "overflow-x-auto",
   minWidth: "min-w-0",
   authPad: "px-4 py-12",
+  /** ~44px tap target (iOS HIG / WCAG 2.5.5 AAA is 44; 2.5.8 AA is 24). */
+  tap: "min-h-11 min-w-11",
 } as const;
 
 export type KeyboardFlow = {

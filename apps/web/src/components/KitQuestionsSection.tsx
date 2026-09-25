@@ -26,6 +26,7 @@ import {
   questionsInCategory,
   questionsKeptOnRegen,
   questionsReplacedOnRegen,
+  shiftOrderedIds,
   type QuestionDraft,
 } from "@/lib/kit-builder";
 import { PHONE_LAYOUT, isTabKey, nextCategoryIndex } from "@/lib/a11y";
@@ -224,11 +225,20 @@ export function KitQuestionsSection({
                       question={q}
                       draft={draft}
                       categories={QUESTION_CATEGORIES}
+                      orderedIds={inTab.map((item) => item.id)}
                       onPromptChange={onPromptChange}
                       onOutlineChange={onOutlineChange}
                       onMove={onMove}
                       onPinToggle={onPinToggle}
                       onDelete={() => handleDelete(q)}
+                      onShift={(id, delta) => {
+                        const next = shiftOrderedIds(
+                          inTab.map((item) => item.id),
+                          id,
+                          delta,
+                        );
+                        if (next) onReorder(tab, next);
+                      }}
                     />
                   );
                 })}
@@ -278,20 +288,24 @@ function SortableQuestionCard({
   question,
   draft,
   categories,
+  orderedIds,
   onPromptChange,
   onOutlineChange,
   onMove,
   onPinToggle,
   onDelete,
+  onShift,
 }: {
   question: KitQuestion;
   draft: QuestionDraft;
   categories: readonly QuestionCategory[];
+  orderedIds: string[];
   onPromptChange: (id: string, value: string) => void;
   onOutlineChange: (id: string, value: string) => void;
   onMove: (id: string, category: QuestionCategory) => void;
   onPinToggle: (id: string, pinned: boolean) => void;
   onDelete: () => void;
+  onShift: (id: string, delta: number) => void;
 }) {
   const {
     attributes,
@@ -309,6 +323,9 @@ function SortableQuestionCard({
 
   const pinned = question.meta?.pinned === true;
   const badges = itemBadges(question.meta);
+  const index = orderedIds.indexOf(question.id);
+  const canUp = index > 0;
+  const canDown = index >= 0 && index < orderedIds.length - 1;
 
   return (
     <li
@@ -325,11 +342,24 @@ function SortableQuestionCard({
       <div className="mb-2 flex flex-wrap items-center gap-2">
         <button
           type="button"
-          className="cursor-grab rounded border border-zinc-200 bg-white px-2 py-0.5 text-xs text-zinc-500 active:cursor-grabbing"
-          aria-label={`Drag to reorder ${question.id}`}
+          className={`cursor-grab rounded border border-zinc-200 bg-white px-2 ${PHONE_LAYOUT.tap} text-xs text-zinc-500 active:cursor-grabbing`}
+          aria-label={`Reorder ${question.id}. Space then arrow keys, or use Move up and Move down.`}
           data-testid={`question-drag-${question.id}`}
           {...attributes}
           {...listeners}
+          onKeyDown={(e) => {
+            const fromDnd = listeners?.onKeyDown;
+            if (typeof fromDnd === "function") fromDnd(e);
+            if (e.defaultPrevented) return;
+            if (e.key === "ArrowDown") {
+              e.preventDefault();
+              if (canDown) onShift(question.id, 1);
+            }
+            if (e.key === "ArrowUp") {
+              e.preventDefault();
+              if (canUp) onShift(question.id, -1);
+            }
+          }}
         >
           ⋮⋮
         </button>
@@ -348,8 +378,28 @@ function SortableQuestionCard({
         <div className="ml-auto flex flex-wrap items-center gap-2">
           <button
             type="button"
+            onClick={() => onShift(question.id, -1)}
+            disabled={!canUp}
+            className={`rounded-md border border-zinc-300 bg-white px-2 text-xs font-medium text-zinc-800 hover:bg-zinc-50 disabled:opacity-40 ${PHONE_LAYOUT.tap}`}
+            data-testid={`question-move-up-${question.id}`}
+            aria-label={`Move ${question.id} up`}
+          >
+            Up
+          </button>
+          <button
+            type="button"
+            onClick={() => onShift(question.id, 1)}
+            disabled={!canDown}
+            className={`rounded-md border border-zinc-300 bg-white px-2 text-xs font-medium text-zinc-800 hover:bg-zinc-50 disabled:opacity-40 ${PHONE_LAYOUT.tap}`}
+            data-testid={`question-move-down-${question.id}`}
+            aria-label={`Move ${question.id} down`}
+          >
+            Down
+          </button>
+          <button
+            type="button"
             onClick={() => onPinToggle(question.id, !pinned)}
-            className="rounded-md border border-zinc-300 bg-white px-2 py-1 text-xs font-medium text-zinc-800 hover:bg-zinc-50"
+            className={`rounded-md border border-zinc-300 bg-white px-2 text-xs font-medium text-zinc-800 hover:bg-zinc-50 ${PHONE_LAYOUT.tap}`}
             aria-pressed={pinned}
             data-testid={`question-pin-${question.id}`}
           >
@@ -362,7 +412,7 @@ function SortableQuestionCard({
               onChange={(e) =>
                 onMove(question.id, e.target.value as QuestionCategory)
               }
-              className="rounded-md border border-zinc-300 bg-white px-2 py-1 text-xs"
+              className={`rounded-md border border-zinc-300 bg-white px-2 text-xs ${PHONE_LAYOUT.tap}`}
               data-testid={`question-move-${question.id}`}
             >
               {categories.map((c) => (
@@ -375,7 +425,7 @@ function SortableQuestionCard({
           <button
             type="button"
             onClick={onDelete}
-            className="rounded-md border border-rose-200 bg-white px-2 py-1 text-xs font-medium text-rose-700 hover:bg-rose-50"
+            className={`rounded-md border border-rose-200 bg-white px-2 text-xs font-medium text-rose-700 hover:bg-rose-50 ${PHONE_LAYOUT.tap}`}
             data-testid={`question-delete-${question.id}`}
           >
             Delete

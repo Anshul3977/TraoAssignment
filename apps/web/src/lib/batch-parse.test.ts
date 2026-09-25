@@ -57,6 +57,11 @@ describe("parseBatchJson", () => {
     expect(validBatchInputs(result.rows)).toHaveLength(1);
   });
 
+  it("rejects malformed JSON", () => {
+    expect(parseBatchJson("{not json").ok).toBe(false);
+    expect(parseBatchJson("{not json").fileError).toMatch(/invalid json/i);
+  });
+
   it("rejects non-array and oversized batches", () => {
     expect(parseBatchJson("{}").ok).toBe(false);
     const tooMany = Array.from({ length: BATCH_MAX_ROWS + 1 }, () => ({

@@ -120,5 +120,6 @@ describe("375px smoke", () => {
     expect(PHONE_LAYOUT.overflowX).toBe("overflow-x-auto");
     expect(PHONE_LAYOUT.minWidth).toBe("min-w-0");
     expect(PHONE_LAYOUT.skipHref).toBe("#main");
+    expect(PHONE_LAYOUT.tap).toContain("min-h-11");
   });
 });

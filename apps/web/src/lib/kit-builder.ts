@@ -108,6 +108,26 @@ export function questionsInCategory(
   return questions.filter((q) => q.category === category);
 }
 
+/**
+ * Keyboard / 375px fallback for drag-and-drop: move `id` by `delta` in the
+ * ordered id list. Returns null when the move is a no-op.
+ */
+export function shiftOrderedIds(
+  ids: readonly string[],
+  id: string,
+  delta: number,
+): string[] | null {
+  const index = ids.indexOf(id);
+  if (index < 0 || delta === 0) return null;
+  const nextIndex = index + delta;
+  if (nextIndex < 0 || nextIndex >= ids.length) return null;
+  const next = [...ids];
+  const [item] = next.splice(index, 1);
+  if (!item) return null;
+  next.splice(nextIndex, 0, item);
+  return next;
+}
+
 /** Questions in this category that regenerate will keep (user / edited / pinned). */
 export function questionsKeptOnRegen(
   questions: readonly KitQuestion[],

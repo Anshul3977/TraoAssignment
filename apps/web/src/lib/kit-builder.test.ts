@@ -18,6 +18,7 @@ import {
   questionsReplacedOnRegen,
   removeFlashcard,
   reorderQuestionsInCategory,
+  shiftOrderedIds,
   saveStatusLabel,
   scheduleSummary,
   setQuestionPinned,
@@ -432,6 +433,16 @@ describe("reorder / move / pin", () => {
   it("toggles pin on meta", () => {
     const next = setQuestionPinned(sampleQuestions(), "q1", true);
     expect(next.find((q) => q.id === "q1")?.meta?.pinned).toBe(true);
+  });
+
+  it("shifts an id down/up for keyboard and 375px reorder fallback", () => {
+    expect(shiftOrderedIds(["q1", "q2", "q3"], "q1", 1)).toEqual([
+      "q2",
+      "q1",
+      "q3",
+    ]);
+    expect(shiftOrderedIds(["q1", "q2", "q3"], "q1", -1)).toBeNull();
+    expect(shiftOrderedIds(["q1", "q2", "q3"], "q3", 1)).toBeNull();
   });
 });
 
