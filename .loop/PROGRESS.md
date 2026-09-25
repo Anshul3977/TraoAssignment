@@ -301,5 +301,15 @@ pm run typecheck fails solely with TS2307 on ../deterministic/groundRequirements
 - Decisions: Tick T28 only after public Next login loaded and `GET /health` + `/api/health` rewrite returned `{ ok: true }` — because the task requires a working live stack, not config files. MongoDB MCP stays local `--readOnly` stdio — because it is not Atlas Admin and cannot provision M0; the human Atlas dashboard created M0. Vercel MCP stayed Unauthorized after `mcp_auth`; used logged-in Vercel CLI instead.
 - Limitations / follow-ups: Vercel MCP account tools still Unauthorized; GitHub auto-deploy needs the Next 15.2.6 + lint fix or production will regress; Render free sleep still applies.
 
+## 2026-09-25 T29 README
+- Changed: root `README.md`, `.loop/TASKS.md` (T29 `[x]`)
+- Decisions:
+  - README is the submission artifact: mermaid architecture, sources table, edge-case table, security, job lifecycle, live Vercel/Render URLs — because SPEC lists those sections and human score includes README reasoning.
+  - Five judgment points are explicit headings (code vs model, 3 coverage passes, unreachable = ok, generated/edited/pinned/dismissed/version, Leitner) — because those are the design defences in the video/README, not buried in task logs.
+  - Coverage cap is 3 LLM drafts then deterministic must fallbacks — because infinite second-pass loops burn free-tier RPM and a kit with uncovered musts has failed §4.
+  - Leitner boxes over a single confidence sort — because practice is multi-session spaced repetition (§7).
+  - Did not start T30 clean-clone script — because PROMPT forbids the next task in the same iteration.
+- Limitations / follow-ups: T30 `scripts/clean-clone-check.sh`; Checkpoint E video.
+
 
 

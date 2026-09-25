@@ -1,140 +1,313 @@
 # Prep Kit
 
-Interview prep kit generator (Trao FS-AI-INTERVIEW-01). Paste a job description and company URL; the pipeline researches the company and builds a kit (brief, requirements, questions, flashcards, schedule).
+Interview prep kit generator ([Trao FS-AI-INTERVIEW-01](docs/SPEC.md)). Paste a job description, a company URL, and days until the interview. The pipeline crawls the company site, searches public interview discussion, grounds requirements in the JD, and builds a kit: company brief, role breakdown, question bank, flashcards, and a day-by-day schedule. You can edit any part, regenerate one section without losing edits, and practise flashcards in-app.
 
-## Layout
+**Live app:** [https://prep-kit-rho.vercel.app](https://prep-kit-rho.vercel.app)  
+**API health:** [https://prep-kit-fjgi.onrender.com/health](https://prep-kit-fjgi.onrender.com/health)  
+**GitHub:** [https://github.com/Anshul3977/TraoAssignment](https://github.com/Anshul3977/TraoAssignment)
 
-npm workspaces:
+The browser talks only to the Next origin (`/api/*`); Vercel rewrites that prefix to Express. Free Render instances sleep after idle — the first request after sleep is often ~50s.
 
-- `packages/core` — schema, retrieval, LLM helpers, deterministic steps, pipeline pieces
-- `apps/api` — Express API (auth, Mongo persistence, scoped kits, async generation jobs — see `docs/API.md`)
-- `apps/web` — Next.js App Router UI (auth shell, dashboard, create-kit / batch upload, job progress, kit builder, Story Bank, practice, schedule + coverage matrix)
-- `docs/API.md` — HTTP contract the web app builds against
+---
 
-## Setup
+## What the model does vs what code decides
+
+The model drafts text. **Code owns every decision that would change scores if the model got it wrong.**
+
+| Decision | Owner | Why |
+|---|---|---|
+| Schedule days, minutes, question placement | `allocateSchedule` (pure) | SPEC §8: arithmetic in code, not a prompt |
+| Coverage gaps (must before nice) | `findGaps` (pure) | SPEC §3 / §4: comparing questions vs requirements is never the model's job |
+| Requirement ids (`r1…`), question/flashcard ids | `assignIds` / step post-process | Stable ids; the model must not mint colliding ids |
+| Must vs nice when the JD has a cue | `groundRequirements` (heading + evidence phrases) | "required" ≠ "bonus"; model label is last |
+| Which URLs are cited in `sources` | Filter to URLs actually fetched | Model cannot invent citations |
+| Whether to generate system-design questions | Code: hiring stage **or** seniority ≥ senior **or** req text mentions architecture/scale | Categories are not one prompt with one instruction set |
+| Question category routing on the coverage pass | Requirement `kind` → generate function | Technical vs behavioural must be separate calls |
+| Which sources are skipped | `safeFetch` / crawl log | Failed fetch never throws out of the pipeline |
+| Merge on regenerate (keep edited/pinned/user) | `mergeRegenerated` | SPEC §6: regeneration must not discard edits |
+
+LLM output is always `generateJson`: parse → zod → one repair call with the validation errors → typed error. Untrusted JD and page text enter prompts **only** via `wrapUntrusted(source, text)`.
+
+---
+
+## Overview and stack
+
+Preferred stack from the spec: Next.js + Tailwind, Node + Express, MongoDB, TypeScript, an LLM with a genuine free tier.
+
+| Piece | Choice | Deviation / justification |
+|---|---|---|
+| Web | Next.js 15 App Router + Tailwind | Spec stack. Same-origin `/api/*` rewrites so the session cookie is first-party. |
+| API | Express + Mongoose | Spec stack. In-process job worker (no extra queue service on free tier). |
+| Core pipeline | `packages/core` — pure TypeScript | No Express/Mongo in core so the **batch CLI and API call the same `runPipeline`**. |
+| LLM | Gemini primary (`gemini-flash-lite-latest`), Groq fallback (`llama-3.3-70b-versatile`) | Free-tier RPM; sliding-window limiter + retry + provider fallback. |
+| HTML | cheerio | Spec-allowed. Title, links, main text. |
+| robots | `robots-parser` | SPEC §2: respect robots.txt. |
+| Domain | `tldts` | Needed to follow `handbook.gitlab.com` from `about.gitlab.com` (eTLD+1) without hard-coded hosts. Allowed extra; noted in progress. |
+| Tests | vitest next to source | Schedule, coverage, `validateKit`, fake-provider LLM steps. |
+
+npm workspaces: `packages/core`, `apps/api`, `apps/web`. Node ≥ 20.
+
+---
+
+## Architecture
+
+```mermaid
+flowchart TB
+  subgraph web [apps/web Next]
+    UI[Auth / builder / practice]
+  end
+  subgraph api [apps/api Express]
+    Auth[JWT cookie]
+    Jobs[Job worker]
+    Edit[PATCH + regenerate]
+    Practice[Leitner]
+  end
+  subgraph core [packages/core]
+    Fetch[safeFetch + crawl + search]
+    LLM[generateJson + wrapUntrusted]
+    Det[ground / findGaps / schedule / merge]
+    Pipe[runPipeline]
+  end
+  Mongo[(MongoDB Atlas)]
+  UI -->|same-origin /api| Auth
+  Auth --> Jobs
+  Jobs --> Pipe
+  Pipe --> Fetch
+  Pipe --> LLM
+  Pipe --> Det
+  Jobs --> Mongo
+  Edit --> Det
+  Practice --> Mongo
+```
+
+**Step sequence (genuine, not one prompt):**
+
+1. Validate input (non-empty JD, http(s) URL, integer days ≥ 1).
+2. Extract requirements from the **JD only** (no crawl). Ground: drop ungrounded evidence, override priority from JD cues, ids in JD order. Thin JD → thin kit + `notes.thin_jd`.
+3. Crawl company site (rank links; no hard-coded hiring paths) → search public discussion.
+4. Company brief from homepage/about; interview process from hiring pages + discussion.
+5. Four **separate** question generators (technical, behavioural, system-design if code says so, company-fit).
+6. Coverage loop (draft → up to 3 passes → deterministic must fallbacks).
+7. Flashcards (code guarantees ≥1 card per must) → `allocateSchedule` → `validateKit`.
+
+Progress events: `{ step, status: running | done | skipped | failed, detail? }`.
+
+**FAQ:** `status: failed` only when **no kit can be produced** (`EMPTY_JD`, `LLM_UNAVAILABLE`, `INVALID_INPUT`, `INVALID_KIT`). Unreachable company, missing hiring page, empty discussion, and skipped sources are **ok kits** with `research_log` filled in. Partial research is not failure.
+
+---
+
+## Retrieval and sources used
+
+Crawl starts at `company_url`, stays on the seed’s registrable domain, BFS depth ≤ 3, page budget ≤ 15, score-ordered fetches. Ranking uses hiring/about keywords in **anchor text + path + page text** — never a fixed path list.
+
+`safeFetch`: http/https only; DNS + block private/loopback/link-local in production unless `ALLOW_PRIVATE_HOSTS=true`; ≤5 redirects re-checked each hop; 10s timeout; 2 MB stream cap; content-type allowlist (html, xhtml, plain, xml); identifiable User-Agent; ≥500 ms per host; retry on network/5xx/429.
+
+**Sources the pipeline may contact (SPEC §2 — list what we use):**
+
+| Source | When | Auth |
+|---|---|---|
+| The user-supplied company origin (and same eTLD+1 links) | Always, via crawl | None |
+| `/robots.txt` at that origin | Before fetch | None |
+| `sitemap.xml` if present | Crawl seed | None |
+| [HN Algolia](https://hn.algolia.com/api/v1/search) | Discussion search | None |
+| DuckDuckGo HTML (`html.duckduckgo.com`) | After HN, best effort | None |
+| Brave / Tavily search APIs | Only if `SEARCH_API_KEY` is set | Key |
+| Gemini / Groq APIs | Generation | Provider keys |
+
+We do **not** scrape job boards (Greenhouse / Lever / Ashby) as a follow-on host. Discussion hits that do not mention the company name are dropped. Failed sources go to `research_log.skipped` with a reason.
+
+**robots.txt and site terms:** fetches honour origin `robots.txt` (robots-parser, cached). Path-prefixed fixture robots files are a known limitation (only origin `/robots.txt` is read). We rate-limit and identify the User-Agent; do not use this crawler against sites whose terms forbid automated access beyond what robots.txt allows.
+
+---
+
+## Coverage stop rule (why 3)
+
+SPEC §4: a kit that ships with uncovered **must** requirements has failed. Nice gaps may remain and are listed.
+
+1. **Pass 1** — category drafts. `findGaps` in code.
+2. **While must-gaps remain and passes < 3** — generate **only** those must-gap requirements, routed by `kind`, then `findGaps` again.
+3. **After pass 3** — one deterministic fallback question per remaining must (`meta.origin = 'fallback'`). Nice-only gaps never start another pass.
+
+Three is the cap because: one extra LLM pass usually closes an accidental miss; a second extra pass is still cheaper than infinite loops on a stubborn model; after that the model has twice failed the same musts, so **code** writes a grounded fallback instead of inventing more prose. `coverage.passes` and `research_log.coverage_passes` record the trail. Empty banks on thin/nice-only JDs get a fallback question per grounded requirement so schedules are never all-empty days.
+
+---
+
+## Unreachable company is still an ok kit
+
+If the company URL 404s, times out, or is otherwise unreachable, `runPipeline` still returns a kit from the JD: honest brief (“we could not fetch …”), `research_log.company_unreachable = true`, `pages_used` only URLs actually fetched. Missing hiring page → `interview_process.found = false`, not `failed`. Unknown company → no fabricated about-section. The fixture case with `http://localhost:8099/does-not-exist/` is this path.
+
+---
+
+## Builder state model (generated / edited / pinned / dismissed / version)
+
+SPEC §6: “hardest state problem.” Extra fields live on `meta` (Appendix A names stay exact).
+
+| Flag | Meaning | Survives regenerate of its section? |
+|---|---|---|
+| `origin: generated` | Model (or pipeline) wrote it | **No** — replaced if unedited and unpinned |
+| `origin: fallback` | Deterministic coverage/flashcard fallback | Same as generated (delete records dismissed) |
+| `origin: user` | Added in the builder | **Yes** |
+| `edited: true` | User changed prompt/outline/text | **Yes** (kept in place) |
+| `pinned: true` | User pinned | **Yes** |
+| `brief.meta.edited` | Brief text edited | Brief regen skipped unless `force` |
+| `kit.meta.dismissed[]` | Normalised prompts of deleted generated/fallback questions | **Not resurrected** |
+| `kit.meta.next_ids` | Next r/q/f integers | New items never reuse ids |
+| `kit.version` | Integer optimistic concurrency | `PATCH` / regenerate send `baseVersion`; mismatch → `409 VERSION_CONFLICT` + current kit |
+
+`mergeRegenerated` keeps user/edited/pinned items in place, swaps only untouched generated items in that section, re-runs `findGaps` + fallbacks for the category, and re-allocates the schedule in code when questions change. The UI flushes debounced PATCH ops before regenerate so `baseVersion` matches. Story Bank is stored on the Kit document, **not** Appendix A, and does not bump `version`.
+
+---
+
+## Schedule allocation (§8)
+
+`allocateSchedule` — no LLM.
+
+- Score = `(must=2, nice=1) × 10` + `difficulty × 3` + `5` if the question is the **only** cover for a must.
+- Minutes: difficulty 1→10, 2→20, 3→30 (integers).
+- Exactly `N` days (`days_available`). Learning = first `ceil(N × 0.7)` days (min 1); remaining days are review/mock; last day labelled mock / weak spots.
+- Greedy fill: high scores first, earlier days preferred, 180-minute cap (overflow noted, day not emptied).
+- Extra days when `N` > questions become spaced review — never an empty day if any question exists.
+- Every must-have requirement appears in some scheduled `question_ids`. Focus label = dominant category/requirement of that day.
+
+---
+
+## Practice (why Leitner)
+
+Confidence 1–5 on one card at a time (Space/Enter reveal; keys 1–5).
+
+**Leitner boxes, not a one-shot sort of last confidence**, because interview prep is multi-session: a card you just crushed should wait; a card you missed should come back tomorrow. Boxes are a small, inspectable spaced-repetition model that matches SPEC §7 (“pick and defend”).
+
+| Confidence | Box update |
+|---|---|
+| ≤ 2 | box 1 |
+| 3 | box 2 |
+| ≥ 4 | box + 1 (max 5) |
+
+**Next session order:** box ascending, then last-confidence ascending, then least-recently-seen. Never-seen cards are interleaved **early** so new material is not starved. Ordering is computed on the API; the client does not re-sort. Stats: a requirement is covered if ≥1 linked flashcard has been reviewed.
+
+---
+
+## Creative feature: Story Bank
+
+People often write a unique answer per behavioural question and freeze. Story Bank: write 4–6 STAR stories once. **Code** maps stories onto behavioural requirements/questions with stemmed keyword overlap (no LLM). Requirements with no overlap are flagged (`You have no story for 'mentoring juniors'`). Practice shows a matching story as a hint. Routes: `GET`/`PUT /kits/:id/story-bank` (see `docs/API.md`).
+
+---
+
+## Edge cases (§10)
+
+| Case | Behaviour |
+|---|---|
+| Invalid / 404 / timeout company URL | Kit **ok** from JD; `research_log.skipped` + `company_unreachable` when the origin never loaded; never abort the run |
+| No hiring or about page | Honest brief; `interview_process.found = false`; `sources` only fetched URLs |
+| Two-line stub JD | Ground what is literally there; `notes.thin_jd = true`; do **not** invent requirements |
+| Discussion finds nothing | `[]` + log; kit still ok |
+| Invalid / incomplete model JSON | One repair call with zod errors; then `LlmError` / kit fail only if still unusable |
+| LLM 429 / brief outage | Retry + backoff (honour Retry-After); fall back Gemini ↔ Groq; limiter is process-wide |
+| Same JD + company + days twice | Idempotency `sha256(userId + normalised JD + URL + days)` → same job (`200`), no second pipeline |
+| 1-day schedule | One learning/mock day; all musts still appear |
+| 60-day schedule | 60 days, no empty days (spaced review fills extras) |
+| Prompt injection on a crawled page | Page text only inside `wrapUntrusted`; COBOL-style planted requirements are dropped at grounding |
+
+Inventing requirements is worse than a thin kit.
+
+---
+
+## Security (§11)
+
+- **SSRF:** parse URL (http/https); resolve DNS; block private, loopback, and link-local IPs when `NODE_ENV=production` unless `ALLOW_PRIVATE_HOSTS=true`. Re-validate every redirect hop. CLI evaluate **allows** private hosts so localhost fixtures work.
+- **Type / size:** HTML/XHTML/plain/XML; 2 MB cap; 10s abort.
+- **Prompt injection:** JD and fetched pages are data. `wrapUntrusted` wraps `<untrusted_document source="…">` and neutralises embedded closing tags. System prompt states they are not instructions.
+- **Auth:** httpOnly `session` cookie, `SameSite=Lax`, `Secure` in production. Kits scoped by `userId` (foreign id → 404). `401 UNAUTHENTICATED` vs `SESSION_EXPIRED`. Helmet + rate limit on Express. No CORS: the browser never calls Render origin directly.
+
+---
+
+## Job lifecycle (§13)
+
+Generation is ~90s of crawl + LLM. The API does **not** run `runPipeline` on the HTTP thread for `POST /kits`.
+
+| Situation | Behaviour |
+|---|---|
+| Create kit | Enqueue in-process worker; poll `GET /jobs/:id`; steps persist so leaving the page is safe |
+| Fails halfway | Job `failed` with a code; kit not saved unless `validateKit` passed; `POST /jobs/:id/retry` |
+| Process restart mid-run | Boot marks leftover `running` jobs `INTERRUPTED` (retryable) |
+| Double submit | Same idempotency key → existing queued/running/done/failed job, no parallel pipeline |
+| Batch file | `POST /kits/batch` (1–50 rows); each row is its own job |
+| Regenerate | Synchronous LLM on the request (Render 3 min Node timeout; Vercel rewrite may 504 on Hobby — retry when warm) |
+
+---
+
+## Setup (local)
 
 ```bash
 npm install
+cp .env.example .env   # Windows: copy .env.example .env
 ```
 
-Requires Node ≥ 20. Copy `.env.example` to `.env` and fill values as needed. Do not commit secrets. Default Gemini model is `gemini-flash-lite-latest` (free-tier daily request caps are per-model; set `GEMINI_MODEL` to override).
-
-## Commands
+Fill at least `GEMINI_API_KEY` or `GROQ_API_KEY`, plus `JWT_SECRET` and `MONGODB_URI` for the API. Defaults: `LLM_PROVIDER=gemini`, `GEMINI_MODEL=gemini-flash-lite-latest`, `GROQ_MODEL=llama-3.3-70b-versatile`. All variables are in `.env.example`.
 
 ```bash
 npm run typecheck
 npm test
-npm run fixtures                                          # serves fixtures/sites on :8099
+npm run fixtures                                          # :8099
 npm run evaluate -- --input fixtures/cases.json --output out/kits.json
-npm run check-output -- --input out/kits.json             # validate Appendix B shape
-npx tsx scripts/review-kits.ts out/kits.json              # Checkpoint B per-case review
-npm run evaluate -- --input fixtures/cases-real.json --output out/kits-real.json
-npm run dev                                               # workspace dev scripts if present
+npm run check-output -- --input out/kits.json
 ```
 
-### API (`apps/api`) — T17a + T17b + T18 + T19b + T20
-
-Express base with helmet, rate limiting, cookie sessions, and zod request validation. Contract: [`docs/API.md`](docs/API.md).
-
-Auth routes: `GET /health`, `POST /auth/register`, `POST /auth/login`, `POST /auth/logout`, `GET /auth/me`. JWT lives in an httpOnly `session` cookie (7 days, `SameSite=Lax`, `Secure` in production). Protected routes distinguish `401 UNAUTHENTICATED` (no cookie) from `401 SESSION_EXPIRED` (bad/expired cookie).
-
-**Persistence (T17b):** Mongoose models `User`, `Kit`, `Job`, `PracticeState`. Kit reads (`GET /kits/:id`) always filter by `userId` — another owner's id returns `404 NOT_FOUND`.
-
-**Generation jobs (T18):** `POST /kits` and `POST /kits/batch` enqueue an in-process worker that runs `runPipeline`, persisting step progress on the Job for polling via `GET /jobs/:id`. Idempotency key = `sha256(userId + normalised JD + URL + days)` — a second submit returns the same job (`200`) instead of starting another run. `POST /jobs/:id/retry` re-queues failed jobs (including boot-time `INTERRUPTED`). Kits are `validateKit`'d before save. The worker also stores the crawl `researchBundle` on the Kit so regenerate can skip a re-crawl.
-
-**Edit + regenerate (T19b):** `PATCH /kits/:id` applies a batch of ops (`update` / `add` / `delete` / `reorder` / `move`) with optimistic concurrency via `baseVersion` (mismatch → `409 VERSION_CONFLICT` + current kit). Deleting a generated question records its normalised prompt in `kit.meta.dismissed`. `POST /kits/:id/regenerate` merges via `mergeRegenerated` (brief / schedule / one question category); schedule re-allocates with `allocateSchedule` when questions change.
-
-**Practice (T20):** `POST /kits/:id/practice/review` records confidence (1–5) into Leitner boxes (≤2 → box 1, 3 → box 2, ≥4 → box+1 capped at 5). `GET /kits/:id/practice/next` returns the next-session queue (seen cards by box↑ / lastConfidence↑ / least-recently-seen; never-seen interleaved early) plus optional `hintStories` from Story Bank. `GET /kits/:id/practice/stats` reports covered/not-covered per requirement (≥1 reviewed flashcard linked to that req).
-
-**Story Bank (T26):** `GET` / `PUT /kits/:id/story-bank` stores 0–6 STAR stories on the Kit (not Appendix A). Mapping onto behavioural requirements/questions is deterministic keyword overlap (no LLM). Uncovered behavioural requirements return `You have no story for '<text>'`. Practice cards show matching stories as hints. Does not bump kit `version`.
+Exact batch command (SPEC §9) — **same `runPipeline` as the API**:
 
 ```bash
-# requires JWT_SECRET and MONGODB_URI in .env (see .env.example); default PORT=4000
-# optional: ALLOW_PRIVATE_HOSTS=true for localhost fixture company URLs
-npm run dev --workspace=@prep/api
-# or
-npm start --workspace=@prep/api
-```
-
-### Web (`apps/web`) — T21 + T22a + T22b + T23a + T23b + T23c + T24 + T25 + T26 + T27
-
-Auth UI + app shell against [`docs/API.md`](docs/API.md) only (no invented routes). Login/register/logout, `middleware.ts` gate for signed-out visitors, same-origin API client (`credentials: 'include'`, 401 → `/login?next=`), TanStack Query provider, dashboard empty state.
-
-**Create kit** (`/kits/new`): JD textarea (char count + thin-JD warning under 80 chars), company URL, prep days 1–60. Client validation for empty JD / bad URL / days bounds. Submits `POST /kits`; a `200` (idempotent existing job) shows a duplicate-submit notice instead of starting a second run.
-
-**Batch upload** (`/kits/batch`): JSON or CSV file → preview table with per-row validation → `POST /kits/batch` (1–50 `{ jd, company_url, days }`). Links to each job’s progress page.
-
-**Job progress** (`/jobs/:id`): polls `GET /jobs/:id` while queued/running; step timeline (spinner / ✓ / skipped+reason / failed); sources found vs skipped from step details; elapsed time; safe-to-leave notice; `POST /jobs/:id/retry` when failed. When done, links to the kit builder.
-
-**Kit builder** (`/kits/:id`): loads `GET /kits/:id`. Editable company brief (summary / what they do) and requirement text with must/nice badges, coverage (covered vs uncovered from `coverage.uncovered_requirement_ids`), and origin/edited badges. Edits stay local and flush as a debounced (600 ms) `PATCH /kits/:id` op batch (`baseVersion` + brief/requirement/question/flashcard update ops). Save status: Saved / Saving… / Offline (+ Retry). No full-page reload on save.
-
-**Questions (T23b):** category tabs (technical / behavioural / system-design / company-fit); inline edit prompt + answer outline; optimistic reorder via `@dnd-kit` (PointerSensor + KeyboardSensor); move-to-category select; add / delete with undo toast; pin toggle; badges AI / Edited / Yours / Pinned. **Regenerate category** opens a confirm dialog listing protected items that will be kept (user / edited / pinned); pending text edits flush before `POST /kits/:id/regenerate` `{ section: "questions", category }`. `409 VERSION_CONFLICT` opens a merge prompt (reload latest) — never silent overwrite. Structural ops use `PATCH` reorder / move / update(pinned) / add / delete.
-
-**Flashcards + Schedule / Brief regen (T23c):** Flashcards section with inline front/back edit, add / delete (+ undo), badges; ops via `PATCH` update/add/delete `flashcard`. Schedule section supports regenerate → `POST /kits/:id/regenerate` `{ section: "schedule" }` after flushing pending edits (does not clobber brief/questions/flashcards). Day-card detail and coverage matrix are T25. **Regenerate brief** confirm lists keep rules for edited/yours briefs; optional force → `{ section: "brief", force }` (skipped without force when edited; `MISSING_RESEARCH` surfaced from API).
-
-**Practice (T24):** `/kits/:id/practice` — one flashcard at a time from `GET /kits/:id/practice/next` (API next-session / Leitner order; client does not re-sort). Space or Enter reveals the back; keys **1–5** submit `POST /kits/:id/practice/review`. Progress bar through the queue; session summary lists ratings; per-requirement covered / not-covered grid from `GET /kits/:id/practice/stats`. Matching Story Bank entries appear as a **Story hint** on the card. **Next session** reloads the API queue. Builder header links to Practice. Keyboard-only session supported.
-
-**Story Bank (T26):** Builder section on `/kits/:id` via `GET`/`PUT /kits/:id/story-bank`. Write 4–6 STAR stories; flags behavioural requirements with no overlapping story.
-
-**Schedule + coverage (T25):** Schedule day cards show focus, minutes, and questions linked by id (hash links to the Questions section). Interview date is derived client-side as kit `createdAt` local date + `days_available` (SPEC: days until the interview); the matching prep day gets a **Today** marker. Requirements × questions coverage matrix highlights rows in `coverage.uncovered_requirement_ids` (gap badge + amber row). Still uses only `GET /kits/:id` (+ existing regenerate). Wide tables scroll horizontally on phone.
-
-**A11y + responsive (T27):** Keyboard-only walkthrough of auth → create/batch → job → builder → practice → Story Bank. Confirm/conflict dialogs trap Tab, close on Escape, and restore focus. Save status and job step timeline use `aria-live="polite"`. Loading skeletons replace bare “Loading…” copy. A React error boundary wraps the app. Layout tokens target **375px** (compact gutters, wrapping toolbars, overflow-x on tables). Skip link → `#main`.
-
-Browser calls go to `/api/*`; Next rewrites strip the prefix to the Express origin (`API_ORIGIN`, default `http://localhost:4000`).
-
-```bash
-# terminal 1 — API (JWT_SECRET + MONGODB_URI required; see .env.example)
-npm run dev --workspace=@prep/api
-# terminal 2 — web (desktop)
-npm run dev --workspace=@prep/web
-```
-
-Open `http://localhost:3000`. Signed-out visits to `/`, `/kits/new`, `/kits/batch`, `/kits/:id`, `/kits/:id/practice`, or `/jobs/:id` redirect to `/login`. After register/login, use **Create a kit** or **Batch upload** on the dashboard (list endpoint not in the contract yet — empty state only). Open a finished job’s **Open builder** link for Brief + Role + Questions + Flashcards + Schedule day cards + coverage matrix + Story Bank, then **Practice**.
-
-
-### Batch CLI (`npm run evaluate`) — T16
-
-Runs every case in `fixtures/cases.json` (or any Appendix B input array) through the **same** `runPipeline` the API will use:
-
-- `--input` / `--output` via `node:util` `parseArgs`
-- Concurrency **1** in the CLI entry (shared limiter; free-tier RPM makes concurrency 2 burn per-case timeouts waiting), shared LLM limiter (~8 RPM), ~8 min per-case timeout
-- `runBatch` still supports concurrency 2 for tests / future API use
-
-- `allowPrivateHosts: true` so localhost fixtures work
-- One failing case never aborts the run; results are rewritten to `--output` after each case (partial Appendix B survives a crash)
-- Prints a summary table + elapsed time; exits 0 when the batch finishes
-
-Practical local run (needs a free-tier key in `.env` and fixtures up):
-
-```bash
-npm run fixtures   # separate terminal
 npm run evaluate -- --input fixtures/cases.json --output out/kits.json
-npm run check-output -- out/kits.json
 ```
 
-On some Windows npm versions, `--input` / `--output` are eaten as unknown npm configs; the CLI still accepts the two paths as positionals (`npm run evaluate -- fixtures/cases.json out/kits.json`), which is what those npm versions forward.
+CLI allows private hosts, concurrency 1 at the entry (shared limiter; free-tier RPM), ~8 min per-case timeout, continues after a failed case, rewrites Appendix B after each case. Exit 0 when the batch finishes. On some Windows npm versions, flags are eaten; positionals work: `npm run evaluate -- fixtures/cases.json out/kits.json`.
 
-## Research / crawl
+### API + web locally
 
-Company research uses `safeFetch` + `cleanPage` + `crawl` / `rankLinks` (and optional `searchDiscussion`). Crawl stays on the seed’s **registrable domain** (eTLD+1 via [`tldts`](https://github.com/remusao/tldts)), so links like `handbook.gitlab.com` from `about.gitlab.com` are followed; same-host seeds still respect the path prefix (e.g. `/acme/`). Pages where cheerio extracts almost no text are logged as *little extractable content (likely client-rendered)* and are not treated as confirmed missing hiring pages.
+```bash
+npm run dev --workspace=@prep/api    # PORT=4000, needs JWT_SECRET + MONGODB_URI
+npm run dev --workspace=@prep/web    # http://localhost:3000
+```
 
-Requirement priorities are re-checked in code: evidence/text cues (preferred, familiarity with, …), then nearest JD section heading, then the model’s label. LLM calls use temperature 0. Company briefs append an explicit note when no about or hiring page was crawled, and strip false “no hiring” claims when a hiring page was found.
+Optional `ALLOW_PRIVATE_HOSTS=true` for fixture company URLs. HTTP contract: [`docs/API.md`](docs/API.md).
 
-Coverage loop: after must-gap fallbacks, if the question bank is still empty, seed a deterministic fallback question for every grounded requirement so thin/nice-only JDs never produce all-empty schedule days.
+---
 
-## Pipeline (`runPipeline`)
+## Setup (deployed)
 
-`packages/core/src/pipeline.ts` orchestrates the full kit build (same entry the batch CLI and API will call):
+Do **not** add CORS. Set secrets in dashboards only.
 
-1. Validate input (non-empty JD, http(s) URL, integer days ≥ 1)
-2. Extract + ground requirements from the JD only (no retrieval)
-3. Crawl company site → search public discussion
-4. Company brief + interview process
-5. Questions per category → coverage loop (must-gap second pass + deterministic fallbacks)
-6. Flashcards → deterministic schedule
-7. Assemble `source` / `research_log` → `validateKit`
+**MongoDB Atlas M0** — SRV URI; network `0.0.0.0/0` on free egress (or pin IPs).
 
-Progress callbacks receive `{ step, status: running|done|skipped|failed, detail? }`. Unreachable company sites still return an **ok** kit from the JD with `research_log.company_unreachable=true` (missing hiring page / partial research is not failure). `PipelineError` is thrown only when no kit is possible (`EMPTY_JD`, `LLM_UNAVAILABLE`, `INVALID_INPUT`, `INVALID_KIT`).
+**API — Render** ([`render.yaml`](render.yaml)): `NODE_ENV=production`, `PORT` (platform), `JWT_SECRET`, `MONGODB_URI`, `LLM_PROVIDER`, `GEMINI_API_KEY` (and optional Groq / search). Leave `ALLOW_PRIVATE_HOSTS` unset. Health: `GET /health` → `{ ok: true }` after Mongo connects. Listen `0.0.0.0`.
+
+**Web — Vercel** (root `apps/web`, [`apps/web/vercel.json`](apps/web/vercel.json)): `API_ORIGIN` = public Render URL, **no trailing slash**, baked at `next build`. Production: `https://prep-kit-fjgi.onrender.com`. Redeploy web after the API URL changes.
+
+---
+
+## Layout and product surface
+
+- `packages/core` — schema, retrieval, LLM, deterministic steps, `runPipeline`, batch CLI
+- `apps/api` — auth, persistence, jobs, edit/regenerate, practice, Story Bank
+- `apps/web` — auth, create/batch, job timeline, builder, practice, schedule + coverage matrix, Story Bank
+- `fixtures/` — local sites + `cases.json`
+
+Builder: debounced PATCH (600 ms), origin badges, `@dnd-kit` reorder (keyboard), regenerate confirm listing what is kept, `409` merge prompt (never silent overwrite). Practice and coverage matrix consume API/pipeline fields rather than recomputing policy on the client. A11y: focus-trapped dialogs, `aria-live` save/job status, 375px gutters, skip link, error boundary.
+
+---
+
+## Trade-offs and known limitations
+
+- **Free-tier RPM** forced CLI concurrency 1 and a process-wide limiter. Correctness over wall-clock on Gemini flash-lite.
+- **Render sleep ~50s** and `INTERRUPTED` after deploys are free-tier costs; jobs are retryable.
+- **Vercel Hobby proxy** can cut long synchronous regenerates; create-kit stays async.
+- **Job-board hosts** are off-site and not followed.
+- **Client-rendered shells** with near-empty cheerio text are logged as skipped/other — not proof that hiring is missing.
+- **Discussion without `SEARCH_API_KEY`** is HN + DuckDuckGo HTML only.
+- **Story overlap is lexical** (no synonyms).
+- **Dashboard kit list** is not in the original API contract — empty state + job → builder.
+- Do not invent a live URL: this README’s Vercel/Render links were verified with `/health` and a public login page.
+
+Pipeline usage from code:
 
 ```ts
 import { runPipeline } from "@prep/core";
@@ -144,71 +317,3 @@ const { kit } = await runPipeline(
   { allowPrivateHosts: true, onProgress: console.log },
 );
 ```
-
-Integration coverage: `packages/core/src/pipeline.test.ts` (fake LLM over all `fixtures/cases.json`).
-
-### Crawl probe (Checkpoint A)
-
-With fixtures (optional) or against a live URL:
-
-```bash
-npm run fixtures          # optional; for http://localhost:8099/acme/
-npx tsx scripts/try-crawl.ts https://posthog.com
-npx tsx scripts/try-crawl.ts http://localhost:8099/acme/
-```
-
-Writes JSON + log under `.loop/checkpoint-a/`. Review notes: `.loop/checkpoint-a.md`.
-
-## Production deploy (T28)
-
-Live web app: **[https://prep-kit-rho.vercel.app](https://prep-kit-rho.vercel.app)** (Next, `apps/web`). API origin baked into that build: `https://prep-kit-fjgi.onrender.com`.
-
-**Do not add CORS.** The browser only calls same-origin `/api/*` on the Next app; `next.config.ts` rewrites that prefix to Express (`API_ORIGIN`).
-
-### MongoDB Atlas (M0)
-
-1. Create an M0 cluster and a database user.
-2. Network access: allow `0.0.0.0/0` (Render free egress IPs are not stable) or pin Render IPs if you upgrade.
-3. Copy the `mongodb+srv://…` URI into Render as `MONGODB_URI`.
-
-### API — Render free web service (`render.yaml`)
-
-Blueprint: [`render.yaml`](render.yaml). Create the service from this repo (or paste the `buildCommand` / `startCommand`). Fill **sync:false** secrets in the Render dashboard:
-
-| Name | Required | Notes |
-|---|---|---|
-| `NODE_ENV` | yes | `production` (blocks private/loopback fetches unless `ALLOW_PRIVATE_HOSTS=true`) |
-| `PORT` | set by Render | Listen binds `0.0.0.0` |
-| `JWT_SECRET` | yes | Long random string. `Secure` cookies are on when `NODE_ENV=production` |
-| `MONGODB_URI` | yes | Atlas SRV URI |
-| `LLM_PROVIDER` | yes | `gemini` (default) or `groq` |
-| `GEMINI_API_KEY` | if Gemini | Free-tier key |
-| `GEMINI_MODEL` | no | Default `gemini-flash-lite-latest` |
-| `GROQ_API_KEY` / `GROQ_MODEL` | optional fallback | |
-| `SEARCH_API_KEY` | no | Discussion search |
-| `ALLOW_PRIVATE_HOSTS` | **no** | Leave unset/false in production |
-
-Health: `GET /health` → `{ ok: true }` (`healthCheckPath` in the blueprint). **`/health` fails until a real Atlas `MONGODB_URI` is set** — Express `listen`s only after `connectMongo`. The MongoDB MCP (`mongodb-mcp-server` stdio + `--readOnly` against local `mongodb://127.0.0.1`) is **not** the Atlas Admin API; it cannot create M0 clusters, DB users, or IP allowlists. Creating a cluster still needs a human Atlas login (and free-tier/card as Atlas requires). Early Render boots logged `querySrv ENOTFOUND` until a dashboard-created M0 URI was pasted.
-
-**Sleep:** free instances sleep after idle; the first hit after sleep is often **~50s**. Boot marks leftover `running` jobs `failed` with `INTERRUPTED` (retry via `POST /jobs/:id/retry`). `POST /kits` stays async (~90s pipeline on the worker). **`POST /kits/:id/regenerate` is synchronous** (LLM). Node request timeout is 3 minutes on the API; the **Vercel rewrite proxy** may still cut it shorter (Hobby ~10s, Pro ~60s). If regen 504s, retry after the API is warm or raise the Vercel plan.
-
-### Web — Vercel (`apps/web`)
-
-Root Directory: `apps/web` (install/build already `cd ../..` in [`apps/web/vercel.json`](apps/web/vercel.json)).
-
-| Name | Required | Notes |
-|---|---|---|
-| `API_ORIGIN` | yes | Public Render origin, **no trailing slash**. Production is `https://prep-kit-fjgi.onrender.com`. **Baked at `next build`** — redeploy the web app after the API URL changes. |
-
-No `JWT_SECRET` or Mongo on Vercel. No CORS plugin.
-
-Secrets stay in dashboards only (`GEMINI_API_KEY` / `JWT_SECRET` / `MONGODB_URI` / `API_ORIGIN`). Do not commit them.
-
-## Known limitations
-
-- **Batch evaluate without an LLM key** prints a startup `WARNING`, then records every case as `failed` with code `LLM_NOT_CONFIGURED` and a message pointing at `.env` / `.env.example` (`GEMINI_API_KEY` or `GROQ_API_KEY` for the active `LLM_PROVIDER`). Put a free-tier key in `.env` for real kits.
-- **Job-board hosts** (Greenhouse / Lever / Ashby) are off-site and not followed.
-- **Client-rendered shells:** if extracted text is near-empty after `cleanPage`, the crawl records *little extractable content (likely client-rendered)* on `skipped` and keeps the page as `other` — that is not evidence that a hiring page is missing.
-- Classification can still label careers hubs as **about** when hiring-process copy is thin; budget can exhaust before high-signal paths are fetched.
-- Robots are checked at origin `/robots.txt` only (path-prefixed fixture robots are not read).
-- Without `SEARCH_API_KEY`, discussion search is HN + DuckDuckGo HTML only.
