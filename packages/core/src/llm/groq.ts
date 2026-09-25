@@ -38,6 +38,7 @@ export function createGroqProvider(config: GroqConfig): LlmProvider {
         ],
       };
       if (json) body.response_format = { type: "json_object" };
+      body.temperature = 0;
 
       let res: Response;
       try {

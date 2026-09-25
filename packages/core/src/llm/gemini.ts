@@ -67,7 +67,9 @@ export function createGeminiProvider(config: GeminiConfig): LlmProvider {
       const body = {
         systemInstruction: { parts: [{ text: input.system }] },
         contents: [{ role: "user", parts: [{ text: input.user }] }],
-        generationConfig: json ? { responseMimeType: "application/json" } : {},
+        generationConfig: json
+          ? { responseMimeType: "application/json", temperature: 0 }
+          : { temperature: 0 },
       };
 
       let res: Response;

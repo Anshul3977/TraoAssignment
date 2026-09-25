@@ -25,7 +25,7 @@ export function resolveLlmEnv(env: EnvLike = process.env): ResolvedLlmEnv {
   return {
     primaryId,
     gemini: geminiKey
-      ? { apiKey: geminiKey, model: (env.GEMINI_MODEL?.trim() || "gemini-2.5-flash") }
+      ? { apiKey: geminiKey, model: (env.GEMINI_MODEL?.trim() || "gemini-flash-lite-latest") }
       : undefined,
     groq: groqKey
       ? { apiKey: groqKey, model: (env.GROQ_MODEL?.trim() || "llama-3.3-70b-versatile") }
