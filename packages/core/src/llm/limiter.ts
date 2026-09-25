@@ -111,7 +111,8 @@ export class TokenRequestLimiter {
 
 /** Conservative defaults aimed at Gemini free-tier RPM/TPM headroom. */
 export const DEFAULT_LIMITER_OPTIONS: LimiterOptions = {
-  requestsPerMinute: 15,
+  // Free-tier generate_content often caps near 20 RPM; leave headroom for retries.
+  requestsPerMinute: 8,
   tokensPerMinute: 250_000,
 };
 

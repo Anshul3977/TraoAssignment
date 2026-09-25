@@ -34,7 +34,9 @@ npm run dev                                               # workspace dev script
 Runs every case in `fixtures/cases.json` (or any Appendix B input array) through the **same** `runPipeline` the API will use:
 
 - `--input` / `--output` via `node:util` `parseArgs`
-- Concurrency 2, shared LLM limiter, ~8 min per-case timeout (free-tier rate limits; T16 aimed ~4 min)
+- Concurrency **1** in the CLI entry (shared limiter; free-tier RPM makes concurrency 2 burn per-case timeouts waiting), shared LLM limiter (~8 RPM), ~8 min per-case timeout
+- `runBatch` still supports concurrency 2 for tests / future API use
+
 - `allowPrivateHosts: true` so localhost fixtures work
 - One failing case never aborts the run; results are rewritten to `--output` after each case (partial Appendix B survives a crash)
 - Prints a summary table + elapsed time; exits 0 when the batch finishes
