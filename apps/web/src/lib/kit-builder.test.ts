@@ -1,21 +1,25 @@
 import { describe, expect, it } from "vitest";
-import type { KitDocument, KitQuestion } from "./api";
+import type { KitDocument, KitFlashcard, KitQuestion } from "./api";
 import {
   SAVE_DEBOUNCE_MS,
   buildBriefRoleOps,
+  buildFlashcardTextOps,
   buildPendingTextOps,
   buildQuestionTextOps,
   categoryTabLabel,
   coverageIndicator,
   draftsFromKit,
   isNetworkError,
+  isProtectedBrief,
   isProtectedQuestion,
   itemBadges,
   moveQuestionCategory,
   questionsKeptOnRegen,
   questionsReplacedOnRegen,
+  removeFlashcard,
   reorderQuestionsInCategory,
   saveStatusLabel,
+  scheduleSummary,
   setQuestionPinned,
 } from "./kit-builder";
 
@@ -60,6 +64,25 @@ function sampleQuestions(): KitQuestion[] {
   ];
 }
 
+function sampleFlashcards(): KitFlashcard[] {
+  return [
+    {
+      id: "f1",
+      front: "What is React?",
+      back: "A UI library",
+      requirement_ids: ["r1"],
+      meta: { origin: "generated", edited: false },
+    },
+    {
+      id: "f2",
+      front: "Mentoring tip",
+      back: "Pair weekly",
+      requirement_ids: ["r2"],
+      meta: { origin: "user", edited: true },
+    },
+  ];
+}
+
 function sampleKit(overrides: Partial<KitDocument> = {}): KitDocument {
   const base: KitDocument = {
     source: {
@@ -99,8 +122,24 @@ function sampleKit(overrides: Partial<KitDocument> = {}): KitDocument {
       ],
     },
     questions: sampleQuestions(),
-    flashcards: [],
-    schedule: { days_available: 1, days: [] },
+    flashcards: sampleFlashcards(),
+    schedule: {
+      days_available: 2,
+      days: [
+        {
+          day: 1,
+          focus: "Technical foundations",
+          question_ids: ["q1"],
+          minutes: 40,
+        },
+        {
+          day: 2,
+          focus: "Mock interview + weak spots",
+          question_ids: ["q2", "q4"],
+          minutes: 50,
+        },
+      ],
+    },
     coverage: {
       uncovered_requirement_ids: ["r2"],
       passes: 1,
@@ -161,6 +200,16 @@ describe("isProtectedQuestion / regen keep lists", () => {
     expect(questionsKeptOnRegen(qs, "behavioural").map((q) => q.id)).toEqual([
       "q4",
     ]);
+  });
+});
+
+describe("isProtectedBrief", () => {
+  it("protects edited and user-origin briefs for confirm/keep UX", () => {
+    expect(isProtectedBrief({ edited: true })).toBe(true);
+    expect(isProtectedBrief({ origin: "user" })).toBe(true);
+    expect(isProtectedBrief({ origin: "generated", edited: false })).toBe(
+      false,
+    );
   });
 });
 
@@ -248,7 +297,7 @@ describe("buildBriefRoleOps", () => {
   });
 });
 
-describe("buildQuestionTextOps / buildPendingTextOps", () => {
+describe("buildQuestionTextOps / buildFlashcardTextOps / buildPendingTextOps", () => {
   it("emits prompt and outline update ops", () => {
     const saved = sampleKit();
     const drafts = draftsFromKit(saved);
@@ -270,7 +319,44 @@ describe("buildQuestionTextOps / buildPendingTextOps", () => {
     ]);
   });
 
-  it("combines brief and question text ops for flush-before-regen", () => {
+  it("emits flashcard front/back update ops", () => {
+    const saved = sampleKit();
+    const drafts = draftsFromKit(saved);
+    const ops = buildFlashcardTextOps(
+      saved,
+      drafts.flashcards.map((f) =>
+        f.id === "f1"
+          ? { ...f, front: "What is React really?", back: "UI library + ecosystem" }
+          : f,
+      ),
+    );
+    expect(ops).toEqual([
+      {
+        op: "update",
+        target: "flashcard",
+        id: "f1",
+        set: {
+          front: "What is React really?",
+          back: "UI library + ecosystem",
+        },
+      },
+    ]);
+  });
+
+  it("skips empty flashcard strings", () => {
+    const saved = sampleKit();
+    const drafts = draftsFromKit(saved);
+    expect(
+      buildFlashcardTextOps(
+        saved,
+        drafts.flashcards.map((f) =>
+          f.id === "f1" ? { ...f, front: "   ", back: "" } : f,
+        ),
+      ),
+    ).toEqual([]);
+  });
+
+  it("combines brief, question, and flashcard text ops for flush-before-regen", () => {
     const saved = sampleKit();
     const drafts = draftsFromKit(saved);
     const ops = buildPendingTextOps(
@@ -280,14 +366,51 @@ describe("buildQuestionTextOps / buildPendingTextOps", () => {
       drafts.questions.map((q) =>
         q.id === "q1" ? { ...q, prompt: "Changed prompt" } : q,
       ),
+      drafts.flashcards.map((f) =>
+        f.id === "f1" ? { ...f, front: "Changed front" } : f,
+      ),
     );
-    expect(ops).toHaveLength(2);
+    expect(ops).toHaveLength(3);
     expect(ops[0]?.target).toBe("brief");
     expect(ops[1]).toMatchObject({
       op: "update",
       target: "question",
       id: "q1",
     });
+    expect(ops[2]).toMatchObject({
+      op: "update",
+      target: "flashcard",
+      id: "f1",
+    });
+  });
+
+  it("draftsFromKit includes flashcards", () => {
+    const drafts = draftsFromKit(sampleKit());
+    expect(drafts.flashcards).toEqual([
+      { id: "f1", front: "What is React?", back: "A UI library" },
+      { id: "f2", front: "Mentoring tip", back: "Pair weekly" },
+    ]);
+  });
+});
+
+describe("scheduleSummary / removeFlashcard", () => {
+  it("summarises schedule without mutating it", () => {
+    const schedule = sampleKit().schedule;
+    expect(scheduleSummary(schedule)).toEqual({
+      daysAvailable: 2,
+      dayCount: 2,
+      totalMinutes: 90,
+    });
+    expect(scheduleSummary(null)).toEqual({
+      daysAvailable: 0,
+      dayCount: 0,
+      totalMinutes: 0,
+    });
+  });
+
+  it("removes a flashcard locally for optimistic delete", () => {
+    const next = removeFlashcard(sampleFlashcards(), "f1");
+    expect(next.map((f) => f.id)).toEqual(["f2"]);
   });
 });
 

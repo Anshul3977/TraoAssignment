@@ -45,3 +45,12 @@
   - `409 VERSION_CONFLICT` opens reload/dismiss merge prompt (never silent adopt into overwrite) — because §6 / API.md return current kit on conflict.
   - Optimistic reorder with `@dnd-kit` PointerSensor + KeyboardSensor; pin/move/add/delete via documented PATCH ops; delete undo re-adds via `add` op — because server assigns new ids on add.
 - Limitations / follow-ups: flashcards + schedule/brief regen UI are T23c; practice is T24; desktop only.
+
+## 2026-09-25 T23c Builder — Flashcards + Schedule regen
+- Changed: `apps/web/` (`KitFlashcardsSection`, `KitScheduleSection`, builder wiring, kit-builder helpers + tests, `regenerateKitBrief` / `regenerateKitSchedule` API client), root `README.md`, `.loop/progress-web.md`
+- Decisions:
+  - Flashcards CRUD via documented `PATCH` update/add/delete flashcard ops only — because API.md has no flashcard regenerate section; practice stays T24.
+  - Schedule section is read-only + regenerate — because T25 owns richer day cards / coverage matrix; T23c only needs read + regen.
+  - Flush pending brief/question/flashcard text ops before schedule or brief regen — because Verify requires schedule regen not clobber unrelated edits and version must match.
+  - Brief regen confirm mirrors question keep rules (edited/yours listed) with optional `force` — because API skips edited briefs unless `force:true` and returns `briefSkipped`.
+- Limitations / follow-ups: practice mode is T24; full schedule day cards + coverage matrix are T25; desktop only.

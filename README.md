@@ -45,7 +45,7 @@ npm run dev --workspace=@prep/api
 npm start --workspace=@prep/api
 ```
 
-### Web (`apps/web`) — T21 + T22a + T22b + T23a + T23b
+### Web (`apps/web`) — T21 + T22a + T22b + T23a + T23b + T23c
 
 Auth UI + app shell against [`docs/API.md`](docs/API.md) only (no invented routes). Login/register/logout, `middleware.ts` gate for signed-out visitors, same-origin API client (`credentials: 'include'`, 401 → `/login?next=`), TanStack Query provider, dashboard empty state.
 
@@ -55,9 +55,11 @@ Auth UI + app shell against [`docs/API.md`](docs/API.md) only (no invented route
 
 **Job progress** (`/jobs/:id`): polls `GET /jobs/:id` while queued/running; step timeline (spinner / ✓ / skipped+reason / failed); sources found vs skipped from step details; elapsed time; safe-to-leave notice; `POST /jobs/:id/retry` when failed. When done, links to the kit builder.
 
-**Kit builder — Brief + Role + Questions** (`/kits/:id`): loads `GET /kits/:id`. Editable company brief (summary / what they do) and requirement text with must/nice badges, coverage (covered vs uncovered from `coverage.uncovered_requirement_ids`), and origin/edited badges. Edits stay local and flush as a debounced (600 ms) `PATCH /kits/:id` op batch (`baseVersion` + brief/requirement/question update ops). Save status: Saved / Saving… / Offline (+ Retry). No full-page reload on save.
+**Kit builder** (`/kits/:id`): loads `GET /kits/:id`. Editable company brief (summary / what they do) and requirement text with must/nice badges, coverage (covered vs uncovered from `coverage.uncovered_requirement_ids`), and origin/edited badges. Edits stay local and flush as a debounced (600 ms) `PATCH /kits/:id` op batch (`baseVersion` + brief/requirement/question/flashcard update ops). Save status: Saved / Saving… / Offline (+ Retry). No full-page reload on save.
 
 **Questions (T23b):** category tabs (technical / behavioural / system-design / company-fit); inline edit prompt + answer outline; optimistic reorder via `@dnd-kit` (PointerSensor + KeyboardSensor); move-to-category select; add / delete with undo toast; pin toggle; badges AI / Edited / Yours / Pinned. **Regenerate category** opens a confirm dialog listing protected items that will be kept (user / edited / pinned); pending text edits flush before `POST /kits/:id/regenerate` `{ section: "questions", category }`. `409 VERSION_CONFLICT` opens a merge prompt (reload latest) — never silent overwrite. Structural ops use `PATCH` reorder / move / update(pinned) / add / delete.
+
+**Flashcards + Schedule / Brief regen (T23c):** Flashcards section with inline front/back edit, add / delete (+ undo), badges; ops via `PATCH` update/add/delete `flashcard`. Schedule section is read-only (day focus, minutes, question ids) with **Regenerate schedule** → `POST /kits/:id/regenerate` `{ section: "schedule" }` after flushing pending edits (does not clobber brief/questions/flashcards). **Regenerate brief** confirm lists keep rules for edited/yours briefs; optional force → `{ section: "brief", force }` (skipped without force when edited; `MISSING_RESEARCH` surfaced from API).
 
 Browser calls go to `/api/*`; Next rewrites strip the prefix to the Express origin (`API_ORIGIN`, default `http://localhost:4000`).
 
@@ -68,7 +70,7 @@ npm run dev --workspace=@prep/api
 npm run dev --workspace=@prep/web
 ```
 
-Open `http://localhost:3000`. Signed-out visits to `/`, `/kits/new`, `/kits/batch`, `/kits/:id`, or `/jobs/:id` redirect to `/login`. After register/login, use **Create a kit** or **Batch upload** on the dashboard (list endpoint not in the contract yet — empty state only). Open a finished job’s **Open builder** link for Brief + Role + Questions.
+Open `http://localhost:3000`. Signed-out visits to `/`, `/kits/new`, `/kits/batch`, `/kits/:id`, or `/jobs/:id` redirect to `/login`. After register/login, use **Create a kit** or **Batch upload** on the dashboard (list endpoint not in the contract yet — empty state only). Open a finished job’s **Open builder** link for Brief + Role + Questions + Flashcards + Schedule.
 
 
 ### Batch CLI (`npm run evaluate`) — T16

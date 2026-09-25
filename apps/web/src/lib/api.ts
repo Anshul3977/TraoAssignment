@@ -320,6 +320,28 @@ export type KitQuestion = {
   meta?: KitItemMeta;
 };
 
+/** Appendix A flashcard (builder Flashcards section). */
+export type KitFlashcard = {
+  id: string;
+  front: string;
+  back: string;
+  requirement_ids: string[];
+  meta?: KitItemMeta;
+};
+
+/** Appendix A schedule day (builder Schedule section, read-only). */
+export type KitScheduleDay = {
+  day: number;
+  focus: string;
+  question_ids: string[];
+  minutes: number;
+};
+
+export type KitSchedule = {
+  days_available: number;
+  days: KitScheduleDay[];
+};
+
 /** Appendix A kit document (fields the builder reads). */
 export type KitDocument = {
   source: {
@@ -350,8 +372,8 @@ export type KitDocument = {
     }>;
   };
   questions: KitQuestion[];
-  flashcards: unknown[];
-  schedule: unknown;
+  flashcards: KitFlashcard[];
+  schedule: KitSchedule;
   coverage: {
     uncovered_requirement_ids: string[];
     passes: number;
@@ -406,7 +428,12 @@ export type KitOp =
       op: "update";
       target: "flashcard";
       id: string;
-      set: Record<string, unknown>;
+      set: {
+        front?: string;
+        back?: string;
+        requirement_ids?: string[];
+        pinned?: boolean;
+      };
     }
   | {
       op: "add";
@@ -419,7 +446,15 @@ export type KitOp =
         requirement_ids?: string[];
       };
     }
-  | { op: "add"; target: "flashcard"; value: Record<string, unknown> }
+  | {
+      op: "add";
+      target: "flashcard";
+      value: {
+        front: string;
+        back: string;
+        requirement_ids?: string[];
+      };
+    }
   | { op: "delete"; target: "question" | "flashcard"; id: string }
   | {
       op: "reorder";
@@ -489,6 +524,15 @@ export type RegenerateQuestionsBody = {
   category: QuestionCategory;
 };
 
+export type RegenerateBriefBody = {
+  section: "brief";
+  force?: boolean;
+};
+
+export type RegenerateScheduleBody = {
+  section: "schedule";
+};
+
 export type RegenerateResult = {
   kit: KitRecord;
   briefSkipped: boolean;
@@ -508,6 +552,48 @@ export async function regenerateKitQuestions(
     section: "questions",
     category,
   };
+  return apiFetch(
+    `/kits/${encodeURIComponent(id)}/regenerate`,
+    {
+      method: "POST",
+      body: JSON.stringify(body),
+    },
+    deps,
+  );
+}
+
+/**
+ * POST /kits/:id/regenerate — regenerate company brief from stored research.
+ * Skipped when brief is edited unless `force: true` (briefSkipped: true).
+ */
+export async function regenerateKitBrief(
+  id: string,
+  options: { force?: boolean } = {},
+  deps?: ApiFetchDeps,
+): Promise<RegenerateResult> {
+  const body: RegenerateBriefBody = {
+    section: "brief",
+    ...(options.force === true ? { force: true } : {}),
+  };
+  return apiFetch(
+    `/kits/${encodeURIComponent(id)}/regenerate`,
+    {
+      method: "POST",
+      body: JSON.stringify(body),
+    },
+    deps,
+  );
+}
+
+/**
+ * POST /kits/:id/regenerate — re-allocate schedule from current questions.
+ * Does not rewrite questions / flashcards / brief.
+ */
+export async function regenerateKitSchedule(
+  id: string,
+  deps?: ApiFetchDeps,
+): Promise<RegenerateResult> {
+  const body: RegenerateScheduleBody = { section: "schedule" };
   return apiFetch(
     `/kits/${encodeURIComponent(id)}/regenerate`,
     {

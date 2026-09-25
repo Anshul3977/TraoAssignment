@@ -12,7 +12,9 @@ import {
   loginRedirectUrl,
   logout,
   patchKit,
+  regenerateKitBrief,
   regenerateKitQuestions,
+  regenerateKitSchedule,
   retryJob,
 } from "./api";
 
@@ -452,5 +454,82 @@ describe("regenerateKitQuestions", () => {
       expect(err).toBeInstanceOf(ApiClientError);
       expect(kitFromConflictError(err as ApiClientError)?.version).toBe(4);
     }
+  });
+});
+
+describe("regenerateKitBrief", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("POSTs section brief without force by default", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          kit: sampleKitRecord,
+          briefSkipped: true,
+          questionsChanged: false,
+        }),
+        { status: 200 },
+      ),
+    );
+    const result = await regenerateKitBrief("kit1", {}, { fetch: fetchMock });
+    expect(result.briefSkipped).toBe(true);
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/kits/kit1/regenerate",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ section: "brief" }),
+      }),
+    );
+  });
+
+  it("includes force:true when overwriting an edited brief", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          kit: { ...sampleKitRecord, version: 2 },
+          briefSkipped: false,
+          questionsChanged: false,
+        }),
+        { status: 200 },
+      ),
+    );
+    await regenerateKitBrief("kit1", { force: true }, { fetch: fetchMock });
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/kits/kit1/regenerate",
+      expect.objectContaining({
+        body: JSON.stringify({ section: "brief", force: true }),
+      }),
+    );
+  });
+});
+
+describe("regenerateKitSchedule", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("POSTs section schedule only (does not send question/brief fields)", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          kit: { ...sampleKitRecord, version: 3 },
+          briefSkipped: false,
+          questionsChanged: false,
+        }),
+        { status: 200 },
+      ),
+    );
+    const result = await regenerateKitSchedule("kit1", { fetch: fetchMock });
+    expect(result.kit.version).toBe(3);
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/kits/kit1/regenerate",
+      expect.objectContaining({
+        method: "POST",
+        credentials: "include",
+        body: JSON.stringify({ section: "schedule" }),
+      }),
+    );
   });
 });

@@ -1,18 +1,26 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
+import {
+  KitFlashcardsSection,
+  type UndoFlashcardDeletePayload,
+} from "@/components/KitFlashcardsSection";
 import {
   KitQuestionsSection,
   VersionConflictPrompt,
   type UndoDeletePayload,
 } from "@/components/KitQuestionsSection";
+import { KitScheduleSection } from "@/components/KitScheduleSection";
 import {
   ApiClientError,
   getKit,
   kitFromConflictError,
   patchKit,
+  regenerateKitBrief,
   regenerateKitQuestions,
+  regenerateKitSchedule,
+  type KitFlashcard,
   type KitOp,
   type KitQuestion,
   type KitRecord,
@@ -24,11 +32,14 @@ import {
   coverageIndicator,
   draftsFromKit,
   isNetworkError,
+  isProtectedBrief,
   itemBadges,
   moveQuestionCategory,
+  removeFlashcard,
   saveStatusLabel,
   setQuestionPinned,
   type BriefDraft,
+  type FlashcardDraft,
   type QuestionDraft,
   type RequirementDraft,
   type SaveStatus,
@@ -54,9 +65,15 @@ export function KitBriefRoleBuilder({
   const [questionDrafts, setQuestionDrafts] = useState<QuestionDraft[] | null>(
     initialKit ? draftsFromKit(initialKit.kit).questions : null,
   );
+  const [flashcardDrafts, setFlashcardDrafts] = useState<
+    FlashcardDraft[] | null
+  >(initialKit ? draftsFromKit(initialKit.kit).flashcards : null);
   const [localQuestions, setLocalQuestions] = useState<KitQuestion[] | null>(
     initialKit ? initialKit.kit.questions : null,
   );
+  const [localFlashcards, setLocalFlashcards] = useState<
+    KitFlashcard[] | null
+  >(initialKit ? initialKit.kit.flashcards : null);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("saved");
   const [loadError, setLoadError] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -65,12 +82,16 @@ export function KitBriefRoleBuilder({
   const [pendingConflictKit, setPendingConflictKit] =
     useState<KitRecord | null>(null);
   const [regenerating, setRegenerating] = useState(false);
+  const [briefRegenOpen, setBriefRegenOpen] = useState(false);
+  const [briefForce, setBriefForce] = useState(false);
 
   const recordRef = useRef(record);
   const briefRef = useRef(brief);
   const requirementsRef = useRef(requirements);
   const questionDraftsRef = useRef(questionDrafts);
+  const flashcardDraftsRef = useRef(flashcardDrafts);
   const localQuestionsRef = useRef(localQuestions);
+  const localFlashcardsRef = useRef(localFlashcards);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const savingRef = useRef(false);
   const pendingFlushRef = useRef(false);
@@ -88,8 +109,14 @@ export function KitBriefRoleBuilder({
     questionDraftsRef.current = questionDrafts;
   }, [questionDrafts]);
   useEffect(() => {
+    flashcardDraftsRef.current = flashcardDrafts;
+  }, [flashcardDrafts]);
+  useEffect(() => {
     localQuestionsRef.current = localQuestions;
   }, [localQuestions]);
+  useEffect(() => {
+    localFlashcardsRef.current = localFlashcards;
+  }, [localFlashcards]);
 
   const adoptRecord = useCallback((next: KitRecord) => {
     const drafts = draftsFromKit(next.kit);
@@ -97,12 +124,16 @@ export function KitBriefRoleBuilder({
     setBrief(drafts.brief);
     setRequirements(drafts.requirements);
     setQuestionDrafts(drafts.questions);
+    setFlashcardDrafts(drafts.flashcards);
     setLocalQuestions(next.kit.questions);
+    setLocalFlashcards(next.kit.flashcards);
     recordRef.current = next;
     briefRef.current = drafts.brief;
     requirementsRef.current = drafts.requirements;
     questionDraftsRef.current = drafts.questions;
+    flashcardDraftsRef.current = drafts.flashcards;
     localQuestionsRef.current = next.kit.questions;
+    localFlashcardsRef.current = next.kit.flashcards;
   }, []);
 
   const load = useCallback(async () => {
@@ -193,13 +224,17 @@ export function KitBriefRoleBuilder({
     const briefDraft = briefRef.current;
     const reqDrafts = requirementsRef.current;
     const qDrafts = questionDraftsRef.current;
-    if (!current || !briefDraft || !reqDrafts || !qDrafts) return true;
+    const fDrafts = flashcardDraftsRef.current;
+    if (!current || !briefDraft || !reqDrafts || !qDrafts || !fDrafts) {
+      return true;
+    }
 
     const ops = buildPendingTextOps(
       current.kit,
       briefDraft,
       reqDrafts,
       qDrafts,
+      fDrafts,
     );
     if (ops.length === 0) {
       setSaveStatus("saved");
@@ -278,6 +313,28 @@ export function KitBriefRoleBuilder({
         q.id === id ? { ...q, answer_outline: value } : q,
       );
       questionDraftsRef.current = next;
+      return next;
+    });
+    scheduleSave();
+  }
+
+  function onFlashcardFrontChange(id: string, value: string) {
+    setFlashcardDrafts((prev) => {
+      if (!prev) return prev;
+      const next = prev.map((f) =>
+        f.id === id ? { ...f, front: value } : f,
+      );
+      flashcardDraftsRef.current = next;
+      return next;
+    });
+    scheduleSave();
+  }
+
+  function onFlashcardBackChange(id: string, value: string) {
+    setFlashcardDrafts((prev) => {
+      if (!prev) return prev;
+      const next = prev.map((f) => (f.id === id ? { ...f, back: value } : f));
+      flashcardDraftsRef.current = next;
       return next;
     });
     scheduleSave();
@@ -421,22 +478,97 @@ export function KitBriefRoleBuilder({
     ]);
   }
 
-  async function onRequestRegenerate(category: QuestionCategory) {
+  async function runFlashcardStructuralOp(
+    optimistic: (cards: KitFlashcard[]) => KitFlashcard[],
+    op: KitOp,
+  ) {
+    const ok = await flushPendingEdits();
+    if (!ok) return;
+
+    const prev = localFlashcardsRef.current ?? [];
+    const nextCards = optimistic(prev);
+    setLocalFlashcards(nextCards);
+    localFlashcardsRef.current = nextCards;
+
+    const patched = await applyOps([op]);
+    if (!patched) {
+      setLocalFlashcards(prev);
+      localFlashcardsRef.current = prev;
+    }
+  }
+
+  async function onFlashcardAdd() {
+    await flushPendingEdits();
+    await applyOps([
+      {
+        op: "add",
+        target: "flashcard",
+        value: {
+          front: "New flashcard front",
+          back: "New flashcard back",
+          requirement_ids: [],
+        },
+      },
+    ]);
+  }
+
+  async function onFlashcardDelete(id: string) {
+    await runFlashcardStructuralOp(
+      (cards) => removeFlashcard(cards, id),
+      { op: "delete", target: "flashcard", id },
+    );
+    setFlashcardDrafts((prev) => {
+      if (!prev) return prev;
+      const next = prev.filter((d) => d.id !== id);
+      flashcardDraftsRef.current = next;
+      return next;
+    });
+  }
+
+  async function onFlashcardUndoDelete(payload: UndoFlashcardDeletePayload) {
+    const card = payload.flashcard;
+    await flushPendingEdits();
+    await applyOps([
+      {
+        op: "add",
+        target: "flashcard",
+        value: {
+          front: card.front,
+          back: card.back,
+          requirement_ids: card.requirement_ids,
+        },
+      },
+    ]);
+  }
+
+  async function runRegenerate(
+    call: () => Promise<{
+      kit: KitRecord;
+      briefSkipped: boolean;
+      questionsChanged: boolean;
+    }>,
+  ): Promise<{ briefSkipped: boolean } | null> {
     const current = recordRef.current;
-    if (!current) return;
+    if (!current) return null;
 
     const flushed = await flushPendingEdits();
-    if (!flushed) return;
+    if (!flushed) return null;
 
     setRegenerating(true);
     setSaveError(null);
     try {
-      const result = await regenerateKitQuestions(current.id, category);
+      const result = await call();
       adoptRecord(result.kit);
       setSaveStatus("saved");
+      return { briefSkipped: result.briefSkipped };
     } catch (err) {
       if (err instanceof ApiClientError && err.code === "VERSION_CONFLICT") {
         handleConflict(err);
+      } else if (
+        err instanceof ApiClientError &&
+        err.code === "MISSING_RESEARCH"
+      ) {
+        setSaveError(err.message);
       } else if (isNetworkError(err)) {
         setSaveError("You appear to be offline.");
         setSaveStatus("offline");
@@ -447,9 +579,33 @@ export function KitBriefRoleBuilder({
             : "Regenerate failed. Try again.";
         setSaveError(message);
       }
+      return null;
     } finally {
       setRegenerating(false);
     }
+  }
+
+  async function onRequestRegenerate(category: QuestionCategory) {
+    await runRegenerate(() =>
+      regenerateKitQuestions(recordRef.current!.id, category),
+    );
+  }
+
+  async function onRequestBriefRegenerate(force: boolean) {
+    const result = await runRegenerate(() =>
+      regenerateKitBrief(recordRef.current!.id, { force }),
+    );
+    if (result?.briefSkipped) {
+      setSaveError(
+        "Brief regeneration was skipped because the brief is edited. Use force to overwrite.",
+      );
+    }
+  }
+
+  async function onRequestScheduleRegenerate() {
+    await runRegenerate(() =>
+      regenerateKitSchedule(recordRef.current!.id),
+    );
   }
 
   function onRetry() {
@@ -490,7 +646,9 @@ export function KitBriefRoleBuilder({
     !brief ||
     !requirements ||
     !questionDrafts ||
-    !localQuestions
+    !flashcardDrafts ||
+    !localQuestions ||
+    !localFlashcards
   ) {
     return (
       <p className="text-sm text-zinc-600" role="status">
@@ -501,6 +659,7 @@ export function KitBriefRoleBuilder({
 
   const uncovered = record.kit.coverage.uncovered_requirement_ids;
   const briefBadges = itemBadges(record.kit.company_brief.meta);
+  const briefProtected = isProtectedBrief(record.kit.company_brief.meta);
 
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-10">
@@ -559,16 +718,30 @@ export function KitBriefRoleBuilder({
         className="rounded-lg border border-zinc-200 bg-white p-6"
         data-testid="brief-section"
       >
-        <div className="mb-4 flex flex-wrap items-center gap-2">
-          <h2
-            id="brief-heading"
-            className="text-lg font-semibold tracking-tight"
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <h2
+              id="brief-heading"
+              className="text-lg font-semibold tracking-tight"
+            >
+              Brief
+            </h2>
+            {briefBadges.map((b) => (
+              <Badge key={b.key} label={b.label} />
+            ))}
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              setBriefForce(false);
+              setBriefRegenOpen(true);
+            }}
+            disabled={regenerating}
+            className="rounded-md border border-zinc-800 bg-zinc-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-zinc-800 disabled:opacity-50"
+            data-testid="brief-regen-open"
           >
-            Brief
-          </h2>
-          {briefBadges.map((b) => (
-            <Badge key={b.key} label={b.label} />
-          ))}
+            {regenerating ? "Regenerating…" : "Regenerate brief"}
+          </button>
         </div>
 
         <label className="flex flex-col gap-1.5 text-sm">
@@ -710,11 +883,41 @@ export function KitBriefRoleBuilder({
         regenerating={regenerating}
       />
 
+      <KitFlashcardsSection
+        flashcards={localFlashcards}
+        drafts={flashcardDrafts}
+        onFrontChange={onFlashcardFrontChange}
+        onBackChange={onFlashcardBackChange}
+        onAdd={onFlashcardAdd}
+        onDelete={onFlashcardDelete}
+        onUndoDelete={onFlashcardUndoDelete}
+      />
+
+      <KitScheduleSection
+        schedule={record.kit.schedule}
+        regenerating={regenerating}
+        onRequestRegenerate={onRequestScheduleRegenerate}
+      />
+
       <p className="text-sm text-zinc-600">
         <Link href="/" className="underline hover:text-zinc-900">
           Back to dashboard
         </Link>
       </p>
+
+      {briefRegenOpen ? (
+        <BriefRegenConfirmDialog
+          protectedBrief={briefProtected}
+          force={briefForce}
+          onForceChange={setBriefForce}
+          busy={regenerating}
+          onCancel={() => setBriefRegenOpen(false)}
+          onConfirm={() => {
+            setBriefRegenOpen(false);
+            void onRequestBriefRegenerate(briefForce);
+          }}
+        />
+      ) : null}
 
       {conflictOpen ? (
         <VersionConflictPrompt
@@ -723,6 +926,89 @@ export function KitBriefRoleBuilder({
           onDismiss={onConflictDismiss}
         />
       ) : null}
+    </div>
+  );
+}
+
+function BriefRegenConfirmDialog({
+  protectedBrief,
+  force,
+  onForceChange,
+  busy,
+  onCancel,
+  onConfirm,
+}: {
+  protectedBrief: boolean;
+  force: boolean;
+  onForceChange: (value: boolean) => void;
+  busy: boolean;
+  onCancel: () => void;
+  onConfirm: () => void;
+}) {
+  const titleId = useId();
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+      role="presentation"
+      data-testid="brief-regen-backdrop"
+      onClick={onCancel}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        className="w-full max-w-md rounded-lg border border-zinc-200 bg-white p-5 shadow-lg"
+        data-testid="brief-regen-dialog"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h3 id={titleId} className="text-base font-semibold text-zinc-900">
+          Regenerate brief?
+        </h3>
+        <p className="mt-2 text-sm text-zinc-600">
+          Uses the stored research bundle (no re-crawl). Pending text edits
+          will be saved first.
+        </p>
+        {protectedBrief ? (
+          <div className="mt-3 space-y-2" data-testid="brief-regen-keep">
+            <p className="text-sm text-zinc-800">
+              The current brief is edited / yours and will be kept unless you
+              force overwrite.
+            </p>
+            <label className="flex items-center gap-2 text-sm text-zinc-700">
+              <input
+                type="checkbox"
+                checked={force}
+                onChange={(e) => onForceChange(e.target.checked)}
+                data-testid="brief-regen-force"
+              />
+              Force overwrite edited brief
+            </label>
+          </div>
+        ) : (
+          <p className="mt-3 text-sm text-zinc-500">
+            Nothing protected — the AI brief will be replaced.
+          </p>
+        )}
+        <div className="mt-5 flex justify-end gap-2">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="rounded-md border border-zinc-300 bg-white px-3 py-1.5 text-sm font-medium text-zinc-800 hover:bg-zinc-50"
+            data-testid="brief-regen-cancel"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={onConfirm}
+            disabled={busy}
+            className="rounded-md border border-zinc-800 bg-zinc-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-zinc-800 disabled:opacity-50"
+            data-testid="brief-regen-confirm"
+          >
+            Regenerate
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

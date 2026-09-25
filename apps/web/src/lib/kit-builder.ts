@@ -1,13 +1,15 @@
 /**
- * Pure helpers for the kit builder Brief + Role + Questions UI (T23a / T23b).
- * Ops shapes match docs/API.md PATCH /kits/:id.
+ * Pure helpers for the kit builder Brief + Role + Questions + Flashcards + Schedule UI
+ * (T23a / T23b / T23c). Ops shapes match docs/API.md PATCH /kits/:id.
  */
 
 import type {
   KitDocument,
+  KitFlashcard,
   KitItemMeta,
   KitOp,
   KitQuestion,
+  KitSchedule,
   QuestionCategory,
 } from "./api";
 
@@ -63,6 +65,17 @@ export function isProtectedQuestion(meta: KitItemMeta | undefined): boolean {
   if (meta.origin === "user") return true;
   if (meta.edited === true) return true;
   if (meta.pinned === true) return true;
+  return false;
+}
+
+/**
+ * Brief regen is skipped when `company_brief.meta.edited` unless force=true
+ * (docs/API.md). User-origin briefs are also treated as kept for the confirm UI.
+ */
+export function isProtectedBrief(meta: KitItemMeta | undefined): boolean {
+  if (!meta) return false;
+  if (meta.edited === true) return true;
+  if (meta.origin === "user") return true;
   return false;
 }
 
@@ -153,6 +166,12 @@ export type QuestionDraft = {
   answer_outline: string;
 };
 
+export type FlashcardDraft = {
+  id: string;
+  front: string;
+  back: string;
+};
+
 /**
  * Diff local Brief + requirement text drafts against the last-saved kit
  * and build a PATCH ops array (coalesced; 1–100 ops).
@@ -235,16 +254,47 @@ export function buildQuestionTextOps(
   return ops;
 }
 
-/** Combine brief/role + question text ops for a single debounced flush. */
+/**
+ * Diff flashcard front/back drafts against saved kit → update ops.
+ * Skips empty strings (API min length 1).
+ */
+export function buildFlashcardTextOps(
+  saved: KitDocument,
+  drafts: readonly FlashcardDraft[],
+): KitOp[] {
+  const ops: KitOp[] = [];
+  const byId = new Map(saved.flashcards.map((f) => [f.id, f]));
+  for (const draft of drafts) {
+    const savedF = byId.get(draft.id);
+    if (!savedF) continue;
+    const set: { front?: string; back?: string } = {};
+    const nextFront = draft.front.trim();
+    const nextBack = draft.back.trim();
+    if (nextFront.length > 0 && nextFront !== savedF.front) {
+      set.front = nextFront;
+    }
+    if (nextBack.length > 0 && nextBack !== savedF.back) {
+      set.back = nextBack;
+    }
+    if (set.front !== undefined || set.back !== undefined) {
+      ops.push({ op: "update", target: "flashcard", id: draft.id, set });
+    }
+  }
+  return ops;
+}
+
+/** Combine brief/role + question + flashcard text ops for a single debounced flush. */
 export function buildPendingTextOps(
   saved: KitDocument,
   brief: BriefDraft,
   requirements: readonly RequirementDraft[],
   questionDrafts: readonly QuestionDraft[],
+  flashcardDrafts: readonly FlashcardDraft[] = [],
 ): KitOp[] {
   return [
     ...buildBriefRoleOps(saved, brief, requirements),
     ...buildQuestionTextOps(saved, questionDrafts),
+    ...buildFlashcardTextOps(saved, flashcardDrafts),
   ];
 }
 
@@ -252,6 +302,7 @@ export function draftsFromKit(kit: KitDocument): {
   brief: BriefDraft;
   requirements: RequirementDraft[];
   questions: QuestionDraft[];
+  flashcards: FlashcardDraft[];
 } {
   return {
     brief: {
@@ -267,7 +318,34 @@ export function draftsFromKit(kit: KitDocument): {
       prompt: q.prompt,
       answer_outline: q.answer_outline,
     })),
+    flashcards: kit.flashcards.map((f) => ({
+      id: f.id,
+      front: f.front,
+      back: f.back,
+    })),
   };
+}
+
+/** Read-only schedule summary for the builder (T23c; full day cards are T25). */
+export function scheduleSummary(schedule: KitSchedule | undefined | null): {
+  daysAvailable: number;
+  dayCount: number;
+  totalMinutes: number;
+} {
+  const days = schedule?.days ?? [];
+  return {
+    daysAvailable: schedule?.days_available ?? 0,
+    dayCount: days.length,
+    totalMinutes: days.reduce((sum, d) => sum + (d.minutes || 0), 0),
+  };
+}
+
+/** Optimistic local remove of a flashcard (structural delete). */
+export function removeFlashcard(
+  flashcards: readonly KitFlashcard[],
+  id: string,
+): KitFlashcard[] {
+  return flashcards.filter((f) => f.id !== id);
 }
 
 /** Optimistic reorder of ids within a category; returns new full questions array. */
