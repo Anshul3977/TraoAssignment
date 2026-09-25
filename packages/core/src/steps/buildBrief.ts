@@ -160,18 +160,29 @@ export async function buildBrief(
   }
 
   let summary = extracted.summary.trim();
-  // Deterministic honesty: ensure missing about/hiring is stated even if the model omits it.
+  // Deterministic honesty: ensure missing about/hiring is stated even if the model omits it,
+  // and strip false "no hiring" claims when a hiring page was actually crawled.
   const lower = summary.toLowerCase();
+  if (input.hiringPagesFound === true) {
+    summary = summary
+      .replace(
+        /\s*(?:note:\s*)?no hiring(?:\/careers)? page was found(?: in the provided documents)?\.?/gi,
+        "",
+      )
+      .replace(/\s{2,}/g, " ")
+      .trim();
+  }
   const extras: string[] = [];
+  const lower2 = summary.toLowerCase();
   if (
     input.aboutPages.length === 0 &&
-    !/\bno about\b|\babout page\b|\bno dedicated about\b/.test(lower)
+    !/\bno about\b|\babout page\b|\bno dedicated about\b/.test(lower2)
   ) {
     extras.push("No about page was found.");
   }
   if (
     input.hiringPagesFound === false &&
-    !/\bno hiring\b|\bno careers\b|\bhiring page\b|\bcareers page\b/.test(lower)
+    !/\bno hiring\b|\bno careers\b|\bhiring page\b|\bcareers page\b/.test(lower2)
   ) {
     extras.push("No hiring or careers page was found.");
   }

@@ -168,20 +168,18 @@ describe("overridePriority", () => {
     ).toBe("must");
   });
 
-  it("applies preferred / familiarity cues from requirement text", () => {
+  it("lets preferred cues beat a fabricated LLM Requirements section", () => {
+    const jd = "Backend engineer at QuietCo.\nNode and Postgres preferred.";
     expect(
-      overridePriority({
-        text: "Node preferred",
-        priority: "must",
-        evidence: "Node",
-      }),
-    ).toBe("nice");
-    expect(
-      overridePriority({
-        text: "Familiarity with REST APIs",
-        priority: "must",
-        evidence: "REST APIs",
-      }),
+      overridePriority(
+        {
+          text: "Node preferred",
+          priority: "must",
+          evidence: "Node and Postgres preferred.",
+          section: "Requirements",
+        },
+        jd,
+      ),
     ).toBe("nice");
   });
 });

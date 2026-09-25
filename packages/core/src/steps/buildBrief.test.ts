@@ -109,6 +109,32 @@ describe("buildBrief", () => {
     expect(brief.summary.toLowerCase()).toContain("acme");
   });
 
+  it("strips false no-hiring claims when a hiring page was found", async () => {
+    const primary = fakeProvider("gemini", () => ({
+      text: JSON.stringify({
+        summary:
+          "Acme builds collaboration tools. Note: No hiring page was found in the provided documents.",
+        what_they_do: "Collaboration software.",
+        sources: ["http://localhost:8099/acme/"],
+      }),
+      provider: "gemini",
+      model: "gemini-test",
+    }));
+
+    const brief = await buildBrief(
+      testClient(primary),
+      {
+        homepage: ACME_HOME,
+        aboutPages: [ACME_ABOUT],
+        hiringPagesFound: true,
+      },
+      { cacheDir: false },
+    );
+
+    expect(brief.summary.toLowerCase()).not.toMatch(/no hiring/);
+    expect(brief.summary.toLowerCase()).toContain("acme");
+  });
+
   it("quietco: appends missing about/hiring honesty when the model omits it", async () => {
     const primary = fakeProvider("gemini", () => ({
       text: JSON.stringify({
