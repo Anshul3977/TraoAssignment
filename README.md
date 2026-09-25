@@ -261,6 +261,13 @@ npm run evaluate -- --input fixtures/cases.json --output out/kits.json
 
 CLI allows private hosts, concurrency 1 at the entry (shared limiter; free-tier RPM), ~8 min per-case timeout, continues after a failed case, rewrites Appendix B after each case. Exit 0 when the batch finishes. On some Windows npm versions, flags are eaten; positionals work: `npm run evaluate -- fixtures/cases.json out/kits.json`.
 
+Clean-clone check (SPEC §9 — clone to a temp dir, `npm install`, typecheck, test, fixtures, evaluate, validate Appendix B). Needs a local `.env` with an LLM key (copied into the clone; never printed):
+
+```bash
+npm run clean-clone-check
+# or: bash scripts/clean-clone-check.sh
+```
+
 ### API + web locally
 
 ```bash

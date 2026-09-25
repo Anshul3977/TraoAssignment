@@ -11,7 +11,8 @@
     "typecheck": "npm run typecheck --workspaces --if-present",
     "evaluate": "tsx packages/core/src/cli/evaluate.ts",
     "check-output": "tsx scripts/check-output.ts",
-    "fixtures": "tsx scripts/serve-fixtures.ts"
+    "fixtures": "tsx scripts/serve-fixtures.ts",
+    "clean-clone-check": "tsx scripts/clean-clone-check.ts"
   },
   "devDependencies": {
     "tsx": "^4.19.3",

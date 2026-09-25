@@ -311,5 +311,14 @@ pm run typecheck fails solely with TS2307 on ../deterministic/groundRequirements
   - Did not start T30 clean-clone script — because PROMPT forbids the next task in the same iteration.
 - Limitations / follow-ups: T30 `scripts/clean-clone-check.sh`; Checkpoint E video.
 
+## 2026-09-25 T30 Clean-clone check
+- Changed: `scripts/clean-clone-check.ts` (+ `.sh` wrapper, tests), root `package.json` (`clean-clone-check`), `vitest.config.ts`, `README.md`, `.loop/TASKS.md` (T30 `[x]`; Checkpoint E left `[ ]`)
+- Decisions:
+  - Runner is TypeScript (`npm run clean-clone-check`) with a bash wrapper — because the evaluator may be Unix while this machine is Windows PowerShell; one implementation.
+  - Clone copies gitignored `.env` into the temp tree and never logs values — because SPEC §9 needs credentials with no extra undocumented setup, and tokens must not leak.
+  - Fail the check if any kit is `LLM_NOT_CONFIGURED` or not `ok` — because a schema-valid all-failed batch is not a working clean clone.
+  - Reuse `:8099` when already listening — because a leftover fixtures process must not fail the check with EADDRINUSE.
+- Limitations / follow-ups: Checkpoint E video + submit. Did not start the video.
+
 
 
