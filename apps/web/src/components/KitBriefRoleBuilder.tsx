@@ -368,7 +368,7 @@ export function KitBriefRoleBuilder({
   async function onReorder(category: QuestionCategory, orderedIds: string[]) {
     const prev = localQuestionsRef.current ?? [];
     // Apply ordered ids within category using reorder helper pairwise from first delta.
-    let next = [...prev];
+    const next = [...prev];
     const currentIds = next
       .filter((q) => q.category === category)
       .map((q) => q.id);

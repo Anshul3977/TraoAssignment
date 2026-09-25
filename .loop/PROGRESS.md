@@ -296,5 +296,10 @@ pm run typecheck fails solely with TS2307 on ../deterministic/groundRequirements
 - Decisions: Vercel rewrites `/api/*` → `API_ORIGIN` (build-time); Render runs Express; Atlas M0; no CORS — because cookies stay first-party on the Next origin. Document Render sleep ~50s, `INTERRUPTED`, Secure cookies, regen timeout vs Vercel proxy — because those bite on free tiers. Did **not** tick T28 — no dashboard login, no live URL invented.
 - Limitations / follow-ups: user must create Atlas cluster, Render web service, Vercel project, set secrets, rebuild web after API URL exists. Do not start T29 until T28 has a live URL.
 
+## 2026-09-25 T28 live URL
+- Changed: Vercel project `prep-kit` (root `apps/web`, `API_ORIGIN=https://prep-kit-fjgi.onrender.com` set before production build), `next`/`eslint-config-next` 15.2.6, prefer-const lint in `KitBriefRoleBuilder`, README live URL, TASKS T28 `[x]`
+- Decisions: Tick T28 only after public Next login loaded and `GET /health` + `/api/health` rewrite returned `{ ok: true }` — because the task requires a working live stack, not config files. MongoDB MCP stays local `--readOnly` stdio — because it is not Atlas Admin and cannot provision M0; the human Atlas dashboard created M0. Vercel MCP stayed Unauthorized after `mcp_auth`; used logged-in Vercel CLI instead.
+- Limitations / follow-ups: Vercel MCP account tools still Unauthorized; GitHub auto-deploy needs the Next 15.2.6 + lint fix or production will regress; Render free sleep still applies.
+
 
 

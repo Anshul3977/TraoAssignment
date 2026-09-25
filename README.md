@@ -159,9 +159,9 @@ npx tsx scripts/try-crawl.ts http://localhost:8099/acme/
 
 Writes JSON + log under `.loop/checkpoint-a/`. Review notes: `.loop/checkpoint-a.md`.
 
-## Production deploy (T28) — config only until dashboards are filled
+## Production deploy (T28)
 
-There is **no live deployment URL** in this repo yet. Wire the three free-tier services, then paste the Vercel URL into the submission.
+Live web app: **[https://prep-kit-rho.vercel.app](https://prep-kit-rho.vercel.app)** (Next, `apps/web`). API origin baked into that build: `https://prep-kit-fjgi.onrender.com`.
 
 **Do not add CORS.** The browser only calls same-origin `/api/*` on the Next app; `next.config.ts` rewrites that prefix to Express (`API_ORIGIN`).
 
@@ -188,7 +188,7 @@ Blueprint: [`render.yaml`](render.yaml). Create the service from this repo (or p
 | `SEARCH_API_KEY` | no | Discussion search |
 | `ALLOW_PRIVATE_HOSTS` | **no** | Leave unset/false in production |
 
-Health: `GET /health` → `{ ok: true }` (`healthCheckPath` in the blueprint).
+Health: `GET /health` → `{ ok: true }` (`healthCheckPath` in the blueprint). **`/health` fails until a real Atlas `MONGODB_URI` is set** — Express `listen`s only after `connectMongo`. The MongoDB MCP (`mongodb-mcp-server` stdio + `--readOnly` against local `mongodb://127.0.0.1`) is **not** the Atlas Admin API; it cannot create M0 clusters, DB users, or IP allowlists. Creating a cluster still needs a human Atlas login (and free-tier/card as Atlas requires). Early Render boots logged `querySrv ENOTFOUND` until a dashboard-created M0 URI was pasted.
 
 **Sleep:** free instances sleep after idle; the first hit after sleep is often **~50s**. Boot marks leftover `running` jobs `failed` with `INTERRUPTED` (retry via `POST /jobs/:id/retry`). `POST /kits` stays async (~90s pipeline on the worker). **`POST /kits/:id/regenerate` is synchronous** (LLM). Node request timeout is 3 minutes on the API; the **Vercel rewrite proxy** may still cut it shorter (Hobby ~10s, Pro ~60s). If regen 504s, retry after the API is warm or raise the Vercel plan.
 
@@ -198,11 +198,11 @@ Root Directory: `apps/web` (install/build already `cd ../..` in [`apps/web/verce
 
 | Name | Required | Notes |
 |---|---|---|
-| `API_ORIGIN` | yes | Public Render origin, **no trailing slash**, e.g. `https://YOUR-SERVICE.onrender.com` once you have it. **Baked at `next build`** — redeploy the web app after the API URL changes. |
+| `API_ORIGIN` | yes | Public Render origin, **no trailing slash**. Production is `https://prep-kit-fjgi.onrender.com`. **Baked at `next build`** — redeploy the web app after the API URL changes. |
 
 No `JWT_SECRET` or Mongo on Vercel. No CORS plugin.
 
-You must log into **Vercel**, **Render**, and **Atlas** (and paste `GEMINI_API_KEY` / `JWT_SECRET` / `MONGODB_URI` / `API_ORIGIN`) before T28’s live-URL acceptance is met.
+Secrets stay in dashboards only (`GEMINI_API_KEY` / `JWT_SECRET` / `MONGODB_URI` / `API_ORIGIN`). Do not commit them.
 
 ## Known limitations
 
