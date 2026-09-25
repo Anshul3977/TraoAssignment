@@ -8,7 +8,7 @@ npm workspaces:
 
 - `packages/core` — schema, retrieval, LLM helpers, deterministic steps, pipeline pieces
 - `apps/api` — Express API (auth + health; kits/jobs in later tasks)
-- `apps/web` — Next.js App Router UI (scaffold)
+- `apps/web` — Next.js App Router UI (auth shell + dashboard)
 - `docs/API.md` — HTTP contract the web app builds against
 
 ## Setup
@@ -44,6 +44,21 @@ npm run dev --workspace=@prep/api
 # or
 npm start --workspace=@prep/api
 ```
+
+### Web (`apps/web`) — T21
+
+Auth UI + app shell against [`docs/API.md`](docs/API.md) only (no invented kit routes). Login/register pages, logout control, `middleware.ts` gate for signed-out visitors, same-origin API client (`credentials: 'include'`, 401 → `/login?next=`), TanStack Query provider, dashboard empty state with “Create a kit” CTA.
+
+Browser calls go to `/api/*`; Next rewrites strip the prefix to the Express origin (`API_ORIGIN`, default `http://localhost:4000`).
+
+```bash
+# terminal 1 — API (JWT_SECRET required)
+npm run dev --workspace=@prep/api
+# terminal 2 — web (desktop)
+npm run dev --workspace=@prep/web
+```
+
+Open `http://localhost:3000`. Signed-out visits to `/` redirect to `/login`. After register/login, the dashboard shows an empty kits list until kit list routes land in `docs/API.md` (T17b/T18).
 
 
 ### Batch CLI (`npm run evaluate`) — T16

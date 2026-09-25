@@ -7,8 +7,9 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return [
       {
+        // Browser: /api/auth/login → Express: /auth/login (docs/API.md)
         source: "/api/:path*",
-        destination: `${API_ORIGIN}/api/:path*`,
+        destination: `${API_ORIGIN}/:path*`,
       },
     ];
   },
