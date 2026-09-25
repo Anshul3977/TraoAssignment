@@ -1,4 +1,4 @@
-/** Public entry for @prep/core. Pipeline modules land here in later tasks. */
+/** Public entry for @prep/core. */
 export const PACKAGE_NAME = "@prep/core";
 
 export {
@@ -13,3 +13,13 @@ export {
   type ValidateKitResult,
   type ValidationIssue,
 } from "./schema/index.js";
+
+export {
+  runPipeline,
+  PipelineError,
+  isPipelineError,
+  type PipelineInput,
+  type PipelineOptions,
+  type PipelineResult,
+  type ProgressEvent,
+} from "./pipeline.js";

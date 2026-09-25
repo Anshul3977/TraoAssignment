@@ -32,6 +32,31 @@ npm run dev        # workspace dev scripts if present
 
 Company research uses `safeFetch` + `cleanPage` + `crawl` / `rankLinks` (and optional `searchDiscussion`). Crawl stays on the seed’s **registrable domain** (eTLD+1 via [`tldts`](https://github.com/remusao/tldts)), so links like `handbook.gitlab.com` from `about.gitlab.com` are followed; same-host seeds still respect the path prefix (e.g. `/acme/`). Pages where cheerio extracts almost no text are logged as *little extractable content (likely client-rendered)* and are not treated as confirmed missing hiring pages.
 
+## Pipeline (`runPipeline`)
+
+`packages/core/src/pipeline.ts` orchestrates the full kit build (same entry the batch CLI and API will call):
+
+1. Validate input (non-empty JD, http(s) URL, integer days ≥ 1)
+2. Extract + ground requirements from the JD only (no retrieval)
+3. Crawl company site → search public discussion
+4. Company brief + interview process
+5. Questions per category → coverage loop (must-gap second pass + deterministic fallbacks)
+6. Flashcards → deterministic schedule
+7. Assemble `source` / `research_log` → `validateKit`
+
+Progress callbacks receive `{ step, status: running|done|skipped|failed, detail? }`. Unreachable company sites still return an **ok** kit from the JD with `research_log.company_unreachable=true` (missing hiring page / partial research is not failure). `PipelineError` is thrown only when no kit is possible (`EMPTY_JD`, `LLM_UNAVAILABLE`, `INVALID_INPUT`, `INVALID_KIT`).
+
+```ts
+import { runPipeline } from "@prep/core";
+
+const { kit } = await runPipeline(
+  { jd, company_url, days },
+  { allowPrivateHosts: true, onProgress: console.log },
+);
+```
+
+Integration coverage: `packages/core/src/pipeline.test.ts` (fake LLM over all `fixtures/cases.json`).
+
 ### Crawl probe (Checkpoint A)
 
 With fixtures (optional) or against a live URL:
