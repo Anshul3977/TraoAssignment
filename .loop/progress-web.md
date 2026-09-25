@@ -35,3 +35,13 @@
   - Save status Saved / Saving… / Offline (+ Retry); network `TypeError` → Offline; `VERSION_CONFLICT` adopts returned kit — because contract returns current kit on 409 and T23b owns richer merge UX.
   - Coverage badge from `coverage.uncovered_requirement_ids`; must/nice + origin/edited badges from requirement/brief meta — because Appendix A + API.md extensions.
 - Limitations / follow-ups: no questions UI / regen / flashcards / schedule (T23b–c); no kit list route yet; desktop only.
+
+## 2026-09-25 T23b Builder — Questions
+- Changed: `apps/web/` (`KitQuestionsSection`, builder integration, kit-builder helpers + tests, `regenerateKitQuestions` API client, `@dnd-kit` deps), root `README.md`, `package-lock.json`, `.loop/progress-web.md`
+- Decisions:
+  - Questions on same `/kits/:id` builder as Brief + Role — because T23b extends the kit page; flashcards/schedule regen stay T23c.
+  - Category regen via `POST /kits/:id/regenerate` `{ section: "questions", category }` only — because API.md documents that shape; confirm dialog lists user/edited/pinned that merge will keep.
+  - Flush pending debounced text ops before structural PATCH and before regenerate — because task requires flush-before-regen and version must match.
+  - `409 VERSION_CONFLICT` opens reload/dismiss merge prompt (never silent adopt into overwrite) — because §6 / API.md return current kit on conflict.
+  - Optimistic reorder with `@dnd-kit` PointerSensor + KeyboardSensor; pin/move/add/delete via documented PATCH ops; delete undo re-adds via `add` op — because server assigns new ids on add.
+- Limitations / follow-ups: flashcards + schedule/brief regen UI are T23c; practice is T24; desktop only.

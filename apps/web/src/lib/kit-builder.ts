@@ -1,9 +1,15 @@
 /**
- * Pure helpers for the kit builder Brief + Role UI (T23a).
+ * Pure helpers for the kit builder Brief + Role + Questions UI (T23a / T23b).
  * Ops shapes match docs/API.md PATCH /kits/:id.
  */
 
-import type { KitDocument, KitItemMeta, KitOp } from "./api";
+import type {
+  KitDocument,
+  KitItemMeta,
+  KitOp,
+  KitQuestion,
+  QuestionCategory,
+} from "./api";
 
 /** Debounce before flushing local edits as a PATCH op batch. */
 export const SAVE_DEBOUNCE_MS = 600;
@@ -27,7 +33,10 @@ export type OriginBadge = {
   label: string;
 };
 
-/** Origin / edited badges for brief or requirement meta. */
+/**
+ * Origin / edited / pinned badges (AI / Edited / Yours / Pinned).
+ * Order: Edited → origin → Pinned.
+ */
 export function itemBadges(meta: KitItemMeta | undefined): OriginBadge[] {
   const badges: OriginBadge[] = [];
   if (!meta) return badges;
@@ -42,7 +51,67 @@ export function itemBadges(meta: KitItemMeta | undefined): OriginBadge[] {
   } else if (origin === "generated") {
     badges.push({ key: "ai", label: "AI" });
   }
+  if (meta.pinned === true) {
+    badges.push({ key: "pinned", label: "Pinned" });
+  }
   return badges;
+}
+
+/** Protected items survive category regeneration (API mergeRegenerated / §6). */
+export function isProtectedQuestion(meta: KitItemMeta | undefined): boolean {
+  if (!meta) return false;
+  if (meta.origin === "user") return true;
+  if (meta.edited === true) return true;
+  if (meta.pinned === true) return true;
+  return false;
+}
+
+export const QUESTION_CATEGORIES: readonly QuestionCategory[] = [
+  "technical",
+  "behavioural",
+  "system-design",
+  "company-fit",
+] as const;
+
+export function categoryTabLabel(category: QuestionCategory): string {
+  switch (category) {
+    case "technical":
+      return "Technical";
+    case "behavioural":
+      return "Behavioural";
+    case "system-design":
+      return "System design";
+    case "company-fit":
+      return "Company fit";
+    default:
+      return category;
+  }
+}
+
+export function questionsInCategory(
+  questions: readonly KitQuestion[],
+  category: QuestionCategory,
+): KitQuestion[] {
+  return questions.filter((q) => q.category === category);
+}
+
+/** Questions in this category that regenerate will keep (user / edited / pinned). */
+export function questionsKeptOnRegen(
+  questions: readonly KitQuestion[],
+  category: QuestionCategory,
+): KitQuestion[] {
+  return questionsInCategory(questions, category).filter((q) =>
+    isProtectedQuestion(q.meta),
+  );
+}
+
+export function questionsReplacedOnRegen(
+  questions: readonly KitQuestion[],
+  category: QuestionCategory,
+): KitQuestion[] {
+  return questionsInCategory(questions, category).filter(
+    (q) => !isProtectedQuestion(q.meta),
+  );
 }
 
 export function isRequirementCovered(
@@ -76,6 +145,12 @@ export type BriefDraft = {
 export type RequirementDraft = {
   id: string;
   text: string;
+};
+
+export type QuestionDraft = {
+  id: string;
+  prompt: string;
+  answer_outline: string;
 };
 
 /**
@@ -128,9 +203,55 @@ export function buildBriefRoleOps(
   return ops;
 }
 
+/**
+ * Diff question prompt/outline drafts against saved kit → update ops.
+ * Skips empty strings (API min length 1).
+ */
+export function buildQuestionTextOps(
+  saved: KitDocument,
+  drafts: readonly QuestionDraft[],
+): KitOp[] {
+  const ops: KitOp[] = [];
+  const byId = new Map(saved.questions.map((q) => [q.id, q]));
+  for (const draft of drafts) {
+    const savedQ = byId.get(draft.id);
+    if (!savedQ) continue;
+    const set: {
+      prompt?: string;
+      answer_outline?: string;
+    } = {};
+    const nextPrompt = draft.prompt.trim();
+    const nextOutline = draft.answer_outline.trim();
+    if (nextPrompt.length > 0 && nextPrompt !== savedQ.prompt) {
+      set.prompt = nextPrompt;
+    }
+    if (nextOutline.length > 0 && nextOutline !== savedQ.answer_outline) {
+      set.answer_outline = nextOutline;
+    }
+    if (set.prompt !== undefined || set.answer_outline !== undefined) {
+      ops.push({ op: "update", target: "question", id: draft.id, set });
+    }
+  }
+  return ops;
+}
+
+/** Combine brief/role + question text ops for a single debounced flush. */
+export function buildPendingTextOps(
+  saved: KitDocument,
+  brief: BriefDraft,
+  requirements: readonly RequirementDraft[],
+  questionDrafts: readonly QuestionDraft[],
+): KitOp[] {
+  return [
+    ...buildBriefRoleOps(saved, brief, requirements),
+    ...buildQuestionTextOps(saved, questionDrafts),
+  ];
+}
+
 export function draftsFromKit(kit: KitDocument): {
   brief: BriefDraft;
   requirements: RequirementDraft[];
+  questions: QuestionDraft[];
 } {
   return {
     brief: {
@@ -141,7 +262,66 @@ export function draftsFromKit(kit: KitDocument): {
       id: r.id,
       text: r.text,
     })),
+    questions: kit.questions.map((q) => ({
+      id: q.id,
+      prompt: q.prompt,
+      answer_outline: q.answer_outline,
+    })),
   };
+}
+
+/** Optimistic reorder of ids within a category; returns new full questions array. */
+export function reorderQuestionsInCategory(
+  questions: readonly KitQuestion[],
+  category: QuestionCategory,
+  fromId: string,
+  toId: string,
+): KitQuestion[] {
+  const inCat = questions.filter((q) => q.category === category);
+  const fromIndex = inCat.findIndex((q) => q.id === fromId);
+  const toIndex = inCat.findIndex((q) => q.id === toId);
+  if (fromIndex < 0 || toIndex < 0 || fromIndex === toIndex) {
+    return [...questions];
+  }
+  const nextInCat = [...inCat];
+  const [moved] = nextInCat.splice(fromIndex, 1);
+  nextInCat.splice(toIndex, 0, moved!);
+  const result: KitQuestion[] = [];
+  let catInserted = false;
+  for (const q of questions) {
+    if (q.category === category) {
+      if (!catInserted) {
+        result.push(...nextInCat);
+        catInserted = true;
+      }
+    } else {
+      result.push(q);
+    }
+  }
+  if (!catInserted) result.push(...nextInCat);
+  return result;
+}
+
+export function moveQuestionCategory(
+  questions: readonly KitQuestion[],
+  id: string,
+  category: QuestionCategory,
+): KitQuestion[] {
+  return questions.map((q) => (q.id === id ? { ...q, category } : q));
+}
+
+export function setQuestionPinned(
+  questions: readonly KitQuestion[],
+  id: string,
+  pinned: boolean,
+): KitQuestion[] {
+  return questions.map((q) => {
+    if (q.id !== id) return q;
+    return {
+      ...q,
+      meta: { ...q.meta, pinned },
+    };
+  });
 }
 
 export function isNetworkError(err: unknown): boolean {

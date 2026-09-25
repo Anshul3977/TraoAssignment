@@ -12,6 +12,7 @@ import {
   loginRedirectUrl,
   logout,
   patchKit,
+  regenerateKitQuestions,
   retryJob,
 } from "./api";
 
@@ -389,6 +390,67 @@ describe("getKit / patchKit", () => {
       const e = err as ApiClientError;
       expect(e.code).toBe("VERSION_CONFLICT");
       expect(kitFromConflictError(e)?.version).toBe(3);
+    }
+  });
+});
+
+describe("regenerateKitQuestions", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("POSTs /api/kits/:id/regenerate with section questions + category", async () => {
+    const updated = { ...sampleKitRecord, version: 2 };
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          kit: updated,
+          briefSkipped: false,
+          questionsChanged: true,
+        }),
+        { status: 200 },
+      ),
+    );
+    const result = await regenerateKitQuestions("kit1", "technical", {
+      fetch: fetchMock,
+    });
+    expect(result.questionsChanged).toBe(true);
+    expect(result.kit.version).toBe(2);
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/kits/kit1/regenerate",
+      expect.objectContaining({
+        method: "POST",
+        credentials: "include",
+        body: JSON.stringify({
+          section: "questions",
+          category: "technical",
+        }),
+      }),
+    );
+  });
+
+  it("surfaces VERSION_CONFLICT with kit on regenerate race", async () => {
+    const conflictKit = { ...sampleKitRecord, version: 4 };
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          error: {
+            code: "VERSION_CONFLICT",
+            message: "Kit was modified; reload and retry.",
+          },
+          kit: conflictKit,
+        }),
+        { status: 409 },
+      ),
+    );
+    try {
+      await regenerateKitQuestions("kit1", "behavioural", {
+        fetch: fetchMock,
+      });
+      expect.unreachable("should throw");
+    } catch (err) {
+      expect(err).toBeInstanceOf(ApiClientError);
+      expect(kitFromConflictError(err as ApiClientError)?.version).toBe(4);
     }
   });
 });

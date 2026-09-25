@@ -8,7 +8,7 @@ npm workspaces:
 
 - `packages/core` — schema, retrieval, LLM helpers, deterministic steps, pipeline pieces
 - `apps/api` — Express API (auth, kits/jobs — see `docs/API.md`)
-- `apps/web` — Next.js App Router UI (auth shell, dashboard, create-kit / batch upload, job progress, kit builder Brief + Role)
+- `apps/web` — Next.js App Router UI (auth shell, dashboard, create-kit / batch upload, job progress, kit builder Brief + Role + Questions)
 - `docs/API.md` — HTTP contract the web app builds against
 
 ## Setup
@@ -45,7 +45,7 @@ npm run dev --workspace=@prep/api
 npm start --workspace=@prep/api
 ```
 
-### Web (`apps/web`) — T21 + T22a + T22b + T23a
+### Web (`apps/web`) — T21 + T22a + T22b + T23a + T23b
 
 Auth UI + app shell against [`docs/API.md`](docs/API.md) only (no invented routes). Login/register/logout, `middleware.ts` gate for signed-out visitors, same-origin API client (`credentials: 'include'`, 401 → `/login?next=`), TanStack Query provider, dashboard empty state.
 
@@ -55,7 +55,9 @@ Auth UI + app shell against [`docs/API.md`](docs/API.md) only (no invented route
 
 **Job progress** (`/jobs/:id`): polls `GET /jobs/:id` while queued/running; step timeline (spinner / ✓ / skipped+reason / failed); sources found vs skipped from step details; elapsed time; safe-to-leave notice; `POST /jobs/:id/retry` when failed. When done, links to the kit builder.
 
-**Kit builder — Brief + Role** (`/kits/:id`): loads `GET /kits/:id`. Editable company brief (summary / what they do) and requirement text with must/nice badges, coverage (covered vs uncovered from `coverage.uncovered_requirement_ids`), and origin/edited badges. Edits stay local and flush as a debounced (600 ms) `PATCH /kits/:id` op batch (`baseVersion` + brief/requirement update ops). Save status: Saved / Saving… / Offline (+ Retry). No full-page reload on save. Questions / flashcards / schedule / regenerate arrive in later tasks.
+**Kit builder — Brief + Role + Questions** (`/kits/:id`): loads `GET /kits/:id`. Editable company brief (summary / what they do) and requirement text with must/nice badges, coverage (covered vs uncovered from `coverage.uncovered_requirement_ids`), and origin/edited badges. Edits stay local and flush as a debounced (600 ms) `PATCH /kits/:id` op batch (`baseVersion` + brief/requirement/question update ops). Save status: Saved / Saving… / Offline (+ Retry). No full-page reload on save.
+
+**Questions (T23b):** category tabs (technical / behavioural / system-design / company-fit); inline edit prompt + answer outline; optimistic reorder via `@dnd-kit` (PointerSensor + KeyboardSensor); move-to-category select; add / delete with undo toast; pin toggle; badges AI / Edited / Yours / Pinned. **Regenerate category** opens a confirm dialog listing protected items that will be kept (user / edited / pinned); pending text edits flush before `POST /kits/:id/regenerate` `{ section: "questions", category }`. `409 VERSION_CONFLICT` opens a merge prompt (reload latest) — never silent overwrite. Structural ops use `PATCH` reorder / move / update(pinned) / add / delete.
 
 Browser calls go to `/api/*`; Next rewrites strip the prefix to the Express origin (`API_ORIGIN`, default `http://localhost:4000`).
 
@@ -66,7 +68,7 @@ npm run dev --workspace=@prep/api
 npm run dev --workspace=@prep/web
 ```
 
-Open `http://localhost:3000`. Signed-out visits to `/`, `/kits/new`, `/kits/batch`, `/kits/:id`, or `/jobs/:id` redirect to `/login`. After register/login, use **Create a kit** or **Batch upload** on the dashboard (list endpoint not in the contract yet — empty state only). Open a finished job’s **Open builder** link for Brief + Role.
+Open `http://localhost:3000`. Signed-out visits to `/`, `/kits/new`, `/kits/batch`, `/kits/:id`, or `/jobs/:id` redirect to `/login`. After register/login, use **Create a kit** or **Batch upload** on the dashboard (list endpoint not in the contract yet — empty state only). Open a finished job’s **Open builder** link for Brief + Role + Questions.
 
 
 ### Batch CLI (`npm run evaluate`) — T16

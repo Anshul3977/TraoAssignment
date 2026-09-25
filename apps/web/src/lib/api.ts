@@ -303,7 +303,24 @@ export type KitItemMeta = {
   [key: string]: unknown;
 };
 
-/** Appendix A kit document (fields the builder reads for Brief + Role). */
+export type QuestionCategory =
+  | "technical"
+  | "behavioural"
+  | "system-design"
+  | "company-fit";
+
+/** Appendix A question (builder Questions section). */
+export type KitQuestion = {
+  id: string;
+  requirement_ids: string[];
+  category: QuestionCategory | string;
+  prompt: string;
+  answer_outline: string;
+  difficulty: 1 | 2 | 3 | number;
+  meta?: KitItemMeta;
+};
+
+/** Appendix A kit document (fields the builder reads). */
 export type KitDocument = {
   source: {
     company: string;
@@ -332,7 +349,7 @@ export type KitDocument = {
       meta?: KitItemMeta;
     }>;
   };
-  questions: unknown[];
+  questions: KitQuestion[];
   flashcards: unknown[];
   schedule: unknown;
   coverage: {
@@ -356,7 +373,7 @@ export type KitRecord = {
   updatedAt: string;
 };
 
-/** PATCH /kits/:id op shapes used by the builder (Brief + Role). */
+/** PATCH /kits/:id op shapes used by the builder (docs/API.md). */
 export type KitOp =
   | {
       op: "update";
@@ -377,7 +394,13 @@ export type KitOp =
       op: "update";
       target: "question";
       id: string;
-      set: Record<string, unknown>;
+      set: {
+        prompt?: string;
+        answer_outline?: string;
+        difficulty?: 1 | 2 | 3;
+        requirement_ids?: string[];
+        pinned?: boolean;
+      };
     }
   | {
       op: "update";
@@ -385,16 +408,31 @@ export type KitOp =
       id: string;
       set: Record<string, unknown>;
     }
-  | { op: "add"; target: "question"; value: Record<string, unknown> }
+  | {
+      op: "add";
+      target: "question";
+      value: {
+        prompt: string;
+        answer_outline: string;
+        category: QuestionCategory;
+        difficulty?: 1 | 2 | 3;
+        requirement_ids?: string[];
+      };
+    }
   | { op: "add"; target: "flashcard"; value: Record<string, unknown> }
   | { op: "delete"; target: "question" | "flashcard"; id: string }
   | {
       op: "reorder";
       target: "questions" | "flashcards";
       ids: string[];
-      category?: string;
+      category?: QuestionCategory;
     }
-  | { op: "move"; target: "question"; id: string; category: string };
+  | {
+      op: "move";
+      target: "question";
+      id: string;
+      category: QuestionCategory;
+    };
 
 export type KitPatchBody = {
   baseVersion: number;
@@ -444,4 +482,38 @@ export function kitFromConflictError(
     return (body as { kit: KitRecord }).kit;
   }
   return null;
+}
+
+export type RegenerateQuestionsBody = {
+  section: "questions";
+  category: QuestionCategory;
+};
+
+export type RegenerateResult = {
+  kit: KitRecord;
+  briefSkipped: boolean;
+  questionsChanged: boolean;
+};
+
+/**
+ * POST /kits/:id/regenerate — regenerate one question category (no re-crawl).
+ * Merge keeps user / edited / pinned items. 409 VERSION_CONFLICT includes current kit.
+ */
+export async function regenerateKitQuestions(
+  id: string,
+  category: QuestionCategory,
+  deps?: ApiFetchDeps,
+): Promise<RegenerateResult> {
+  const body: RegenerateQuestionsBody = {
+    section: "questions",
+    category,
+  };
+  return apiFetch(
+    `/kits/${encodeURIComponent(id)}/regenerate`,
+    {
+      method: "POST",
+      body: JSON.stringify(body),
+    },
+    deps,
+  );
 }

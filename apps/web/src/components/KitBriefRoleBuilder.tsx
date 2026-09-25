@@ -3,21 +3,33 @@
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
+  KitQuestionsSection,
+  VersionConflictPrompt,
+  type UndoDeletePayload,
+} from "@/components/KitQuestionsSection";
+import {
   ApiClientError,
   getKit,
   kitFromConflictError,
   patchKit,
+  regenerateKitQuestions,
+  type KitOp,
+  type KitQuestion,
   type KitRecord,
+  type QuestionCategory,
 } from "@/lib/api";
 import {
   SAVE_DEBOUNCE_MS,
-  buildBriefRoleOps,
+  buildPendingTextOps,
   coverageIndicator,
   draftsFromKit,
   isNetworkError,
   itemBadges,
+  moveQuestionCategory,
   saveStatusLabel,
+  setQuestionPinned,
   type BriefDraft,
+  type QuestionDraft,
   type RequirementDraft,
   type SaveStatus,
 } from "@/lib/kit-builder";
@@ -39,13 +51,26 @@ export function KitBriefRoleBuilder({
   const [requirements, setRequirements] = useState<RequirementDraft[] | null>(
     initialKit ? draftsFromKit(initialKit.kit).requirements : null,
   );
+  const [questionDrafts, setQuestionDrafts] = useState<QuestionDraft[] | null>(
+    initialKit ? draftsFromKit(initialKit.kit).questions : null,
+  );
+  const [localQuestions, setLocalQuestions] = useState<KitQuestion[] | null>(
+    initialKit ? initialKit.kit.questions : null,
+  );
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("saved");
   const [loadError, setLoadError] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [conflictOpen, setConflictOpen] = useState(false);
+  const [conflictMessage, setConflictMessage] = useState("");
+  const [pendingConflictKit, setPendingConflictKit] =
+    useState<KitRecord | null>(null);
+  const [regenerating, setRegenerating] = useState(false);
 
   const recordRef = useRef(record);
   const briefRef = useRef(brief);
   const requirementsRef = useRef(requirements);
+  const questionDraftsRef = useRef(questionDrafts);
+  const localQuestionsRef = useRef(localQuestions);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const savingRef = useRef(false);
   const pendingFlushRef = useRef(false);
@@ -59,15 +84,25 @@ export function KitBriefRoleBuilder({
   useEffect(() => {
     requirementsRef.current = requirements;
   }, [requirements]);
+  useEffect(() => {
+    questionDraftsRef.current = questionDrafts;
+  }, [questionDrafts]);
+  useEffect(() => {
+    localQuestionsRef.current = localQuestions;
+  }, [localQuestions]);
 
   const adoptRecord = useCallback((next: KitRecord) => {
     const drafts = draftsFromKit(next.kit);
     setRecord(next);
     setBrief(drafts.brief);
     setRequirements(drafts.requirements);
+    setQuestionDrafts(drafts.questions);
+    setLocalQuestions(next.kit.questions);
     recordRef.current = next;
     briefRef.current = drafts.brief;
     requirementsRef.current = drafts.requirements;
+    questionDraftsRef.current = drafts.questions;
+    localQuestionsRef.current = next.kit.questions;
   }, []);
 
   const load = useCallback(async () => {
@@ -89,67 +124,91 @@ export function KitBriefRoleBuilder({
     void load();
   }, [load]);
 
-  const flushSave = useCallback(async () => {
+  const handleConflict = useCallback(
+    (err: ApiClientError) => {
+      const conflictKit = kitFromConflictError(err);
+      setConflictMessage(
+        err.message || "Kit was modified; reload and retry.",
+      );
+      setPendingConflictKit(conflictKit);
+      setConflictOpen(true);
+      setSaveStatus("saved");
+      setSaveError(null);
+    },
+    [],
+  );
+
+  const applyOps = useCallback(
+    async (ops: KitOp[]): Promise<boolean> => {
+      const current = recordRef.current;
+      if (!current || ops.length === 0) return true;
+
+      if (savingRef.current) {
+        pendingFlushRef.current = true;
+        return false;
+      }
+
+      savingRef.current = true;
+      setSaveStatus("saving");
+      setSaveError(null);
+
+      try {
+        const { kit: next } = await patchKit(current.id, {
+          baseVersion: current.version,
+          ops,
+        });
+        adoptRecord(next);
+        setSaveStatus("saved");
+        return true;
+      } catch (err) {
+        if (err instanceof ApiClientError && err.code === "VERSION_CONFLICT") {
+          handleConflict(err);
+          return false;
+        }
+        if (isNetworkError(err)) {
+          setSaveError("You appear to be offline.");
+          setSaveStatus("offline");
+        } else {
+          const message =
+            err instanceof ApiClientError
+              ? err.message
+              : "Save failed. Try again.";
+          setSaveError(message);
+          setSaveStatus("offline");
+        }
+        return false;
+      } finally {
+        savingRef.current = false;
+        if (pendingFlushRef.current) {
+          pendingFlushRef.current = false;
+          // Caller may re-schedule; do not recurse blindly with stale ops.
+        }
+      }
+    },
+    [adoptRecord, handleConflict],
+  );
+
+  const flushSave = useCallback(async (): Promise<boolean> => {
     const current = recordRef.current;
     const briefDraft = briefRef.current;
     const reqDrafts = requirementsRef.current;
-    if (!current || !briefDraft || !reqDrafts) return;
+    const qDrafts = questionDraftsRef.current;
+    if (!current || !briefDraft || !reqDrafts || !qDrafts) return true;
 
-    const ops = buildBriefRoleOps(current.kit, briefDraft, reqDrafts);
+    const ops = buildPendingTextOps(
+      current.kit,
+      briefDraft,
+      reqDrafts,
+      qDrafts,
+    );
     if (ops.length === 0) {
       setSaveStatus("saved");
       setSaveError(null);
-      return;
+      return true;
     }
 
-    if (savingRef.current) {
-      pendingFlushRef.current = true;
-      return;
-    }
-
-    savingRef.current = true;
-    setSaveStatus("saving");
-    setSaveError(null);
-
-    try {
-      const { kit: next } = await patchKit(current.id, {
-        baseVersion: current.version,
-        ops,
-      });
-      adoptRecord(next);
-      setSaveStatus("saved");
-    } catch (err) {
-      if (err instanceof ApiClientError && err.code === "VERSION_CONFLICT") {
-        const conflictKit = kitFromConflictError(err);
-        if (conflictKit) {
-          adoptRecord(conflictKit);
-          setSaveError(
-            "Kit was modified elsewhere — reloaded the latest version. Re-apply your edit if needed.",
-          );
-          setSaveStatus("saved");
-        } else {
-          setSaveError(err.message);
-          setSaveStatus("offline");
-        }
-      } else if (isNetworkError(err)) {
-        setSaveError("You appear to be offline.");
-        setSaveStatus("offline");
-      } else {
-        const message =
-          err instanceof ApiClientError
-            ? err.message
-            : "Save failed. Try again.";
-        setSaveError(message);
-        setSaveStatus("offline");
-      }
-    } finally {
-      savingRef.current = false;
-      if (pendingFlushRef.current) {
-        pendingFlushRef.current = false;
-        void flushSave();
-      }
-    }
-  }, [adoptRecord]);
+    return applyOps(ops);
+  }, [applyOps]);
 
   const scheduleSave = useCallback(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -164,6 +223,21 @@ export function KitBriefRoleBuilder({
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
   }, []);
+
+  /** Flush any pending debounce + text ops before structural / regen calls. */
+  const flushPendingEdits = useCallback(async (): Promise<boolean> => {
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+      debounceRef.current = null;
+    }
+    // Wait briefly if a save is in flight.
+    let spins = 0;
+    while (savingRef.current && spins < 50) {
+      await new Promise((r) => setTimeout(r, 50));
+      spins += 1;
+    }
+    return flushSave();
+  }, [flushSave]);
 
   function onBriefChange(field: keyof BriefDraft, value: string) {
     setBrief((prev) => {
@@ -185,8 +259,222 @@ export function KitBriefRoleBuilder({
     scheduleSave();
   }
 
+  function onQuestionPromptChange(id: string, value: string) {
+    setQuestionDrafts((prev) => {
+      if (!prev) return prev;
+      const next = prev.map((q) =>
+        q.id === id ? { ...q, prompt: value } : q,
+      );
+      questionDraftsRef.current = next;
+      return next;
+    });
+    scheduleSave();
+  }
+
+  function onQuestionOutlineChange(id: string, value: string) {
+    setQuestionDrafts((prev) => {
+      if (!prev) return prev;
+      const next = prev.map((q) =>
+        q.id === id ? { ...q, answer_outline: value } : q,
+      );
+      questionDraftsRef.current = next;
+      return next;
+    });
+    scheduleSave();
+  }
+
+  async function runStructuralOp(
+    optimistic: (qs: KitQuestion[]) => KitQuestion[],
+    op: KitOp,
+  ) {
+    const ok = await flushPendingEdits();
+    if (!ok) return;
+
+    const prev = localQuestionsRef.current ?? [];
+    const nextQs = optimistic(prev);
+    setLocalQuestions(nextQs);
+    localQuestionsRef.current = nextQs;
+
+    const patched = await applyOps([op]);
+    if (!patched) {
+      // Revert optimistic order on failure (conflict dialog handles reload).
+      setLocalQuestions(prev);
+      localQuestionsRef.current = prev;
+    }
+  }
+
+  async function onReorder(category: QuestionCategory, orderedIds: string[]) {
+    const prev = localQuestionsRef.current ?? [];
+    // Apply ordered ids within category using reorder helper pairwise from first delta.
+    let next = [...prev];
+    const currentIds = next
+      .filter((q) => q.category === category)
+      .map((q) => q.id);
+    if (
+      currentIds.length === orderedIds.length &&
+      orderedIds.every((id, i) => id === currentIds[i])
+    ) {
+      return;
+    }
+    // Rebuild category block from orderedIds
+    const byId = new Map(next.map((q) => [q.id, q]));
+    const reorderedCat = orderedIds
+      .map((id) => byId.get(id))
+      .filter((q): q is KitQuestion => Boolean(q));
+    const result: KitQuestion[] = [];
+    let inserted = false;
+    for (const q of next) {
+      if (q.category === category) {
+        if (!inserted) {
+          result.push(...reorderedCat);
+          inserted = true;
+        }
+      } else {
+        result.push(q);
+      }
+    }
+    if (!inserted) result.push(...reorderedCat);
+
+    await flushPendingEdits();
+    setLocalQuestions(result);
+    localQuestionsRef.current = result;
+    const patched = await applyOps([
+      {
+        op: "reorder",
+        target: "questions",
+        category,
+        ids: orderedIds,
+      },
+    ]);
+    if (!patched) {
+      setLocalQuestions(prev);
+      localQuestionsRef.current = prev;
+    }
+  }
+
+  async function onMove(id: string, category: QuestionCategory) {
+    await runStructuralOp(
+      (qs) => moveQuestionCategory(qs, id, category),
+      { op: "move", target: "question", id, category },
+    );
+  }
+
+  async function onPinToggle(id: string, pinned: boolean) {
+    await runStructuralOp(
+      (qs) => setQuestionPinned(qs, id, pinned),
+      {
+        op: "update",
+        target: "question",
+        id,
+        set: { pinned },
+      },
+    );
+  }
+
+  async function onAdd(category: QuestionCategory) {
+    await flushPendingEdits();
+    await applyOps([
+      {
+        op: "add",
+        target: "question",
+        value: {
+          prompt: "New question",
+          answer_outline: "Outline your answer here.",
+          category,
+          difficulty: 2,
+          requirement_ids: [],
+        },
+      },
+    ]);
+  }
+
+  async function onDelete(id: string) {
+    await runStructuralOp(
+      (qs) => qs.filter((q) => q.id !== id),
+      { op: "delete", target: "question", id },
+    );
+    setQuestionDrafts((prev) => {
+      if (!prev) return prev;
+      const next = prev.filter((d) => d.id !== id);
+      questionDraftsRef.current = next;
+      return next;
+    });
+  }
+
+  async function onUndoDelete(payload: UndoDeletePayload) {
+    const q = payload.question;
+    await flushPendingEdits();
+    await applyOps([
+      {
+        op: "add",
+        target: "question",
+        value: {
+          prompt: q.prompt,
+          answer_outline: q.answer_outline,
+          category: q.category as QuestionCategory,
+          difficulty: ([1, 2, 3].includes(Number(q.difficulty))
+            ? Number(q.difficulty)
+            : 2) as 1 | 2 | 3,
+          requirement_ids: q.requirement_ids,
+        },
+      },
+    ]);
+  }
+
+  async function onRequestRegenerate(category: QuestionCategory) {
+    const current = recordRef.current;
+    if (!current) return;
+
+    const flushed = await flushPendingEdits();
+    if (!flushed) return;
+
+    setRegenerating(true);
+    setSaveError(null);
+    try {
+      const result = await regenerateKitQuestions(current.id, category);
+      adoptRecord(result.kit);
+      setSaveStatus("saved");
+    } catch (err) {
+      if (err instanceof ApiClientError && err.code === "VERSION_CONFLICT") {
+        handleConflict(err);
+      } else if (isNetworkError(err)) {
+        setSaveError("You appear to be offline.");
+        setSaveStatus("offline");
+      } else {
+        const message =
+          err instanceof ApiClientError
+            ? err.message
+            : "Regenerate failed. Try again.";
+        setSaveError(message);
+      }
+    } finally {
+      setRegenerating(false);
+    }
+  }
+
   function onRetry() {
     void flushSave();
+  }
+
+  function onConflictReload() {
+    if (pendingConflictKit) {
+      adoptRecord(pendingConflictKit);
+    } else {
+      void load();
+    }
+    setConflictOpen(false);
+    setPendingConflictKit(null);
+  }
+
+  function onConflictDismiss() {
+    // Do not silently adopt — leave local drafts; user decides.
+    setConflictOpen(false);
+    if (pendingConflictKit) {
+      // Keep server kit as record source of truth for version, but surface alert.
+      setSaveError(
+        "Server has a newer version. Reload latest to continue saving, or re-apply edits after reload.",
+      );
+    }
   }
 
   if (loadError && !record) {
@@ -197,7 +485,13 @@ export function KitBriefRoleBuilder({
     );
   }
 
-  if (!record || !brief || !requirements) {
+  if (
+    !record ||
+    !brief ||
+    !requirements ||
+    !questionDrafts ||
+    !localQuestions
+  ) {
     return (
       <p className="text-sm text-zinc-600" role="status">
         Loading kit…
@@ -401,11 +695,34 @@ export function KitBriefRoleBuilder({
         </ul>
       </section>
 
+      <KitQuestionsSection
+        questions={localQuestions}
+        drafts={questionDrafts}
+        onPromptChange={onQuestionPromptChange}
+        onOutlineChange={onQuestionOutlineChange}
+        onReorder={onReorder}
+        onMove={onMove}
+        onPinToggle={onPinToggle}
+        onAdd={onAdd}
+        onDelete={onDelete}
+        onUndoDelete={onUndoDelete}
+        onRequestRegenerate={onRequestRegenerate}
+        regenerating={regenerating}
+      />
+
       <p className="text-sm text-zinc-600">
         <Link href="/" className="underline hover:text-zinc-900">
           Back to dashboard
         </Link>
       </p>
+
+      {conflictOpen ? (
+        <VersionConflictPrompt
+          message={conflictMessage}
+          onReload={onConflictReload}
+          onDismiss={onConflictDismiss}
+        />
+      ) : null}
     </div>
   );
 }
