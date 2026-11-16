@@ -2,11 +2,14 @@
 
 Interview prep kit generator ([Trao FS-AI-INTERVIEW-01](docs/SPEC.md)). Paste a job description, a company URL, and days until the interview. The pipeline crawls the company site, searches public interview discussion, grounds requirements in the JD, and builds a kit: company brief, role breakdown, question bank, flashcards, and a day-by-day schedule. You can edit any part, regenerate one section without losing edits, and practise flashcards in-app.
 
+**Try it without an account:** [https://prep-kit-rho.vercel.app/demo](https://prep-kit-rho.vercel.app/demo)  
 **Live app:** [https://prep-kit-rho.vercel.app](https://prep-kit-rho.vercel.app)  
 **API health:** [https://prep-kit-fjgi.onrender.com/health](https://prep-kit-fjgi.onrender.com/health)  
 **GitHub:** [https://github.com/Anshul3977/TraoAssignment](https://github.com/Anshul3977/TraoAssignment)
 
 The browser talks only to the Next origin (`/api/*`); Vercel rewrites that prefix to Express. Free Render instances sleep after idle — the first request after sleep is often ~50s.
+
+**Public demo (`/demo`).** A Next.js route handler (`apps/web/src/app/api/demo/route.ts`) runs the same `runPipeline` from `@prep/core` on Vercel and streams each step as NDJSON, then renders the kit read-only. No account, nothing stored. It uses Groq (`LLM_PROVIDER=groq`, key in the Vercel dashboard only), allows 3 kits per IP per hour and 2 at once per instance (in-memory, best effort), caps the JD at 6,000 characters and 14 days, and never fetches private hosts. A kit takes about 1–2.5 minutes on the free tier, inside the 300 s function limit.
 
 ---
 

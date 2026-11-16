@@ -107,6 +107,12 @@ export function AuthForm({ mode, nextPath }: AuthFormProps) {
           {altLabel}
         </Link>
       </p>
+      <p className="mt-3 text-center text-sm text-zinc-600">
+        Just looking?{" "}
+        <Link href="/demo" className="font-medium text-zinc-900 underline">
+          Try the demo without an account
+        </Link>
+      </p>
     </div>
   );
 }

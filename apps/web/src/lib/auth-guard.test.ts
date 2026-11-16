@@ -38,6 +38,11 @@ describe("decideAuthRedirect", () => {
     });
   });
 
+  it("leaves the public demo open to everyone", () => {
+    expect(decideAuthRedirect("/demo", false)).toEqual({ action: "allow" });
+    expect(decideAuthRedirect("/demo", true)).toEqual({ action: "allow" });
+  });
+
   it("allows signed-in visitors on protected routes", () => {
     expect(decideAuthRedirect("/", true)).toEqual({ action: "allow" });
   });

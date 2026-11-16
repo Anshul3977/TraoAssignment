@@ -3,6 +3,12 @@
 export const SESSION_COOKIE = "session";
 
 const PUBLIC_PATHS = new Set(["/login", "/register"]);
+/** Open to everyone, signed in or not (no redirect either way). */
+const OPEN_PATHS = new Set(["/demo"]);
+
+export function isOpenPath(pathname: string): boolean {
+  return OPEN_PATHS.has(pathname);
+}
 
 export function isPublicPath(pathname: string): boolean {
   return PUBLIC_PATHS.has(pathname);
@@ -29,6 +35,9 @@ export function decideAuthRedirect(
   pathname: string,
   hasSessionCookie: boolean,
 ): GuardDecision {
+  if (isOpenPath(pathname)) {
+    return { action: "allow" };
+  }
   if (!hasSessionCookie && !isPublicPath(pathname)) {
     const next = encodeURIComponent(pathname);
     return { action: "redirect", to: `/login?next=${next}` };
