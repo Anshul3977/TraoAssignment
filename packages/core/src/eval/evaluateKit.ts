@@ -171,7 +171,9 @@ export function evaluateKit(kit: Kit, jd: string): KitEvaluation {
   });
 
   // 8. The company brief exists and cites at least one page.
-  const hasSummary = kit.company_brief.summary.trim().length >= 40;
+  const hasSummary =
+    kit.company_brief.summary.trim().length >= 40 &&
+    !kit.company_brief.summary.startsWith("We could not produce a reliable company brief");
   const hasSource = kit.company_brief.sources.length > 0;
   const bp = (Number(hasSummary) + Number(hasSource)) / 2;
   checks.push({
@@ -180,8 +182,10 @@ export function evaluateKit(kit: Kit, jd: string): KitEvaluation {
     value: bp,
     pass: bp === 1,
     detail: !hasSummary
-      ? "brief is empty or a placeholder"
-      : `${kit.company_brief.sources.length} source page(s) cited`,
+      ? "fallback brief: the model call failed or pages were too thin"
+      : hasSource
+        ? `${kit.company_brief.sources.length} source page(s) cited`
+        : "brief cites no pages",
   });
 
   const score = Math.round((checks.reduce((a, c) => a + c.value, 0) / checks.length) * 100);
