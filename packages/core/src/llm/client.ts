@@ -1,8 +1,8 @@
 import { LlmProviderError } from "./errors.js";
 import {
+  TokenRequestLimiter,
   estimateTokens,
   getSharedLimiter,
-  type TokenRequestLimiter,
 } from "./limiter.js";
 import { withRetry, type RetryOptions } from "./retry.js";
 import { createProvidersFromEnv, type EnvLike } from "./config.js";
@@ -67,11 +67,27 @@ export function createLlmClient(opts: CreateLlmClientOptions): LlmClient {
   };
 }
 
+let groqLimiter: TokenRequestLimiter | undefined;
+
+/**
+ * Groq's free tier allows ~8k tokens per minute per model (input + output).
+ * The limiter only sees estimated input, so default to 7k: most calls fit, and a 429 is retried after
+ * Groq's retry-after. Override with GROQ_TPM / GROQ_RPM.
+ */
+export function getGroqLimiter(env: EnvLike = process.env): TokenRequestLimiter {
+  groqLimiter ??= new TokenRequestLimiter({
+    requestsPerMinute: Number(env.GROQ_RPM) || 20,
+    tokensPerMinute: Number(env.GROQ_TPM) || 7_000,
+  });
+  return groqLimiter;
+}
+
 /** Client wired from process env (or injected env map). */
 export function createLlmClientFromEnv(
   env: EnvLike = process.env,
   opts?: Omit<CreateLlmClientOptions, "primary" | "fallback">,
 ): LlmClient {
-  const { primary, fallback } = createProvidersFromEnv(env);
-  return createLlmClient({ primary, fallback, ...opts });
+  const { primary, fallback, primaryId } = createProvidersFromEnv(env);
+  const limiter = opts?.limiter ?? (primaryId === "groq" ? getGroqLimiter(env) : undefined);
+  return createLlmClient({ primary, fallback, ...opts, ...(limiter ? { limiter } : {}) });
 }

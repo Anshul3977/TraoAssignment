@@ -8,7 +8,7 @@ import type {
   LlmProvider,
   ProviderId,
 } from "../llm/types.js";
-import { buildBrief, honestEmptyBrief } from "./buildBrief.js";
+import { buildBrief, fitPagesToBudget, honestEmptyBrief } from "./buildBrief.js";
 import type { ResearchPage } from "./researchPages.js";
 
 function fakeProvider(
@@ -209,5 +209,20 @@ describe("buildBrief", () => {
     expect(brief.summary.toLowerCase()).not.toContain("cobol");
     expect(brief.what_they_do.toLowerCase()).not.toContain("cobol");
     expect(brief.sources).toEqual(["http://localhost:8099/evil/"]);
+  });
+});
+
+describe("fitPagesToBudget", () => {
+  const page = (url: string, n: number) => ({ url, text: "x".repeat(n) });
+  it("keeps pages untouched under an infinite budget", () => {
+    const pages = [page("a", 5000)];
+    expect(fitPagesToBudget(pages, Infinity)).toBe(pages);
+  });
+  it("splits the budget, passing unused share from short pages to long ones", () => {
+    const out = fitPagesToBudget([page("home", 12000), page("about", 1000), page("team", 12000)], 10000);
+    expect(out.map((p) => p.url)).toEqual(["home", "about", "team"]);
+    expect(out.reduce((a, p) => a + p.text.length, 0)).toBeLessThanOrEqual(10000);
+    expect(out[1]!.text.length).toBe(1000);
+    expect(out[0]!.text.length).toBe(4500);
   });
 });

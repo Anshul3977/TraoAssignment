@@ -100,6 +100,36 @@ export function honestEmptyBrief(input: BuildBriefInput): CompanyBrief {
 }
 
 /**
+ * Fit page text into a total character budget, homepage first. Each page gets
+ * an equal share of what is left, and short pages hand their unused share on.
+ */
+export function fitPagesToBudget(pages: ResearchPage[], budget: number): ResearchPage[] {
+  if (!Number.isFinite(budget)) return pages;
+  const out: ResearchPage[] = [];
+  let remaining = Math.max(0, budget);
+  const order = [...pages].sort((a, b) => a.text.length - b.text.length);
+  const share = new Map<ResearchPage, number>();
+  let left = order.length;
+  for (const p of order) {
+    const cap = Math.floor(remaining / left);
+    const take = Math.min(p.text.length, cap);
+    share.set(p, take);
+    remaining -= take;
+    left--;
+  }
+  for (const p of pages) {
+    const take = share.get(p) ?? 0;
+    if (take >= 200) out.push(take < p.text.length ? { ...p, text: p.text.slice(0, take) } : p);
+  }
+  return out;
+}
+
+/** Total page-text budget per provider: Groq free tier caps a request near 8k tokens. */
+function briefCharBudget(client: LlmClient): number {
+  return client.primary.id === "groq" ? 14_000 : Number.POSITIVE_INFINITY;
+}
+
+/**
  * LLM step: company brief from homepage + about pages only.
  * Page text is sent only via wrapUntrusted; sources are filtered to fetched URLs.
  */
@@ -108,7 +138,7 @@ export async function buildBrief(
   input: BuildBriefInput,
   opts?: BuildBriefOptions,
 ): Promise<CompanyBrief> {
-  const pages = briefPages(input);
+  const pages = fitPagesToBudget(briefPages(input), briefCharBudget(client));
   if (pages.length === 0) {
     return honestEmptyBrief(input);
   }
