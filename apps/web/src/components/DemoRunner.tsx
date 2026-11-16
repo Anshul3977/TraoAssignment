@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import type { Kit } from "@prep/core";
+import type { Kit, KitEvaluation, LlmCallTrace, TraceSummary } from "@prep/core";
 
 const SAMPLE_JD = `Backend Engineer (Python)
 You will build and operate REST APIs with FastAPI and PostgreSQL, write tests with pytest, deploy with Docker on AWS, and work with our data team on ML model serving.
@@ -21,11 +21,13 @@ const STEP_LABELS: Record<string, string> = {
   validate: "Validate the kit",
 };
 
-type StepState = { step: string; status: string; detail?: string };
+type StepState = { step: string; status: string; detail?: string; ms?: number };
+type Trace = TraceSummary & { runId: string; totalMs: number; stepMs: Record<string, number> };
 type Line =
   | ({ type: "progress" } & StepState)
-  | { type: "kit"; kit: Kit }
-  | { type: "error"; code: string; message: string }
+  | ({ type: "llm" } & LlmCallTrace)
+  | { type: "kit"; kit: Kit; evaluation: KitEvaluation; trace: Trace }
+  | { type: "error"; code: string; message: string; trace?: Trace }
   | { type: "ping" };
 
 export function DemoRunner() {
@@ -34,6 +36,9 @@ export function DemoRunner() {
   const [days, setDays] = useState(5);
   const [steps, setSteps] = useState<StepState[]>([]);
   const [kit, setKit] = useState<Kit | null>(null);
+  const [evaluation, setEvaluation] = useState<KitEvaluation | null>(null);
+  const [trace, setTrace] = useState<Trace | null>(null);
+  const [llmCalls, setLlmCalls] = useState<LlmCallTrace[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const [started, setStarted] = useState<number | null>(null);
@@ -44,6 +49,9 @@ export function DemoRunner() {
     setPending(true);
     setError(null);
     setKit(null);
+    setEvaluation(null);
+    setTrace(null);
+    setLlmCalls([]);
     setSteps([]);
     setStarted(Date.now());
     try {
@@ -72,13 +80,20 @@ export function DemoRunner() {
           if (line.type === "progress") {
             setSteps((prev) => {
               const next = prev.filter((s) => s.step !== line.step);
-              return [...next, { step: line.step, status: line.status, detail: line.detail }];
+              return [...next, { step: line.step, status: line.status, detail: line.detail, ms: line.ms }];
             });
+          } else if (line.type === "llm") {
+            const { type: _t, ...call } = line;
+            void _t;
+            setLlmCalls((prev) => [...prev, call]);
           } else if (line.type === "kit") {
             setKit(line.kit);
+            setEvaluation(line.evaluation);
+            setTrace(line.trace);
             setTimeout(() => resultRef.current?.scrollIntoView({ behavior: "smooth" }), 50);
           } else if (line.type === "error") {
             setError(line.message);
+            if (line.trace) setTrace(line.trace);
           }
         }
       }
@@ -150,16 +165,28 @@ export function DemoRunner() {
                 </span>
                 <span className="text-zinc-800">{STEP_LABELS[s.step] ?? s.step}</span>
                 {s.detail && <span className="truncate text-zinc-500">{s.detail}</span>}
+                {s.ms !== undefined && (
+                  <span className="ml-auto shrink-0 font-mono text-xs tabular-nums text-zinc-400">{(s.ms / 1000).toFixed(1)}s</span>
+                )}
               </li>
             ))}
           </ol>
+          {llmCalls.length > 0 && (
+            <p className="mt-3 font-mono text-xs text-zinc-500" data-testid="llm-counter">
+              {llmCalls.length} LLM call{llmCalls.length === 1 ? "" : "s"} ·{" "}
+              {llmCalls.reduce((a, c) => a + (c.promptTokens ?? 0) + (c.completionTokens ?? 0), 0).toLocaleString()} tokens
+              {llmCalls.some((c) => !c.ok) && ` · ${llmCalls.filter((c) => !c.ok).length} retried/failed`}
+            </p>
+          )}
           {error && <p className="mt-3 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
         </section>
       )}
 
       {kit && (
-        <div ref={resultRef}>
+        <div ref={resultRef} className="space-y-6">
+          {evaluation && <EvaluationView evaluation={evaluation} />}
           <KitView kit={kit} />
+          {trace && <TraceView trace={trace} calls={llmCalls} />}
         </div>
       )}
     </div>
@@ -267,5 +294,86 @@ function KitView({ kit }: { kit: Kit }) {
         must-haves: {kit.coverage.uncovered_requirement_ids.length}
       </p>
     </article>
+  );
+}
+
+function EvaluationView({ evaluation }: { evaluation: KitEvaluation }) {
+  return (
+    <section className="rounded-xl border border-zinc-200 bg-white p-5" data-testid="kit-evaluation">
+      <div className="flex items-baseline justify-between gap-4">
+        <h3 className="text-sm font-semibold text-zinc-900">Automatic quality checks</h3>
+        <p className="font-mono text-sm text-zinc-900">
+          {evaluation.score}/100 <span className="text-zinc-500">· {evaluation.passed}/{evaluation.total} passed</span>
+        </p>
+      </div>
+      <p className="mt-1 text-xs text-zinc-500">Recomputed in code from the kit and your JD. No LLM grades its own work.</p>
+      <ul className="mt-3 grid gap-2 sm:grid-cols-2">
+        {evaluation.checks.map((c) => (
+          <li key={c.id} className="flex gap-2 rounded-md border border-zinc-100 px-3 py-2 text-sm">
+            <span className={c.pass ? "text-emerald-600" : "text-amber-600"}>{c.pass ? "✓" : "!"}</span>
+            <span>
+              <span className="text-zinc-900">{c.label}</span>
+              <span className="block text-xs text-zinc-500">{c.detail}</span>
+            </span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+function TraceView({ trace, calls }: { trace: Trace; calls: LlmCallTrace[] }) {
+  const steps = Object.entries(trace.stepMs);
+  const max = Math.max(1, ...steps.map(([, ms]) => ms));
+  return (
+    <section className="rounded-xl border border-zinc-200 bg-white p-5" data-testid="kit-trace">
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <h3 className="text-sm font-semibold text-zinc-900">Run trace</h3>
+        <p className="font-mono text-xs text-zinc-500">
+          run {trace.runId} · {(trace.totalMs / 1000).toFixed(1)}s total · {trace.calls} LLM calls ·{" "}
+          {(trace.promptTokens + trace.completionTokens).toLocaleString()} tokens
+        </p>
+      </div>
+      <ol className="mt-3 space-y-1.5">
+        {steps.map(([step, ms]) => (
+          <li key={step} className="grid grid-cols-[10rem_1fr_4rem] items-center gap-3 text-xs">
+            <span className="truncate text-zinc-700">{STEP_LABELS[step] ?? step}</span>
+            <span className="h-2 rounded bg-zinc-100">
+              <span className="block h-2 rounded bg-zinc-800" style={{ width: `${Math.max(2, (ms / max) * 100)}%` }} />
+            </span>
+            <span className="text-right font-mono tabular-nums text-zinc-500">{(ms / 1000).toFixed(1)}s</span>
+          </li>
+        ))}
+      </ol>
+      {calls.length > 0 && (
+        <details className="mt-4">
+          <summary className="cursor-pointer text-xs text-zinc-600">LLM calls ({calls.length})</summary>
+          <table className="mt-2 w-full text-left font-mono text-xs text-zinc-600">
+            <thead>
+              <tr className="text-zinc-400">
+                <th className="py-1 font-normal">#</th>
+                <th className="font-normal">step</th>
+                <th className="font-normal">model</th>
+                <th className="text-right font-normal">ms</th>
+                <th className="text-right font-normal">in / out tokens</th>
+              </tr>
+            </thead>
+            <tbody>
+              {calls.map((c) => (
+                <tr key={c.seq} className={c.ok ? "" : "text-red-600"}>
+                  <td className="py-0.5">{c.seq}</td>
+                  <td>{c.step ?? "-"}</td>
+                  <td>{c.ok ? c.model : c.error}</td>
+                  <td className="text-right tabular-nums">{c.ms}</td>
+                  <td className="text-right tabular-nums">
+                    {c.promptTokens ?? "-"} / {c.completionTokens ?? "-"}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </details>
+      )}
+    </section>
   );
 }

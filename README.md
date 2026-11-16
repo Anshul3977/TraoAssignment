@@ -11,6 +11,20 @@ The browser talks only to the Next origin (`/api/*`); Vercel rewrites that prefi
 
 **Public demo (`/demo`).** A Next.js route handler (`apps/web/src/app/api/demo/route.ts`) runs the same `runPipeline` from `@prep/core` on Vercel and streams each step as NDJSON, then renders the kit read-only. No account, nothing stored. It uses Groq (`LLM_PROVIDER=groq`, key in the Vercel dashboard only), allows 3 kits per IP per hour and 2 at once per instance (in-memory, best effort), caps the JD at 6,000 characters and 14 days, and never fetches private hosts. A kit takes about 1–2.5 minutes on the free tier, inside the 300 s function limit.
 
+What the demo shows besides the kit:
+
+- **Live pipeline trace.** Every LLM call goes through `createTracingClient` (`packages/core/src/llm/tracing.ts`), which records step, model, latency and provider-reported tokens without logging prompts. The page streams each call as it happens and ends with a per-step timing chart and a call table. Each run also writes one structured `demo_run` JSON line to the Vercel logs (run id, duration, calls, tokens, eval score).
+- **Automatic quality checks.** `evaluateKit` (`packages/core/src/eval/evaluateKit.ts`) re-checks every kit in code, with no LLM grading itself: must-have coverage, requirements grounded in the JD text, citations limited to fetched pages, no dangling ids, schedule fit, near-duplicate questions, and answer-outline depth. Live kits on GitLab's site scored 100/100 (7/7) on both models tried.
+
+## Tests and CI
+
+GitHub Actions runs on every push: typecheck, vitest (unit tests with fake LLM providers, no keys), the web build, and Playwright E2E on desktop and mobile Chrome (`apps/web/e2e`). E2E covers the signed-out redirect, the real `/api/demo` with no key configured, and a full streamed run with a mocked NDJSON response that renders the kit, checks and trace.
+
+```bash
+npm test
+npm run build --workspace=@prep/web && (cd apps/web && npx playwright test)
+```
+
 ---
 
 ## What the model does vs what code decides
@@ -42,7 +56,7 @@ Preferred stack from the spec: Next.js + Tailwind, Node + Express, MongoDB, Type
 | Web | Next.js 15 App Router + Tailwind | Spec stack. Same-origin `/api/*` rewrites so the session cookie is first-party. |
 | API | Express + Mongoose | Spec stack. In-process job worker (no extra queue service on free tier). |
 | Core pipeline | `packages/core` — pure TypeScript | No Express/Mongo in core so the **batch CLI and API call the same `runPipeline`**. |
-| LLM | Gemini primary (`gemini-flash-lite-latest`), Groq fallback (`llama-3.3-70b-versatile`) | Free-tier RPM; sliding-window limiter + retry + provider fallback. |
+| LLM | Gemini primary (`gemini-flash-lite-latest`), Groq fallback (`openai/gpt-oss-120b`) | Free-tier RPM; sliding-window limiter + retry + provider fallback. |
 | HTML | cheerio | Spec-allowed. Title, links, main text. |
 | robots | `robots-parser` | SPEC §2: respect robots.txt. |
 | Domain | `tldts` | Needed to follow `handbook.gitlab.com` from `about.gitlab.com` (eTLD+1) without hard-coded hosts. Allowed extra; noted in progress. |
@@ -246,7 +260,7 @@ npm install
 cp .env.example .env   # Windows: copy .env.example .env
 ```
 
-Fill at least `GEMINI_API_KEY` or `GROQ_API_KEY`, plus `JWT_SECRET` and `MONGODB_URI` for the API. Defaults: `LLM_PROVIDER=gemini`, `GEMINI_MODEL=gemini-flash-lite-latest`, `GROQ_MODEL=llama-3.3-70b-versatile`. All variables are in `.env.example`.
+Fill at least `GEMINI_API_KEY` or `GROQ_API_KEY`, plus `JWT_SECRET` and `MONGODB_URI` for the API. Defaults: `LLM_PROVIDER=gemini`, `GEMINI_MODEL=gemini-flash-lite-latest`, `GROQ_MODEL=openai/gpt-oss-120b`. All variables are in `.env.example`.
 
 ```bash
 npm run typecheck

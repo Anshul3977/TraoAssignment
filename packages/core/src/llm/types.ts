@@ -8,10 +8,17 @@ export type CompleteInput = {
   json?: boolean;
 };
 
+export type TokenUsage = {
+  promptTokens: number;
+  completionTokens: number;
+};
+
 export type CompleteResult = {
   text: string;
   provider: ProviderId;
   model: string;
+  /** Provider-reported token usage when the API returns it. */
+  usage?: TokenUsage;
 };
 
 /** Injectable provider — real Gemini/Groq or fakes in tests. */

@@ -116,7 +116,13 @@ export function createGeminiProvider(config: GeminiConfig): LlmProvider {
         });
       }
 
-      return { text, provider: "gemini", model: config.model };
+      const um = (parsed as { usageMetadata?: { promptTokenCount?: number; candidatesTokenCount?: number } })
+        ?.usageMetadata;
+      const usage =
+        um && typeof um.promptTokenCount === "number" && typeof um.candidatesTokenCount === "number"
+          ? { promptTokens: um.promptTokenCount, completionTokens: um.candidatesTokenCount }
+          : undefined;
+      return { text, provider: "gemini", model: config.model, ...(usage ? { usage } : {}) };
     },
   };
 }

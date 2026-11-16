@@ -1,0 +1,427 @@
+{
+ "source": {
+  "company": "GitLab",
+  "company_url": "https://about.gitlab.com/",
+  "role": "Backend Engineer (Python)",
+  "location": "",
+  "jd_chars": 297,
+  "researched_at": "2026-11-16T20:02:46.898Z",
+  "pages_used": [
+   "https://about.gitlab.com/",
+   "https://about.gitlab.com/gitlab-duo-agent-platform/",
+   "https://about.gitlab.com/company/",
+   "https://about.gitlab.com/jobs/",
+   "https://about.gitlab.com/jobs/accessibility/",
+   "https://about.gitlab.com/platform/",
+   "https://about.gitlab.com/sales/",
+   "https://about.gitlab.com/de-de/company/",
+   "https://about.gitlab.com/es/company/",
+   "https://about.gitlab.com/jobs/ai-interview-process/",
+   "https://about.gitlab.com/jobs/all-jobs/",
+   "https://handbook.gitlab.com/",
+   "https://lisp-journey.gitlab.io/blog/lisp-interview-kina/",
+   "https://borehole.dev/",
+   "https://news.ycombinator.com/item?id=27742048"
+  ]
+ },
+ "company_brief": {
+  "summary": "GitLab is an intelligent orchestration platform for DevSecOps and agentic software engineering that helps teams and AI agents collaborate, plan, build, secure, and ship software faster and more securely. Founded in 2011 as an open-source project and incorporated in 2014, the company operates as an all-remote organization with over 2,500 team members and is publicly traded on the Nasdaq Global Market under the ticker GTLB.",
+  "what_they_do": "GitLab provides an end-to-end software delivery platform that unifies planning, source code management, CI/CD, security scanning, vulnerability management, and compliance into a single data plane and control plane. It features the GitLab Duo Agent Platform, which allows teams to integrate specialized AI agents and automated workflows for tasks such as planning, coding assistance, security analysis, and CI/CD remediation while maintaining enterprise governance, audit trails, and policy-driven controls.",
+  "sources": [
+   "https://about.gitlab.com/",
+   "https://about.gitlab.com/gitlab-duo-agent-platform/",
+   "https://about.gitlab.com/company/",
+   "https://about.gitlab.com/jobs/",
+   "https://about.gitlab.com/jobs/accessibility/",
+   "https://about.gitlab.com/platform/",
+   "https://about.gitlab.com/sales/",
+   "https://about.gitlab.com/de-de/company/",
+   "https://about.gitlab.com/es/company/"
+  ]
+ },
+ "role": {
+  "title": "Backend Engineer (Python)",
+  "seniority": "",
+  "responsibilities": [
+   "build and operate REST APIs with FastAPI and PostgreSQL",
+   "write tests with pytest",
+   "deploy with Docker on AWS",
+   "work with our data team on ML model serving"
+  ],
+  "requirements": [
+   {
+    "id": "r1",
+    "text": "SQL",
+    "kind": "technical",
+    "priority": "must"
+   },
+   {
+    "id": "r2",
+    "text": "2+ years Python",
+    "kind": "technical",
+    "priority": "must"
+   },
+   {
+    "id": "r3",
+    "text": "REST API design",
+    "kind": "technical",
+    "priority": "must"
+   },
+   {
+    "id": "r4",
+    "text": "Git",
+    "kind": "technical",
+    "priority": "must"
+   },
+   {
+    "id": "r5",
+    "text": "Kubernetes",
+    "kind": "technical",
+    "priority": "nice"
+   },
+   {
+    "id": "r6",
+    "text": "Redis",
+    "kind": "technical",
+    "priority": "nice"
+   },
+   {
+    "id": "r7",
+    "text": "LLM experience",
+    "kind": "technical",
+    "priority": "nice"
+   }
+  ]
+ },
+ "questions": [
+  {
+   "id": "q1",
+   "requirement_ids": [
+    "r1",
+    "r6"
+   ],
+   "category": "technical",
+   "prompt": "Design a database schema and a caching strategy using Redis for a high-throughput user activity feed. Explain how you would optimize expensive SQL queries related to fetching recent activities.",
+   "answer_outline": "Propose normalized or denormalized SQL table structures for users, activities, and feeds. Explain index usage on foreign keys and timestamps. Describe how Redis sorted sets (ZSET) can be used to cache and rank user timelines. Discuss cache eviction policies and invalidation strategies.",
+   "difficulty": 2,
+   "meta": {
+    "origin": "generated"
+   }
+  },
+  {
+   "id": "q2",
+   "requirement_ids": [
+    "r2",
+    "r3"
+   ],
+   "category": "technical",
+   "prompt": "Write a Python function using a web framework (like FastAPI or Flask) that exposes a REST endpoint for pagination of large datasets. Discuss best practices for API versioning and error handling.",
+   "answer_outline": "Implement cursor-based or offset-based pagination in Python. Validate input query parameters using Pydantic or type hints. Return appropriate HTTP status codes and standard JSON error payloads. Discuss idempotency and rate limiting considerations for REST APIs.",
+   "difficulty": 2,
+   "meta": {
+    "origin": "generated"
+   }
+  },
+  {
+   "id": "q3",
+   "requirement_ids": [
+    "r4",
+    "r5"
+   ],
+   "category": "technical",
+   "prompt": "Describe your standard Git branching workflow when working in a team. Additionally, explain how you package and deploy a Python application into a Kubernetes cluster using ConfigMaps and deployments.",
+   "answer_outline": "Outline Git branching strategies such as GitFlow or trunk-based development, handling merge conflicts and code reviews. Write a basic Kubernetes Deployment YAML manifest for a stateless Python app. Explain how to inject environment variables securely using ConfigMaps and Secrets. Describe rolling update strategies and liveness/readiness probes.",
+   "difficulty": 3,
+   "meta": {
+    "origin": "generated"
+   }
+  },
+  {
+   "id": "q4",
+   "requirement_ids": [
+    "r2",
+    "r7"
+   ],
+   "category": "technical",
+   "prompt": "Take-Home Debrief: Walk us through the Python implementation you submitted for the take-home assignment, specifically focusing on how you integrated or mocked LLM capabilities. What challenges did you face and how did you test your code?",
+   "answer_outline": "Candidate explains their architectural choices and code structure in Python. Discussion of API payload design, handling timeouts, and rate limits when interacting with LLM providers. Explanation of mocking strategies used during unit testing. Reflection on trade-offs made under time constraints during the take-home project.",
+   "difficulty": 2,
+   "meta": {
+    "origin": "generated"
+   }
+  },
+  {
+   "id": "q5",
+   "requirement_ids": [
+    "r4"
+   ],
+   "category": "company-fit",
+   "prompt": "GitLab operates as an all-remote organization where code collaboration, transparent documentation, and distributed source control are core to daily operations. Can you walk through a complex Git conflict or branching workflow issue you've resolved in a distributed team environment?",
+   "answer_outline": "Look for a clear explanation of branching strategy, conflict resolution, maintaining a clean history, and effective asynchronous communication during the collaboration process.",
+   "difficulty": 2,
+   "meta": {
+    "origin": "generated"
+   }
+  },
+  {
+   "id": "q6",
+   "requirement_ids": [
+    "r7"
+   ],
+   "category": "company-fit",
+   "prompt": "Given GitLab's focus on the agentic software engineering era and platforms like the GitLab Duo Agent Platform, how have you approached balancing the speed of AI-generated code or workflows with enterprise trust, security policies, and governance?",
+   "answer_outline": "The candidate should discuss incorporating security gates, handling model context/parameters responsibly, maintaining human-in-the-loop checkpoints where policy demands, and ensuring full traceability of automated actions.",
+   "difficulty": 3,
+   "meta": {
+    "origin": "generated"
+   }
+  },
+  {
+   "id": "q7",
+   "requirement_ids": [],
+   "category": "company-fit",
+   "prompt": "GitLab places a high value on transparency, iteration, and results in an all-remote work setting. Can you share an example of a time when you had to drive a cross-functional project asynchronously while keeping your teammates fully aligned and informed?",
+   "answer_outline": "Look for documentation habits, proactive communication, breaking down work into smaller iterative pieces, and an emphasis on trust and autonomy.",
+   "difficulty": 1,
+   "meta": {
+    "origin": "generated"
+   }
+  }
+ ],
+ "flashcards": [
+  {
+   "id": "f1",
+   "front": "How can Redis sorted sets (ZSET) be utilized in a high-throughput user activity feed architecture?",
+   "back": "Redis ZSETs can cache and rank user timelines efficiently by using timestamps as scores, allowing fast range queries for recent activities.",
+   "requirement_ids": [
+    "r1",
+    "r6"
+   ],
+   "meta": {
+    "origin": "generated"
+   }
+  },
+  {
+   "id": "f2",
+   "front": "What are the best practices for optimizing expensive SQL queries when fetching recent user activities?",
+   "back": "Use appropriate index usage on foreign keys and timestamps, and consider denormalized table structures to reduce complex joins.",
+   "requirement_ids": [
+    "r1"
+   ],
+   "meta": {
+    "origin": "generated"
+   }
+  },
+  {
+   "id": "f3",
+   "front": "How do you implement pagination for large datasets in a Python web framework like FastAPI?",
+   "back": "Implement cursor-based or offset-based pagination, validate query parameters using Pydantic, and return standard JSON error payloads with proper status codes.",
+   "requirement_ids": [
+    "r2",
+    "r3"
+   ],
+   "meta": {
+    "origin": "generated"
+   }
+  },
+  {
+   "id": "f4",
+   "front": "What are key REST API design considerations when dealing with client requests at scale?",
+   "back": "Ensure proper API versioning, consistent error handling, input validation, rate limiting, and idempotency for state-changing endpoints.",
+   "requirement_ids": [
+    "r3"
+   ],
+   "meta": {
+    "origin": "generated"
+   }
+  },
+  {
+   "id": "f5",
+   "front": "How do you securely inject configuration and secrets into a Python application deployed in Kubernetes?",
+   "back": "Use Kubernetes ConfigMaps and Secrets to pass environment variables into deployments, and configure rolling updates alongside liveness/readiness probes.",
+   "requirement_ids": [
+    "r4",
+    "r5"
+   ],
+   "meta": {
+    "origin": "generated"
+   }
+  },
+  {
+   "id": "f6",
+   "front": "What strategies are effective for mocking and testing LLM integrations in Python applications?",
+   "back": "Mock external API calls using testing libraries, handle timeouts and rate limits gracefully, and isolate prompt-handling logic into modular functions.",
+   "requirement_ids": [
+    "r2",
+    "r7"
+   ],
+   "meta": {
+    "origin": "generated"
+   }
+  }
+ ],
+ "schedule": {
+  "days_available": 7,
+  "days": [
+   {
+    "day": 1,
+    "focus": "technical: SQL",
+    "question_ids": [
+     "q1",
+     "q6"
+    ],
+    "minutes": 50
+   },
+   {
+    "day": 2,
+    "focus": "technical: 2+ years Python",
+    "question_ids": [
+     "q2",
+     "q7"
+    ],
+    "minutes": 30
+   },
+   {
+    "day": 3,
+    "focus": "technical: Git",
+    "question_ids": [
+     "q3"
+    ],
+    "minutes": 30
+   },
+   {
+    "day": 4,
+    "focus": "technical: 2+ years Python",
+    "question_ids": [
+     "q4"
+    ],
+    "minutes": 20
+   },
+   {
+    "day": 5,
+    "focus": "company-fit: Git",
+    "question_ids": [
+     "q5"
+    ],
+    "minutes": 20
+   },
+   {
+    "day": 6,
+    "focus": "technical: Git",
+    "question_ids": [
+     "q3",
+     "q1"
+    ],
+    "minutes": 50
+   },
+   {
+    "day": 7,
+    "focus": "Mock interview + weak spots",
+    "question_ids": [
+     "q1",
+     "q4"
+    ],
+    "minutes": 40
+   }
+  ]
+ },
+ "coverage": {
+  "uncovered_requirement_ids": [],
+  "passes": 1
+ },
+ "research_log": {
+  "skipped": [
+   {
+    "url": "https://handbook.gitlab.com/handbook/company/mission/",
+    "reason": "response_too_large",
+    "source": "crawl"
+   },
+   {
+    "url": "https://handbook.gitlab.com/handbook/company/culture/all-remote/guide/",
+    "reason": "response_too_large",
+    "source": "crawl"
+   },
+   {
+    "url": "https://handbook.gitlab.com/handbook/company/culture/inclusion/",
+    "reason": "response_too_large",
+    "source": "crawl"
+   }
+  ],
+  "coverage_passes": [
+   {
+    "pass": 1,
+    "must_gaps": [],
+    "nice_gaps": [],
+    "added_question_ids": [],
+    "origin": "draft"
+   }
+  ],
+  "interview_process": {
+   "found": true,
+   "stages": [
+    {
+     "name": "Application materials",
+     "type": "other"
+    },
+    {
+     "name": "Take-Home Assignments",
+     "type": "take-home"
+    },
+    {
+     "name": "Technical Assessments",
+     "type": "technical-screen"
+    },
+    {
+     "name": "Interviews",
+     "type": "behavioural"
+    }
+   ],
+   "sources": [
+    "https://about.gitlab.com/jobs/ai-interview-process/"
+   ]
+  },
+  "discussion": [
+   {
+    "provider": "brave",
+    "status": "skipped",
+    "detail": "no_search_api_key"
+   },
+   {
+    "provider": "tavily",
+    "status": "skipped",
+    "detail": "no_search_api_key"
+   },
+   {
+    "provider": "hn_algolia",
+    "status": "ok",
+    "query": "GitLab interview process",
+    "detail": "2_hits"
+   },
+   {
+    "provider": "hn_algolia",
+    "status": "ok",
+    "query": "GitLab interview experience",
+    "detail": "2_hits"
+   },
+   {
+    "provider": "duckduckgo",
+    "status": "empty",
+    "query": "GitLab interview process",
+    "detail": "no_hits"
+   },
+   {
+    "provider": "duckduckgo",
+    "status": "empty",
+    "query": "GitLab interview experience",
+    "detail": "no_hits"
+   }
+  ],
+  "company_unreachable": false,
+  "pages": {
+   "about": 9,
+   "hiring": 3,
+   "other": 3,
+   "discussion": 3
+  }
+ }
+}

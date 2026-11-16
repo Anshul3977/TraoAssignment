@@ -1,4 +1,12 @@
-import { runPipeline, isPipelineError } from "@prep/core";
+import {
+  createLlmClientFromEnv,
+  createTracingClient,
+  evaluateKit,
+  isPipelineError,
+  runPipeline,
+  summarizeTrace,
+  type LlmCallTrace,
+} from "@prep/core";
 import { createDemoLimiter, parseDemoInput } from "@/lib/demo-rate-limit";
 
 export const runtime = "nodejs";
@@ -24,7 +32,8 @@ function json(status: number, body: unknown, headers: Record<string, string> = {
 
 /**
  * Public demo: no account, nothing stored. Streams NDJSON lines:
- * {type:"progress", step, status, detail?} ... then {type:"kit", kit} or {type:"error", code, message}.
+ * {type:"progress", step, status, detail?, ms?} and {type:"llm", ...LlmCallTrace} while running,
+ * then {type:"kit", kit, evaluation, trace} or {type:"error", code, message, trace}.
  */
 export async function POST(req: Request) {
   if (!process.env.GROQ_API_KEY && !process.env.GEMINI_API_KEY) {
@@ -60,19 +69,80 @@ export async function POST(req: Request) {
         }
       };
       const heartbeat = setInterval(() => send({ type: "ping" }), 15_000);
+      const runId = crypto.randomUUID().slice(0, 8);
+      const t0 = Date.now();
+      const calls: LlmCallTrace[] = [];
+      const stepStart = new Map<string, number>();
+      const stepMs: Record<string, number> = {};
+      let currentStep: string | undefined;
+      const client = createTracingClient(
+        createLlmClientFromEnv(),
+        (call) => {
+          calls.push(call);
+          send({ type: "llm", ...call });
+        },
+        { currentStep: () => currentStep },
+      );
+      const trace = () => ({
+        runId,
+        totalMs: Date.now() - t0,
+        stepMs,
+        ...summarizeTrace(calls),
+      });
       try {
         const { kit } = await runPipeline(input, {
           allowPrivateHosts: false,
-          onProgress: (e) => send({ type: "progress", ...e }),
+          client,
+          onProgress: (e) => {
+            let ms: number | undefined;
+            if (e.status === "running") {
+              currentStep = e.step;
+              stepStart.set(e.step, Date.now());
+            } else if (stepStart.has(e.step)) {
+              ms = Date.now() - stepStart.get(e.step)!;
+              stepMs[e.step] = ms;
+            }
+            send({ type: "progress", ...e, ms });
+          },
         });
-        send({ type: "kit", kit });
+        const evaluation = evaluateKit(kit, input.jd);
+        const t = trace();
+        // One structured line per run for Vercel logs (no prompts, no JD text).
+        console.log(
+          JSON.stringify({
+            event: "demo_run",
+            ok: true,
+            runId,
+            company: kit.source.company,
+            totalMs: t.totalMs,
+            llmCalls: t.calls,
+            llmFailed: t.failed,
+            promptTokens: t.promptTokens,
+            completionTokens: t.completionTokens,
+            evalScore: evaluation.score,
+            evalPassed: `${evaluation.passed}/${evaluation.total}`,
+          }),
+        );
+        send({ type: "kit", kit, evaluation, trace: t });
       } catch (err) {
         const code = isPipelineError(err) ? err.code : "PIPELINE_FAILED";
         const message = isPipelineError(err)
           ? err.message
           : "Kit generation failed, probably a free-tier LLM rate limit. Try again in a minute.";
-        console.error("demo pipeline failed", code, err instanceof Error ? err.message : err);
-        send({ type: "error", code, message });
+        const t = trace();
+        console.error(
+          JSON.stringify({
+            event: "demo_run",
+            ok: false,
+            runId,
+            code,
+            error: err instanceof Error ? err.message.slice(0, 200) : String(err),
+            totalMs: t.totalMs,
+            llmCalls: t.calls,
+            llmFailed: t.failed,
+          }),
+        );
+        send({ type: "error", code, message, trace: t });
       } finally {
         clearInterval(heartbeat);
         running--;

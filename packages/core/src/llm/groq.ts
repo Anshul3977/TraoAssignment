@@ -88,7 +88,12 @@ export function createGroqProvider(config: GroqConfig): LlmProvider {
         });
       }
 
-      return { text, provider: "groq", model: config.model };
+      const u = (parsed as { usage?: { prompt_tokens?: number; completion_tokens?: number } })?.usage;
+      const usage =
+        u && typeof u.prompt_tokens === "number" && typeof u.completion_tokens === "number"
+          ? { promptTokens: u.prompt_tokens, completionTokens: u.completion_tokens }
+          : undefined;
+      return { text, provider: "groq", model: config.model, ...(usage ? { usage } : {}) };
     },
   };
 }

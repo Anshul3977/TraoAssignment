@@ -5,6 +5,7 @@ export type {
   ProviderFailureKind,
   ProviderId,
   RetryableKind,
+  TokenUsage,
 } from "./types.js";
 
 export {
@@ -77,3 +78,10 @@ export {
   writeLlmCache,
   type CacheLookup,
 } from "./cache.js";
+
+export {
+  createTracingClient,
+  summarizeTrace,
+  type LlmCallTrace,
+  type TraceSummary,
+} from "./tracing.js";
