@@ -9,7 +9,7 @@ Interview prep kit generator ([Trao FS-AI-INTERVIEW-01](docs/SPEC.md)). Paste a 
 
 The browser talks only to the Next origin (`/api/*`); Vercel rewrites that prefix to Express. Free Render instances sleep after idle — the first request after sleep is often ~50s.
 
-**Public demo (`/demo`).** A Next.js route handler (`apps/web/src/app/api/demo/route.ts`) runs the same `runPipeline` from `@prep/core` on Vercel and streams each step as NDJSON, then renders the kit read-only. No account, nothing stored. It uses Groq (`LLM_PROVIDER=groq`, key in the Vercel dashboard only), allows 3 kits per IP per hour and 2 at once per instance (in-memory, best effort), caps the JD at 6,000 characters and 14 days, and never fetches private hosts. A kit takes about 1–2.5 minutes on the free tier, inside the 300 s function limit.
+**Public demo (`/demo`).** A Next.js route handler (`apps/web/src/app/api/demo/route.ts`) runs the same `runPipeline` from `@prep/core` on Vercel and streams each step as NDJSON, then renders the kit read-only. No account, nothing stored. It uses Groq (`LLM_PROVIDER=groq`, key in the Vercel dashboard only), allows 3 kits per IP per hour and 2 at once per instance (in-memory, best effort), caps the JD at 6,000 characters and 14 days, and never fetches private hosts. A kit takes about 1.5–3 minutes on the free tier (live runs: 85–150 s), inside the 300 s function limit. Groq requests go through their own TPM limiter (`GROQ_TPM`, default 7,000) and the brief trims page text to fit an 8k-token request.
 
 What the demo shows besides the kit:
 

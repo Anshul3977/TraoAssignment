@@ -18,7 +18,7 @@ export default function DemoPage() {
         <p className="mt-3 max-w-2xl text-sm leading-6 text-zinc-600">
           The pipeline crawls the company site (respecting robots.txt), extracts only requirements that are
           literally in the JD, generates questions until every must-have is covered, then schedules them across
-          your days. No account needed and nothing is saved. Runs on a free LLM tier, so a kit takes 1–2 minutes
+          your days. No account needed and nothing is saved. Runs on a free LLM tier, so a kit takes about 2–3 minutes
           and the demo is limited to 3 kits per hour.
         </p>
         <p className="mt-2 text-sm">
