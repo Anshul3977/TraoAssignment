@@ -3,8 +3,8 @@ import kit from "./fixtures/kit.json" with { type: "json" };
 
 const evaluation = {
   score: 100,
-  passed: 7,
-  total: 7,
+  passed: 8,
+  total: 8,
   checks: [
     { id: "must_coverage", label: "Must-haves covered by a question", value: 1, pass: true, detail: "4/4 must-have requirements" },
     { id: "citation_validity", label: "Citations point at fetched pages", value: 1, pass: true, detail: "10/10 cited URLs were fetched" },

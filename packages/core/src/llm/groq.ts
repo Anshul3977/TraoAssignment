@@ -70,8 +70,14 @@ export function createGroqProvider(config: GroqConfig): LlmProvider {
       if (!res.ok) {
         const errBody = parsed as GroqErrorBody | undefined;
         const message = errBody?.error?.message ?? `groq HTTP ${res.status}`;
+        // gpt-oss models sometimes emit JSON that Groq's json_object mode rejects
+        // (400 json_validate_failed). A fresh sample usually passes, so retry it.
+        const kind =
+          res.status === 400 && errBody?.error?.code === "json_validate_failed"
+            ? "server"
+            : kindFromStatus(res.status);
         throw new LlmProviderError(message, {
-          kind: kindFromStatus(res.status),
+          kind,
           provider: "groq",
           status: res.status,
           retryAfterMs: parseRetryAfterMs(res.headers.get("retry-after")),

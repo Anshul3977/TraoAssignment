@@ -15,7 +15,7 @@ function kit(overrides: Partial<Kit> = {}): Kit {
       researched_at: "2026-11-17T00:00:00Z",
       pages_used: ["https://acme.test/", "https://acme.test/careers"],
     },
-    company_brief: { summary: "s", what_they_do: "w", sources: ["https://acme.test/"] },
+    company_brief: { summary: "Acme builds payment APIs for small online shops in India.", what_they_do: "w", sources: ["https://acme.test/"] },
     role: {
       title: "Backend engineer",
       seniority: "",
@@ -62,6 +62,14 @@ describe("evaluateKit", () => {
     expect(byId.citation_validity!.value).toBe(0.5);
     expect(byId.id_integrity!.pass).toBe(false);
     expect(e.score).toBeLessThan(100);
+  });
+
+  it("flags an empty company brief", () => {
+    const k = kit();
+    k.company_brief = { summary: "", what_they_do: "", sources: [] };
+    const c = evaluateKit(k, JD).checks.find((x) => x.id === "brief_present")!;
+    expect(c.pass).toBe(false);
+    expect(c.value).toBe(0);
   });
 
   it("detects near-duplicate questions", () => {

@@ -289,6 +289,16 @@ function KitView({ kit }: { kit: Kit }) {
         </section>
       </div>
 
+      {(() => {
+        const skipped = ((kit.research_log?.skipped ?? []) as { source?: string; reason?: string }[]).filter(
+          (x) => x.source && x.source !== "crawl" && x.source !== "discussion",
+        );
+        return skipped.length > 0 ? (
+          <p className="rounded-md bg-amber-50 px-3 py-2 text-xs text-amber-800">
+            Degraded honestly: {skipped.map((x) => `${x.source} (${(x.reason ?? "").slice(0, 120)})`).join("; ")}
+          </p>
+        ) : null;
+      })()}
       <p className="text-xs text-zinc-500">
         Sources used: {kit.company_brief.sources.length} company pages · coverage passes: {kit.coverage.passes} · uncovered
         must-haves: {kit.coverage.uncovered_requirement_ids.length}

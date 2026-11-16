@@ -12,7 +12,8 @@ export type KitCheck = {
     | "id_integrity"
     | "schedule_fit"
     | "question_diversity"
-    | "answer_depth";
+    | "answer_depth"
+    | "brief_present";
   label: string;
   /** 0..1 */
   value: number;
@@ -167,6 +168,20 @@ export function evaluateKit(kit: Kit, jd: string): KitEvaluation {
     value: ad,
     pass: ad >= 0.9,
     detail: `${deep}/${kit.questions.length} outlines are 80+ characters`,
+  });
+
+  // 8. The company brief exists and cites at least one page.
+  const hasSummary = kit.company_brief.summary.trim().length >= 40;
+  const hasSource = kit.company_brief.sources.length > 0;
+  const bp = (Number(hasSummary) + Number(hasSource)) / 2;
+  checks.push({
+    id: "brief_present",
+    label: "Company brief written and cited",
+    value: bp,
+    pass: bp === 1,
+    detail: !hasSummary
+      ? "brief is empty or a placeholder"
+      : `${kit.company_brief.sources.length} source page(s) cited`,
   });
 
   const score = Math.round((checks.reduce((a, c) => a + c.value, 0) / checks.length) * 100);

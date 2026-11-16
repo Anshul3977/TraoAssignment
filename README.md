@@ -14,7 +14,7 @@ The browser talks only to the Next origin (`/api/*`); Vercel rewrites that prefi
 What the demo shows besides the kit:
 
 - **Live pipeline trace.** Every LLM call goes through `createTracingClient` (`packages/core/src/llm/tracing.ts`), which records step, model, latency and provider-reported tokens without logging prompts. The page streams each call as it happens and ends with a per-step timing chart and a call table. Each run also writes one structured `demo_run` JSON line to the Vercel logs (run id, duration, calls, tokens, eval score).
-- **Automatic quality checks.** `evaluateKit` (`packages/core/src/eval/evaluateKit.ts`) re-checks every kit in code, with no LLM grading itself: must-have coverage, requirements grounded in the JD text, citations limited to fetched pages, no dangling ids, schedule fit, near-duplicate questions, and answer-outline depth. Live kits on GitLab's site scored 100/100 (7/7) on both models tried.
+- **Automatic quality checks.** `evaluateKit` (`packages/core/src/eval/evaluateKit.ts`) re-checks every kit in code, with no LLM grading itself: must-have coverage, requirements grounded in the JD text, citations limited to fetched pages, no dangling ids, schedule fit, near-duplicate questions, answer-outline depth, and a written, cited company brief. Steps that fail fall back honestly (for example an empty brief) and the checks and a note on the page say so instead of hiding it.
 
 ## Tests and CI
 

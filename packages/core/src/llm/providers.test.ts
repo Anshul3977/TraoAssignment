@@ -122,4 +122,34 @@ describe("groq provider (mocked fetch)", () => {
     expect(result.text).toBe('{"b":2}');
     expect(result.provider).toBe("groq");
   });
+
+  it("returns provider-reported token usage", async () => {
+    const fetchMock: typeof fetch = async () =>
+      new Response(
+        JSON.stringify({
+          choices: [{ message: { content: "{}" } }],
+          usage: { prompt_tokens: 120, completion_tokens: 30 },
+        }),
+        { status: 200 },
+      );
+    const provider = createGroqProvider({ apiKey: "gk", model: "m", fetch: fetchMock });
+    const result = await provider.complete({ system: "s", user: "u" });
+    expect(result.usage).toEqual({ promptTokens: 120, completionTokens: 30 });
+  });
+
+  it("marks json_validate_failed as retryable, other 400s as bad_request", async () => {
+    const make = (code: string) =>
+      createGroqProvider({
+        apiKey: "gk",
+        model: "m",
+        fetch: async () =>
+          new Response(JSON.stringify({ error: { message: "bad", code } }), { status: 400 }),
+      });
+    await expect(make("json_validate_failed").complete({ system: "s", user: "u" })).rejects.toMatchObject({
+      kind: "server",
+    });
+    await expect(make("invalid_request").complete({ system: "s", user: "u" })).rejects.toMatchObject({
+      kind: "bad_request",
+    });
+  });
 });
